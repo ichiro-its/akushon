@@ -1,0 +1,22 @@
+name: Akushon CI
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    name: Build and test the project
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v2
+      - name: Build and test
+        uses: ichiro-its/ros2-ci@v0.4.1
+        with:
+          apt-packages: git ros-foxy-dynamixel-sdk
+          ros2-distro: foxy
+          pre-build: git clone https://github.com/ichiro-its/motion_opencr /ws/motion_opencr
