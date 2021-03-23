@@ -1,0 +1,21 @@
+name: Akushon CI
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v2
+
+      - name: Install and Build 
+        run: |
+          npm install
+          npm run build
+          npm test
