@@ -18,4 +18,4 @@ jobs:
         uses: ichiro-its/ros2-ci@v0.3.0
         with:
           ros2-distro: foxy
-          pre-build: apt-get update && apt-get install -y ros-foxy-dynamixel-sdk
+          pre-build: apt-get update && apt-get install -y ros-foxy-dynamixel-sdk && git clone https://github.com/ichiro-its/motion_opencr
