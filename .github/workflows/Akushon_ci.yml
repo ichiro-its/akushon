@@ -1,0 +1,21 @@
+name: Akushon CI
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    name: Build and test the project
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v2
+      - name: Build and test
+        uses: ichiro-its/ros2-ci@v0.3.0
+        with:
+          ros2-distro: foxy
+          pre-build: apt-get update && apt-get install -y ros-foxy-dynamixel-sdk
