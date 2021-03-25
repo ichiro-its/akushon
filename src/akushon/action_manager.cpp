@@ -18,41 +18,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include <akushon/motion.hpp>
+#include <akushon/action_manager.hpp>
 
 #include <string>
+#include <memory>
 
 namespace akushon
 {
 
-Motion::Motion(std::string pose_name)
-: name(pose_name)
+void ActionManager::insert_action(uint8_t id, std::shared_ptr<Action> action)
 {
+  action_list.insert({id, action});
 }
 
-void Motion::insert_pose(Pose pose)
+void ActionManager::delete_action(uint8_t id)
 {
-  poses.push_back(pose);
-}
-
-void Motion::insert_pose(uint8_t id, Pose pose)
-{
-  poses.insert(poses.begin() + id, pose);
-}
-
-void Motion::delete_pose(uint8_t id)
-{
-  poses.erase(poses.begin() + id);
-}
-
-void Motion::set_name(std::string new_name)
-{
-  name = new_name;
-}
-
-std::string Motion::get_name()
-{
-  return name;
+  action_list.erase(id);
 }
 
 }  // namespace akushon

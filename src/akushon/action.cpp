@@ -21,19 +21,38 @@
 #include <akushon/action.hpp>
 
 #include <string>
-#include <memory>
 
 namespace akushon
 {
 
-void Action::insert_motion(uint8_t id, std::shared_ptr<Motion> motion)
+Action::Action(std::string pose_name)
+: name(pose_name)
 {
-  motion_list.insert({id, motion});
 }
 
-void Action::delete_motion(uint8_t id)
+void Action::insert_pose(Pose pose)
 {
-  motion_list.erase(id);
+  poses.push_back(pose);
+}
+
+void Action::insert_pose(uint8_t id, Pose pose)
+{
+  poses.insert(poses.begin() + id, pose);
+}
+
+void Action::delete_pose(uint8_t id)
+{
+  poses.erase(poses.begin() + id);
+}
+
+void Action::set_name(std::string new_name)
+{
+  name = new_name;
+}
+
+std::string Action::get_name()
+{
+  return name;
 }
 
 }  // namespace akushon

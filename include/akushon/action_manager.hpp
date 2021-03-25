@@ -18,38 +18,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__MOTION_HPP_
-#define AKUSHON__MOTION_HPP_
+#ifndef AKUSHON__ACTION_MANAGER_HPP_
+#define AKUSHON__ACTION_MANAGER_HPP_
 
+#include <akushon/action.hpp>
 #include <akushon/pose.hpp>
 
+#include <map>
 #include <memory>
-#include <string>
-#include <vector>
 
 namespace akushon
 {
 
-class Motion
+class ActionManager
 {
 public:
-  explicit Motion(std::string pose_name);
-
-  void insert_pose(Pose pose);
-  void insert_pose(uint8_t id, Pose pose);
-  void delete_pose(uint8_t id);
-
-  void set_name(std::string pose_name);
-  std::string get_name();
+  void insert_action(uint8_t id, std::shared_ptr<Action> action);
+  void delete_action(uint8_t id);
 
 private:
-  std::string name;
-
-  uint8_t next_motion_id;
-
-  static std::vector<Pose> poses;
+  std::map<uint8_t, std::shared_ptr<Action>> action_list;
 };
-
 }  // namespace akushon
 
-#endif  // AKUSHON__MOTION_HPP_
+#endif  // AKUSHON__ACTION_MANAGER_HPP_

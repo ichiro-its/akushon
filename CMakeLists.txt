@@ -18,8 +18,8 @@ find_package(motion_opencr REQUIRED)
 
 add_library(${PROJECT_NAME}
   "src/${PROJECT_NAME}/pose.cpp"
-  "src/${PROJECT_NAME}/motion.cpp"
-  "src/${PROJECT_NAME}/action.cpp")
+  "src/${PROJECT_NAME}/action.cpp"
+  "src/${PROJECT_NAME}/action_manager.cpp")
 
 target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
