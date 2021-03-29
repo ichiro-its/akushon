@@ -21,7 +21,7 @@
 #ifndef AKUSHON__POSE_HPP_
 #define AKUSHON__POSE_HPP_
 
-#include <motion_opencr/joint.hpp>
+#include <tachimawari/joint.hpp>
 
 #include <string>
 #include <vector>
@@ -43,8 +43,8 @@ public:
   void set_name(std::string new_name);
   std::string get_name();
 
-  void set_joints(std::vector<motion::Joint> joints);
-  std::vector<motion::Joint> get_joints();
+  void set_joints(std::vector<tachimawari::Joint> joints);
+  std::vector<tachimawari::Joint> get_joints();
 
 private:
   float velocity;
@@ -52,7 +52,7 @@ private:
 
   std::string name;
 
-  static std::vector<motion::Joint> joints;
+  static std::vector<tachimawari::Joint> joints;
 };
 
 }  // namespace akushon

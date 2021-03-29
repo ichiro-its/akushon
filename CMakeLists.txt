@@ -14,7 +14,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
-find_package(motion_opencr REQUIRED)
+find_package(tachimawari REQUIRED)
 
 add_library(${PROJECT_NAME}
   "src/${PROJECT_NAME}/pose.cpp"
@@ -26,7 +26,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   $<INSTALL_INTERFACE:include>)
 
 ament_target_dependencies(${PROJECT_NAME}
-  motion_opencr)
+  tachimawari)
 
 install(DIRECTORY "include" DESTINATION ".")
 
@@ -44,7 +44,8 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-ament_export_dependencies(motion_opencr)
+ament_export_dependencies(
+  tachimawari)
 ament_export_include_directories("include")
 ament_export_libraries(${PROJECT_NAME})
 ament_package()
