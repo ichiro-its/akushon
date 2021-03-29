@@ -61,12 +61,12 @@ std::string Pose::get_name()
   return name;
 }
 
-void Pose::set_joints(std::vector<motion::Joint> new_joints)
+void Pose::set_joints(std::vector<tachimawari::Joint> new_joints)
 {
   joints = new_joints;
 }
 
-std::vector<motion::Joint> Pose::get_joints()
+std::vector<tachimawari::Joint> Pose::get_joints()
 {
   return joints;
 }
