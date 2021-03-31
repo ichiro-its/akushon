@@ -54,16 +54,48 @@ void ActionManager::delete_action(uint8_t id)
 bool ActionManager::start_action(uint8_t id)
 {
   Action action = action_list.at(id);
-  for (auto pose : action.get_poses()) {
-    if (send_joints_request(pose.get_joints(), pose.get_speed())) {
-      
+  std::vector<Pose> poses = action.get_poses();
+  int pose_index = 0;
+  while (pose_index < static_cast<int>(poses.size())) {
+    if (send_joints_request(poses.at(pose_index), poses.get_speed())) {
+      pose_index++;
     }
   }
 }
 
 bool ActionManager::send_joints_request(std::vector<tachimawari::Joint> joints, float speed)
 {
-  for ()
+  bool send_request_state = false;
+  if (!set_joints_client->wait_for_service()) {
+    return send_request_state;
+  }
+
+  {
+    using SetJoints = tachimawari_interfaces::srv::SetJoints;
+    using Joint = tachimawari::Joint;
+
+    auto request = std::make_shared<SetJoints::Request>();
+    std::vector<tachimawari_interfaces::msg::Joint> joint_messages;
+
+    for (auto joint : joints) {
+      tachimawari::msg::Joint joint_message;
+      joint_message.name = joint.get_name();
+      joint_message.position = joint.get_goal_position();
+      joint_message.speed = speed;
+
+      joint_messages.push_back(joint_message);
+    }
+
+    request->joints = joint_messages;
+
+    auto request_result = client->async_send_request(request);
+    if (rclcpp::spin_until_future_complete(this, request_result)
+      == rclcpp::executor::FutureReturnCode::SUCCESS) {
+      send_request_state = true;
+    }
+  }
+
+  return send_request_state;
 }
 
 }  // namespace akushon
