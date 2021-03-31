@@ -43,10 +43,15 @@ public:
 
   std::string get_name();
   std::vector<Pose> get_poses();
+  Pose get_pose();
+
+  void next_pose();
 
 private:
   std::string name;
 
+  int pose_index = 0;
+  int pose_count = 0;
   uint8_t next_motion_id;
 
   static std::vector<Pose> poses;

@@ -30,6 +30,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 #include <memory>
 
 namespace akushon
@@ -42,11 +43,12 @@ public:
 
   void insert_action(uint8_t id, std::shared_ptr<Action> action);
   void delete_action(uint8_t id);
-  
-  bool start_action(uint8_t id);
+
+  std::shared_ptr<Action> get_action(uint8_t id);
 
 private:
-  bool send_joints_request(std::vector<tachimawari::Joint> joints, float speed = 1, bool & request_status);
+  std::shared_future<std::shared_ptr<tachimawari_interfaces::srv::SetJoints::Response>>
+  send_joints_request(std::vector<tachimawari::Joint> joints, float speed);
 
   std::map<uint8_t, std::shared_ptr<Action>> action_list;
 

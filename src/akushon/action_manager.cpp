@@ -51,43 +51,23 @@ void ActionManager::delete_action(uint8_t id)
   action_list.erase(id);
 }
 
-bool ActionManager::start_action(uint8_t id)
+std::shared_ptr<Action> ActionManager::get_action(uint8_t id)
 {
-  bool action_state = true;
-  Action action = action_list.at(id);
-  std::vector<Pose> poses = action.get_poses();
-  int pose_index = 0;
-
-  while (pose_index < static_cast<int>(poses.size())) {
-    bool response_received = false;
-    if (send_joints_request(poses.at(pose_index), poses.get_speed(), response_received)) {
-      pose_index++;
-    } else if (response_received) {
-      action_state = false;
-      break;
-    }
-  }
-
-  return action_state;
+  return action_list[id];
 }
 
-bool ActionManager::send_joints_request(std::vector<tachimawari::Joint> joints, float speed, bool & request_status)
+std::shared_future<std::shared_ptr<tachimawari_interfaces::srv::SetJoints::Response>>
+ActionManager::send_joints_request(std::vector<tachimawari::Joint> joints, float speed)
 {
-  bool send_request_state = false;
-  if (!set_joints_client->wait_for_service()) {
-    return send_request_state;
-  }
-
   {
     using SetJoints = tachimawari_interfaces::srv::SetJoints;
-    using Joint = tachimawari::Joint;
 
     auto request = std::make_shared<SetJoints::Request>();
     std::vector<tachimawari_interfaces::msg::Joint> joint_messages;
 
     for (auto joint : joints) {
-      tachimawari::msg::Joint joint_message;
-      joint_message.name = joint.get_name();
+      tachimawari_interfaces::msg::Joint joint_message;
+      joint_message.name = joint.get_joint_name();
       joint_message.position = joint.get_goal_position();
       joint_message.speed = speed;
 
@@ -96,18 +76,8 @@ bool ActionManager::send_joints_request(std::vector<tachimawari::Joint> joints, 
 
     request->joints = joint_messages;
 
-    auto request_result = client->async_send_request(request);
-    if (rclcpp::spin_until_future_complete(this, request_result)
-      == rclcpp::executor::FutureReturnCode::SUCCESS) {
-      request_status = true;
-      auto response = request_result.get();
-      if (static_cast<bool>(response->status)) {
-        send_request_state = true;
-      }
-    }
+    return set_joints_client->async_send_request(request);
   }
-
-  return send_request_state;
 }
 
 }  // namespace akushon
