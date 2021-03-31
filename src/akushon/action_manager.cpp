@@ -53,17 +53,25 @@ void ActionManager::delete_action(uint8_t id)
 
 bool ActionManager::start_action(uint8_t id)
 {
+  bool action_state = true;
   Action action = action_list.at(id);
   std::vector<Pose> poses = action.get_poses();
   int pose_index = 0;
+
   while (pose_index < static_cast<int>(poses.size())) {
-    if (send_joints_request(poses.at(pose_index), poses.get_speed())) {
+    bool response_received = false;
+    if (send_joints_request(poses.at(pose_index), poses.get_speed(), response_received)) {
       pose_index++;
+    } else if (response_received) {
+      action_state = false;
+      break;
     }
   }
+
+  return action_state;
 }
 
-bool ActionManager::send_joints_request(std::vector<tachimawari::Joint> joints, float speed)
+bool ActionManager::send_joints_request(std::vector<tachimawari::Joint> joints, float speed, bool & request_status)
 {
   bool send_request_state = false;
   if (!set_joints_client->wait_for_service()) {
@@ -91,7 +99,11 @@ bool ActionManager::send_joints_request(std::vector<tachimawari::Joint> joints, 
     auto request_result = client->async_send_request(request);
     if (rclcpp::spin_until_future_complete(this, request_result)
       == rclcpp::executor::FutureReturnCode::SUCCESS) {
-      send_request_state = true;
+      request_status = true;
+      auto response = request_result.get();
+      if (static_cast<bool>(response->status)) {
+        send_request_state = true;
+      }
     }
   }
 

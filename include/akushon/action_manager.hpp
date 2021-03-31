@@ -46,7 +46,7 @@ public:
   bool start_action(uint8_t id);
 
 private:
-  bool send_joints_request(std::vector<tachimawari::Joint> joints, float speed = 1);
+  bool send_joints_request(std::vector<tachimawari::Joint> joints, float speed = 1, bool & request_status);
 
   std::map<uint8_t, std::shared_ptr<Action>> action_list;
 
