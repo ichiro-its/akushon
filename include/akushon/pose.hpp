@@ -34,20 +34,20 @@ class Pose
 public:
   explicit Pose(std::string pose_name);
 
-  void set_velocity(float new_velocity);
-  float get_velocity();
+  void set_speed(float speed);
+  float get_speed();
 
-  void set_pause(float new_pause);
+  void set_pause(float pause);
   float get_pause();
 
-  void set_name(std::string new_name);
+  void set_name(std::string pose_name);
   std::string get_name();
 
   void set_joints(std::vector<tachimawari::Joint> joints);
   std::vector<tachimawari::Joint> get_joints();
 
 private:
-  float velocity;
+  float speed;
   float pause;
 
   std::string name;

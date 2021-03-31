@@ -25,8 +25,8 @@
 namespace akushon
 {
 
-Action::Action(std::string pose_name)
-: name(pose_name)
+Action::Action(std::string action_name)
+: name(action_name)
 {
 }
 
@@ -45,14 +45,19 @@ void Action::delete_pose(uint8_t id)
   poses.erase(poses.begin() + id);
 }
 
-void Action::set_name(std::string new_name)
+void Action::set_name(std::string action_name)
 {
-  name = new_name;
+  name = action_name;
 }
 
 std::string Action::get_name()
 {
   return name;
+}
+
+std::vector<Pose> Action::get_poses()
+{
+  return poses;
 }
 
 }  // namespace akushon

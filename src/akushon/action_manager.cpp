@@ -20,11 +20,14 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <tachimawari_interfaces/srv/set_joints.hpp>
+#include <tachimawari_interfaces/msg/joint.hpp>
+#include <tachimawari/joint.hpp>
 
 #include <akushon/action_manager.hpp>
 
 #include <string>
 #include <memory>
+#include <vector>
 
 namespace akushon
 {
@@ -46,6 +49,21 @@ void ActionManager::insert_action(uint8_t id, std::shared_ptr<Action> action)
 void ActionManager::delete_action(uint8_t id)
 {
   action_list.erase(id);
+}
+
+bool ActionManager::start_action(uint8_t id)
+{
+  Action action = action_list.at(id);
+  for (auto pose : action.get_poses()) {
+    if (send_joints_request(pose.get_joints(), pose.get_speed())) {
+      
+    }
+  }
+}
+
+bool ActionManager::send_joints_request(std::vector<tachimawari::Joint> joints, float speed)
+{
+  for ()
 }
 
 }  // namespace akushon

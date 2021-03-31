@@ -23,6 +23,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <tachimawari_interfaces/srv/set_joints.hpp>
+#include <tachimawari/joint.hpp>
 
 #include <akushon/action.hpp>
 #include <akushon/pose.hpp>
@@ -41,8 +42,12 @@ public:
 
   void insert_action(uint8_t id, std::shared_ptr<Action> action);
   void delete_action(uint8_t id);
+  
+  bool start_action(uint8_t id);
 
 private:
+  bool send_joints_request(std::vector<tachimawari::Joint> joints, float speed = 1);
+
   std::map<uint8_t, std::shared_ptr<Action>> action_list;
 
   std::shared_ptr<rclcpp::Client<tachimawari_interfaces::srv::SetJoints>>
