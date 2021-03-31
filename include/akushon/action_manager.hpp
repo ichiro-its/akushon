@@ -21,24 +21,34 @@
 #ifndef AKUSHON__ACTION_MANAGER_HPP_
 #define AKUSHON__ACTION_MANAGER_HPP_
 
+#include <rclcpp/rclcpp.hpp>
+#include <tachimawari_interfaces/srv/set_joints.hpp>
+
 #include <akushon/action.hpp>
 #include <akushon/pose.hpp>
 
+#include <string>
 #include <map>
 #include <memory>
 
 namespace akushon
 {
 
-class ActionManager
+class ActionManager : public rclcpp::Node
 {
 public:
+  explicit ActionManager(std::string node_name, std::string service_name);
+
   void insert_action(uint8_t id, std::shared_ptr<Action> action);
   void delete_action(uint8_t id);
 
 private:
   std::map<uint8_t, std::shared_ptr<Action>> action_list;
+
+  std::shared_ptr<rclcpp::Client<tachimawari_interfaces::srv::SetJoints>>
+  set_joints_client;
 };
+
 }  // namespace akushon
 
 #endif  // AKUSHON__ACTION_MANAGER_HPP_

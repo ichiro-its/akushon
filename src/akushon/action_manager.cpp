@@ -18,6 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#include <rclcpp/rclcpp.hpp>
+#include <tachimawari_interfaces/srv/set_joints.hpp>
+
 #include <akushon/action_manager.hpp>
 
 #include <string>
@@ -25,6 +28,15 @@
 
 namespace akushon
 {
+
+ActionManager::ActionManager(std::string node_name, std::string service_name)
+: rclcpp::Node(node_name)
+{
+  {
+    using SetJoints = tachimawari_interfaces::srv::SetJoints;
+    set_joints_client = this->create_client<SetJoints>(service_name + "/set_joints");
+  }
+}
 
 void ActionManager::insert_action(uint8_t id, std::shared_ptr<Action> action)
 {
