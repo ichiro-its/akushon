@@ -33,18 +33,25 @@ namespace akushon
 class Action
 {
 public:
-  explicit Action(std::string pose_name);
+  explicit Action(std::string action_name);
 
   void insert_pose(Pose pose);
   void insert_pose(uint8_t id, Pose pose);
   void delete_pose(uint8_t id);
 
-  void set_name(std::string pose_name);
+  void set_name(std::string action_name);
+
   std::string get_name();
+  std::vector<Pose> get_poses();
+  Pose get_pose();
+
+  void next_pose();
 
 private:
   std::string name;
 
+  int pose_index = 0;
+  int pose_count = 0;
   uint8_t next_motion_id;
 
   static std::vector<Pose> poses;

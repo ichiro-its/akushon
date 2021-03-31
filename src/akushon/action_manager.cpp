@@ -18,13 +18,28 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#include <rclcpp/rclcpp.hpp>
+#include <tachimawari_interfaces/srv/set_joints.hpp>
+#include <tachimawari_interfaces/msg/joint.hpp>
+#include <tachimawari/joint.hpp>
+
 #include <akushon/action_manager.hpp>
 
 #include <string>
 #include <memory>
+#include <vector>
 
 namespace akushon
 {
+
+ActionManager::ActionManager(std::string node_name, std::string service_name)
+: rclcpp::Node(node_name)
+{
+  {
+    using SetJoints = tachimawari_interfaces::srv::SetJoints;
+    set_joints_client = this->create_client<SetJoints>(service_name + "/set_joints");
+  }
+}
 
 void ActionManager::insert_action(uint8_t id, std::shared_ptr<Action> action)
 {
@@ -34,6 +49,35 @@ void ActionManager::insert_action(uint8_t id, std::shared_ptr<Action> action)
 void ActionManager::delete_action(uint8_t id)
 {
   action_list.erase(id);
+}
+
+std::shared_ptr<Action> ActionManager::get_action(uint8_t id)
+{
+  return action_list[id];
+}
+
+std::shared_future<std::shared_ptr<tachimawari_interfaces::srv::SetJoints::Response>>
+ActionManager::send_joints_request(std::vector<tachimawari::Joint> joints, float speed)
+{
+  {
+    using SetJoints = tachimawari_interfaces::srv::SetJoints;
+
+    auto request = std::make_shared<SetJoints::Request>();
+    std::vector<tachimawari_interfaces::msg::Joint> joint_messages;
+
+    for (auto joint : joints) {
+      tachimawari_interfaces::msg::Joint joint_message;
+      joint_message.name = joint.get_joint_name();
+      joint_message.position = joint.get_goal_position();
+      joint_message.speed = speed;
+
+      joint_messages.push_back(joint_message);
+    }
+
+    request->joints = joint_messages;
+
+    return set_joints_client->async_send_request(request);
+  }
 }
 
 }  // namespace akushon

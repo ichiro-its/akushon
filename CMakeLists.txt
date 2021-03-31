@@ -14,7 +14,9 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
 find_package(tachimawari REQUIRED)
+find_package(tachimawari_interfaces REQUIRED)
 
 add_library(${PROJECT_NAME}
   "src/${PROJECT_NAME}/pose.cpp"
@@ -26,7 +28,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   $<INSTALL_INTERFACE:include>)
 
 ament_target_dependencies(${PROJECT_NAME}
-  tachimawari)
+  rclcpp
+  tachimawari
+  tachimawari_interfaces)
 
 install(DIRECTORY "include" DESTINATION ".")
 
@@ -45,7 +49,9 @@ if(BUILD_TESTING)
 endif()
 
 ament_export_dependencies(
-  tachimawari)
+  rclcpp
+  tachimawari
+  tachimawari_interfaces)
 ament_export_include_directories("include")
 ament_export_libraries(${PROJECT_NAME})
 ament_package()

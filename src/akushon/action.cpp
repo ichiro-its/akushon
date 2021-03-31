@@ -21,38 +21,57 @@
 #include <akushon/action.hpp>
 
 #include <string>
+#include <vector>
 
 namespace akushon
 {
 
-Action::Action(std::string pose_name)
-: name(pose_name)
+Action::Action(std::string action_name)
+: name(action_name)
 {
 }
 
 void Action::insert_pose(Pose pose)
 {
   poses.push_back(pose);
+  pose_count = poses.size();
 }
 
 void Action::insert_pose(uint8_t id, Pose pose)
 {
   poses.insert(poses.begin() + id, pose);
+  pose_count = poses.size();
 }
 
 void Action::delete_pose(uint8_t id)
 {
   poses.erase(poses.begin() + id);
+  pose_count = poses.size();
 }
 
-void Action::set_name(std::string new_name)
+void Action::set_name(std::string action_name)
 {
-  name = new_name;
+  name = action_name;
 }
 
 std::string Action::get_name()
 {
   return name;
+}
+
+std::vector<Pose> Action::get_poses()
+{
+  return poses;
+}
+
+Pose Action::get_pose()
+{
+  return poses.at(pose_index);
+}
+
+void Action::next_pose()
+{
+  pose_index++;
 }
 
 }  // namespace akushon

@@ -6,11 +6,10 @@
   <description>Action Package for ROS 2</description>
   <maintainer email="segara2410@gmail.com">Segara Bhagas Dagsapurwa</maintainer>
   <license>MIT License</license>
-
   <buildtool_depend>ament_cmake</buildtool_depend>
-
+  <depend>rclcpp</depend>
   <depend>tachimawari</depend>
-
+  <depend>tachimawari_interfaces</depend>
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 

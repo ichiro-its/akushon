@@ -19,4 +19,6 @@ jobs:
         with:
           apt-packages: git ros-foxy-dynamixel-sdk
           ros2-distro: foxy
-          pre-build: git clone https://github.com/ichiro-its/motion_opencr /ws/motion_opencr
+          pre-build: |
+            git clone https://github.com/ichiro-its/tachimawari /ws/tachimawari && \
+              git clone https://github.com/ichiro-its/tachimawari_interfaces /ws/tachimawari_interfaces

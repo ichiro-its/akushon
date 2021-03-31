@@ -31,19 +31,19 @@ Pose::Pose(std::string pose_name)
 {
 }
 
-void Pose::set_velocity(float new_velocity)
+void Pose::set_speed(float speed)
 {
-  velocity = new_velocity;
+  this->speed = speed;
 }
 
-float Pose::get_velocity()
+float Pose::get_speed()
 {
-  return velocity;
+  return speed;
 }
 
-void Pose::set_pause(float new_pause)
+void Pose::set_pause(float pause)
 {
-  pause = new_pause;
+  this->pause = pause;
 }
 
 float Pose::get_pause()
@@ -51,9 +51,9 @@ float Pose::get_pause()
   return pause;
 }
 
-void Pose::set_name(std::string new_name)
+void Pose::set_name(std::string pose_name)
 {
-  name = new_name;
+  name = pose_name;
 }
 
 std::string Pose::get_name()
@@ -61,9 +61,9 @@ std::string Pose::get_name()
   return name;
 }
 
-void Pose::set_joints(std::vector<tachimawari::Joint> new_joints)
+void Pose::set_joints(std::vector<tachimawari::Joint> joints)
 {
-  joints = new_joints;
+  this->joints = joints;
 }
 
 std::vector<tachimawari::Joint> Pose::get_joints()
