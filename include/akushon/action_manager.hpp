@@ -48,7 +48,7 @@ public:
 
 private:
   std::shared_future<std::shared_ptr<tachimawari_interfaces::srv::SetJoints::Response>>
-  send_joints_request(std::vector<tachimawari::Joint> joints, float speed);
+  send_joints_request(std::vector<tachimawari::Joint> joints, float speed = 1);
 
   std::map<uint8_t, std::shared_ptr<Action>> action_list;
 
