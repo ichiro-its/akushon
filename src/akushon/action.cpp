@@ -74,4 +74,9 @@ void Action::next_pose()
   pose_index++;
 }
 
+bool Action::is_finished()
+{
+  return pose_index == pose_count;
+}
+
 }  // namespace akushon
