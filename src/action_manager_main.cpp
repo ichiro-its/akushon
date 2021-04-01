@@ -51,8 +51,6 @@ int main(int argc, char * argv[])
 
     // check the node
     if (action_manager->is_ready()) {
-      std::cout << "\033[H\033[J";
-
       // send request
       auto response_future =
         action_manager->send_joints_request(pose.get_joints(), pose.get_speed());
