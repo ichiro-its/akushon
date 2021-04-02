@@ -40,7 +40,14 @@ install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION "lib"
   RUNTIME DESTINATION "bin")
 
+add_executable(action_manager "src/action_manager_main.cpp")
+target_include_directories(action_manager PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+target_link_libraries(action_manager ${PROJECT_NAME})
+
 install(TARGETS
+  action_manager
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)

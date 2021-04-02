@@ -46,6 +46,7 @@ public:
   Pose get_pose();
 
   void next_pose();
+  bool is_finished();
 
 private:
   std::string name;
@@ -54,7 +55,7 @@ private:
   int pose_count = 0;
   uint8_t next_motion_id;
 
-  static std::vector<Pose> poses;
+  std::vector<Pose> poses;
 };
 
 }  // namespace akushon

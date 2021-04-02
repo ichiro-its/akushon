@@ -52,7 +52,7 @@ private:
 
   std::string name;
 
-  static std::vector<tachimawari::Joint> joints;
+  std::vector<tachimawari::Joint> joints;
 };
 
 }  // namespace akushon

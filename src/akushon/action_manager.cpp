@@ -56,6 +56,16 @@ std::shared_ptr<Action> ActionManager::get_action(uint8_t id)
   return action_list[id];
 }
 
+bool ActionManager::is_ready()
+{
+  if (!set_joints_client->wait_for_service()) {
+    RCLCPP_INFO(get_logger(), "service not available");
+    return false;
+  }
+
+  return true;
+}
+
 std::shared_future<std::shared_ptr<tachimawari_interfaces::srv::SetJoints::Response>>
 ActionManager::send_joints_request(std::vector<tachimawari::Joint> joints, float speed)
 {

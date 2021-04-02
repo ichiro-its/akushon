@@ -46,10 +46,11 @@ public:
 
   std::shared_ptr<Action> get_action(uint8_t id);
 
-private:
+  bool is_ready();
   std::shared_future<std::shared_ptr<tachimawari_interfaces::srv::SetJoints::Response>>
   send_joints_request(std::vector<tachimawari::Joint> joints, float speed = 1);
 
+private:
   std::map<uint8_t, std::shared_ptr<Action>> action_list;
 
   std::shared_ptr<rclcpp::Client<tachimawari_interfaces::srv::SetJoints>>
