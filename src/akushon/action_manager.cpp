@@ -29,6 +29,9 @@
 #include <memory>
 #include <vector>
 
+#include <fstream>
+#include <nlohmann/json.hpp>
+
 namespace akushon
 {
 
@@ -64,6 +67,43 @@ bool ActionManager::is_ready()
   }
 
   return true;
+}
+
+void ActionManager::load_action_data(std::vector<std::string> action_names)
+{
+  uint8_t id = 0;
+  for (auto action_name : action_names) {
+    std::string file_name = action_name + ".json";
+    std::ifstream file(file_name);
+    nlohmann::json action_data = nlohmann::json::parse(file);
+
+    // auto action = std::make_shared<akushon::Action>(action_data["name"]);
+    auto action = Action(action_data["name"]);
+    
+    for (auto& [key, val] : action_data.items()) {
+      if (key.find("step_") != std::string::npos) {
+        Pose pose(val);
+        std::vector<tachimawari::Joint> joints;
+        for (auto& [steps_key, steps_val] : action_data[key].items()) {
+          if (!(steps_key.find("step_") != std::string::npos)) {
+            tachimawari::Joint joint(steps_key, static_cast<float>(steps_val)); //init join
+            joints.push_back(joint);
+          } 
+          else if (steps_key == "step_pause") {
+            pose.set_pause(steps_val);
+          }
+          else if (steps_key == "step_time") {
+            pose.set_speed(static_cast<float>(steps_val));
+          }
+        }
+        pose.set_joints(joints);
+        action.insert_pose(pose);
+      }
+    }
+    // this->action_list.insert(std::pair<uint8_t, std::shared_ptr<Action>>(id, action));
+    std::cout << this->action_list.size() << std::endl;
+    id++;
+  }
 }
 
 std::shared_future<std::shared_ptr<tachimawari_interfaces::srv::SetJoints::Response>>

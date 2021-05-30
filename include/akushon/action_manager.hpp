@@ -46,6 +46,8 @@ public:
 
   std::shared_ptr<Action> get_action(uint8_t id);
 
+  void load_action_data(std::vector<std::string> action_names);
+
   bool is_ready();
   std::shared_future<std::shared_ptr<tachimawari_interfaces::srv::SetJoints::Response>>
   send_joints_request(std::vector<tachimawari::Joint> joints, float speed = 1);
