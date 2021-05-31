@@ -42,4 +42,3 @@ jobs:
             cd ~/repository/debian
             reprepro includedeb stable ~/temp/stable/akushon/package/*.deb
             rm -rf ~/temp/stable/akushon/
-            

@@ -44,4 +44,3 @@ jobs:
             cd ~/repository/debian
             reprepro includedeb nightly ~/temp/nightly/akushon/package/*.deb
             rm -rf ~/temp/nightly/akushon/
-            
