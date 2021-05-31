@@ -19,3 +19,4 @@ jobs:
           curl -s http://repository.ichiro-its.org/rosdep/setup.bash | bash -s
       - name: Build and test workspace
         uses: ichiro-its/ros2-build-and-test-action@main
+        
