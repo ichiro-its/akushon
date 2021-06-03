@@ -28,15 +28,18 @@
 
 #include <akushon/action_manager.hpp>
 #include <akushon/pose.hpp>
+#include <nlohmann/json.hpp>
 
 #include <fstream>
 #include <iostream>
-#include <string>
-
+#include <map>
 #include <memory>
-#include <nlohmann/json.hpp>
+#include <string>
+#include <utility>
+#include <vector>
 
-std::map<uint8_t, std::shared_ptr<akushon::Action>> load_action_data(std::vector<std::string> action_names);
+std::map<uint8_t, std::shared_ptr<akushon::Action>> load_action_data(
+  std::vector<std::string> action_names);
 
 int main(int argc, char * argv[])
 {
@@ -56,13 +59,13 @@ int main(int argc, char * argv[])
   }
 
   std::vector<std::string> action_names = {
-      // "left_kick", 
-      "right_kick", 
-      // "back_standup", 
-      // "forward_standup", 
-      // "left_standup",
-      // "right_standup"
-    }; 
+    // "left_kick",
+    "right_kick",
+    // "back_standup",
+    // "forward_standup",
+    // "left_standup",
+    // "right_standup"
+  };
 
   robocup_client::MessageHandler message;
 
@@ -71,7 +74,6 @@ int main(int argc, char * argv[])
   while (client.get_tcp_socket()->is_connected()) {
     try {
       std::map<uint8_t, std::shared_ptr<akushon::Action>> action_list;
-      action_list = load_action_data(action_names);
 
       std::string cmds[2];
       std::cin >> cmds[0] >> cmds[1];
@@ -81,44 +83,51 @@ int main(int argc, char * argv[])
       }
 
       std::cout << "cmd: " << cmds[0] << " " << cmds[1] << std::endl;
+      action_list = load_action_data(action_names);
 
-      if (cmds[0] == "run_action")
-      {
+      if (cmds[0] == "run_action") {
         bool find_action = false;
-        for (auto id = 0; id < action_names.size(); id++)
-        {
-          if (cmds[1] == action_names[id])
-          {
+        for (auto id = 0; id < action_names.size(); id++) {
+          if (cmds[1] == action_names[id]) {
             find_action = true;
 
             auto action = action_list[id];
 
-            while (!action->is_finished())
-            {
+            while (!action->is_finished()) {
               akushon::Pose pose = action->get_pose();
               std::cout << "joints at pose: " << pose.get_name() << "\n";
 
               std::vector<tachimawari::Joint> joints = pose.get_joints();
               std::cout << "JOINTS" << std::endl;
-              for (auto &joint : joints)
-              {
-                std::cout << "joints: " << joint.get_joint_name() << " at " << joint.get_position() << "\n";
-                 message.add_motor_position(joint.get_joint_name(), joint.get_position());
+              for (auto & joint : joints) {
+                std::string joint_name = joint.get_joint_name();
+
+                if (joint_name.find("shoulder_pitch") != std::string::npos) {
+                  joint_name += " [shoulder]";
+                  // std::cout << joint_name << std::endl;
+                } else if (joint_name.find("hip_yaw") != std::string::npos) {
+                  joint_name += " [hip]";
+                  // std::cout << "hip" << std::endl;
+                }
+
+                std::cout << "joints: " << joint_name << " at " << joint.get_position() << "\n";
+                message.add_motor_position(joint_name, joint.get_position());
               }
               client.send(*message.get_actuator_request());
 
               action->next_pose();
             }
-            break; // done pose
+            break;  // done pose
           }
         }
         // if doesn't find the action_name
         if (!find_action) {
-          std::cout << "-ERR action_name was not found\n usage: run_action <action_name>" << std::endl;
+          std::cout << "-ERR action_name was not found\n usage: run_action <action_name>" <<
+            std::endl;
         }
-      }
-      else {
-        std::cout << "-ERR first command is not valid\n usage: run_action <action_name>" << std::endl;
+      } else {
+        std::cout << "-ERR first command is not valid\n usage: run_action <action_name>" <<
+          std::endl;
       }
 
       auto sensors = client.receive();
@@ -129,8 +138,6 @@ int main(int argc, char * argv[])
         std::cout << position_sensor.name() << " " << position_sensor.value() << std::endl;
       }
       std::cout << std::endl;
-
-    
 
       // Get time
       auto time = sensors.get()->time();
@@ -143,36 +150,29 @@ int main(int argc, char * argv[])
   return 0;
 }
 
-std::map<uint8_t, std::shared_ptr<akushon::Action>> load_action_data(std::vector<std::string> action_names) {
+std::map<uint8_t, std::shared_ptr<akushon::Action>> load_action_data(
+  std::vector<std::string> action_names)
+{
   uint8_t id = 0;
   std::map<uint8_t, std::shared_ptr<akushon::Action>> action_list;
-  for (auto action_name : action_names)
-  {
-    std::string file_name = "/home/finesa/ichiro-2021/src/akushon/src/" + action_name + ".json";
+  for (auto action_name : action_names) {
+    std::string file_name = "/home/nathanael/ICHIRO/src/akushon/src/" + action_name + ".json";
     std::ifstream file(file_name);
     nlohmann::json action_data = nlohmann::json::parse(file);
 
     auto action = std::make_shared<akushon::Action>(action_data["name"]);
 
-    for (auto &[key, val] : action_data.items())
-    {
-      if (key.find("step_") != std::string::npos)
-      {
+    for (auto &[key, val] : action_data.items()) {
+      if (key.find("step_") != std::string::npos) {
         akushon::Pose pose(key);
         std::vector<tachimawari::Joint> joints;
-        for (auto &[steps_key, steps_val] : action_data[key].items())
-        {
-          if (!(steps_key.find("step_") != std::string::npos))
-          {
-            tachimawari::Joint joint(steps_key, static_cast<float>(steps_val)); //init join
+        for (auto &[steps_key, steps_val] : action_data[key].items()) {
+          if (!(steps_key.find("step_") != std::string::npos)) {
+            tachimawari::Joint joint(steps_key, static_cast<float>(steps_val));  // init join
             joints.push_back(joint);
-          }
-          else if (steps_key == "step_pause")
-          {
+          } else if (steps_key == "step_pause") {
             pose.set_pause(static_cast<float>(steps_val));
-          }
-          else if (steps_key == "step_speed")
-          {
+          } else if (steps_key == "step_speed") {
             pose.set_speed(static_cast<float>(steps_val));
           }
         }
