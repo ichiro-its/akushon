@@ -48,6 +48,8 @@ public:
   void next_pose();
   bool is_finished();
 
+  int get_pose_index();
+
 private:
   std::string name;
 

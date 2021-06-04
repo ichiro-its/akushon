@@ -22,7 +22,7 @@
 #define AKUSHON__ACTION_MANAGER_HPP_
 
 #include <rclcpp/rclcpp.hpp>
-#include <tachimawari_interfaces/srv/set_joints.hpp>
+// #include <tachimawari_interfaces/srv/set_joints.hpp>
 #include <tachimawari/joint.hpp>
 
 #include <akushon/action.hpp>
@@ -36,21 +36,22 @@
 namespace akushon
 {
 
-class ActionManager 
+class ActionManager
 {
 public:
-  explicit ActionManager(std::string node_name, std::string service_name);
+  // explicit ActionManager(std::string node_name, std::string service_name);
+  ActionManager();
 
   void insert_action(uint8_t id, std::shared_ptr<Action> action);
   void delete_action(uint8_t id);
 
   std::shared_ptr<Action> get_action(uint8_t id);
 
-  void load_action_data(std::vector<std::string> action_names);
-  std::shared_ptr<Pose> run_action();
+  void load_action_data(std::string path, std::vector<std::string> action_names);
+  std::shared_ptr<Pose> run_action(int time);
   void set_current_action(uint8_t action_id, Pose pose);
 
-  bool is_running();
+  bool is_empty();
   bool is_ready();
 
   // std::shared_future<std::shared_ptr<tachimawari_interfaces::srv::SetJoints::Response>>
@@ -59,9 +60,11 @@ public:
 private:
   std::map<uint8_t, std::shared_ptr<Action>> action_list;
   std::shared_ptr<Action> current_action;
-  std::shared_ptr<Pose> current_pose;
-  bool running;
+  std::shared_ptr<Pose> robot_pose;
 
+  int pause_start_time;
+  bool on_pause;
+  bool is_running;
   // std::shared_ptr<rclcpp::Client<tachimawari_interfaces::srv::SetJoints>> set_joints_client;
 };
 

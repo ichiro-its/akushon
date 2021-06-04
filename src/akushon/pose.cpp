@@ -22,7 +22,6 @@
 
 #include <string>
 #include <vector>
-
 namespace akushon
 {
 
@@ -61,12 +60,10 @@ std::string Pose::get_name()
   return name;
 }
 
-void Pose::interpolate() 
+void Pose::interpolate()
 {
-  for (auto & current_joint: this->joints) {
-    while(current_joint.get_position()!= current_joint.get_goal_position()) {
-      current_joint.interpolate();
-    }
+  for (auto & current_joint : joints) {
+    current_joint.interpolate();
   }
 }
 
@@ -80,19 +77,35 @@ std::vector<tachimawari::Joint> Pose::get_joints()
   return joints;
 }
 
-bool Pose::is_equals(Pose other_pose) {
-  std::vector<tachimawari::Joint> joints = other_pose.get_joints();
-  
-  for (auto & joint: this->joints) {
-    for (auto & other_joint: other_pose.get_joints()) {
-      if(joint.get_joint_name() == other_joint.get_joint_name()) {
-        if(joint.get_position() != other_joint.get_goal_position()) {
+void Pose::set_simulator_target_position(Pose target_pose)
+{
+  std::vector<tachimawari::Joint> new_joints;
+  for (auto & joint : get_joints()) {
+    for (auto & target_joint : target_pose.get_joints()) {
+      if (joint.get_joint_name() == target_joint.get_joint_name()) {
+        tachimawari::Joint new_joint(joint.get_joint_name(), joint.get_position());
+        new_joint.set_simulator_target_position(
+          target_joint.get_position(), target_pose.get_speed());
+        new_joints.push_back(new_joint);
+      }
+    }
+  }
+
+  set_joints(new_joints);
+}
+
+bool Pose::operator==(Pose other_pose)
+{
+  for (auto & joint : joints) {
+    for (auto & other_joint : other_pose.get_joints()) {
+      if (joint.get_joint_name() == other_joint.get_joint_name()) {
+        if (joint.get_position() != other_joint.get_position()) {
           return false;
         }
       }
     }
   }
-  
+
   return true;
 }
 

@@ -39,10 +39,11 @@
 
 int main(int argc, char * argv[])
 {
-  if (argc < 3) {
-    std::cerr << "Please specify the host and the port!" << std::endl;
+  if (argc < 4) {
+    std::cerr << "Please specify the host, the port, and the path!" << std::endl;
     return 0;
   }
+
   std::string host = argv[1];
   int port = std::stoi(argv[2]);
 
@@ -54,8 +55,7 @@ int main(int argc, char * argv[])
     return 1;
   }
 
-  auto action_manager =
-    std::make_shared<akushon::ActionManager>("action_manager", "motion_manager");
+  auto action_manager = std::make_shared<akushon::ActionManager>();
 
   std::vector<std::string> action_names = {
     // "left_kick",
@@ -69,24 +69,24 @@ int main(int argc, char * argv[])
   robocup_client::MessageHandler message;
   message.add_sensor_time_step("neck_yaw_s", 8);
   message.add_sensor_time_step("neck_pitch_s", 8);
-  message.add_sensor_time_step("left_shoulder_pitch", 8);
-  message.add_sensor_time_step("left_shoulder_roll", 8);
-  message.add_sensor_time_step("left_elbow", 8);
-  message.add_sensor_time_step("right_shoulder_pitch", 8);
-  message.add_sensor_time_step("right_shoulder_roll", 8);
-  message.add_sensor_time_step("right_elbow", 8);
-  message.add_sensor_time_step("left_hip_yaw", 8);
-  message.add_sensor_time_step("left_hip_roll", 8);
-  message.add_sensor_time_step("left_hip_pitch", 8);
-  message.add_sensor_time_step("left_knee", 8);
-  message.add_sensor_time_step("left_ankle_roll", 8);
-  message.add_sensor_time_step("left_ankle_pitch", 8);
-  message.add_sensor_time_step("right_hip_yaw", 8);
-  message.add_sensor_time_step("right_hip_roll", 8);
-  message.add_sensor_time_step("right_hip_pitch", 8);
-  message.add_sensor_time_step("right_knee", 8);
-  message.add_sensor_time_step("right_ankle_roll", 8);
-  message.add_sensor_time_step("right_ankle_pitch", 8);
+  message.add_sensor_time_step("left_shoulder_pitch_s", 8);
+  message.add_sensor_time_step("left_shoulder_roll_s", 8);
+  message.add_sensor_time_step("left_elbow_s", 8);
+  message.add_sensor_time_step("right_shoulder_pitch_s", 8);
+  message.add_sensor_time_step("right_shoulder_roll_s", 8);
+  message.add_sensor_time_step("right_elbow_s", 8);
+  message.add_sensor_time_step("left_hip_yaw_s", 8);
+  message.add_sensor_time_step("left_hip_roll_s", 8);
+  message.add_sensor_time_step("left_hip_pitch_s", 8);
+  message.add_sensor_time_step("left_knee_s", 8);
+  message.add_sensor_time_step("left_ankle_roll_s", 8);
+  message.add_sensor_time_step("left_ankle_pitch_s", 8);
+  message.add_sensor_time_step("right_hip_yaw_s", 8);
+  message.add_sensor_time_step("right_hip_roll_s", 8);
+  message.add_sensor_time_step("right_hip_pitch_s", 8);
+  message.add_sensor_time_step("right_knee_s", 8);
+  message.add_sensor_time_step("right_ankle_roll_s", 8);
+  message.add_sensor_time_step("right_ankle_pitch_s", 8);
 
   client.send(*message.get_actuator_request());
 
@@ -95,13 +95,12 @@ int main(int argc, char * argv[])
       message.clear_actuator_request();
 
       auto sensors = client.receive();
-      
+
       // get time
       auto time = sensors.get()->time();
-      std::cout << time << std::endl;
 
-      if (action_manager->is_running()) { //
-        auto robot_pose = action_manager->run_action(); //
+      if (!action_manager->is_empty()) {
+        auto robot_pose = action_manager->run_action(time);
 
         for (auto & joint : robot_pose->get_joints()) {
           std::string joint_name = joint.get_joint_name();
@@ -111,24 +110,25 @@ int main(int argc, char * argv[])
           } else if (joint_name.find("hip_yaw") != std::string::npos) {
             joint_name += " [hip]";
           }
-          message.add_motor_position(joint_name, joint.get_position());
+          message.add_motor_position(joint_name, joint.get_position() / 180 * 3.14);
         }
 
         client.send(*message.get_actuator_request());
-        std::cout << "send" << std::endl;
       } else {
         std::string cmds[2];
+
+        std::cout << "> ";
         std::cin >> cmds[0] >> cmds[1];
 
         if (cmds[0] == "q") {
           break;
         }
 
-        action_manager->load_action_data(action_names);
+        action_manager->load_action_data(argv[3], action_names);
 
-        if (cmds[0] == "run_action") {
+        if (cmds[0] == "run") {
           bool find_action = false;
-          for (auto id = 0; id < action_names.size(); id++) {
+          for (uint id = 0; id < action_names.size(); id++) {
             if (cmds[1] == action_names[id]) {
               find_action = true;
               akushon::Pose init_pose("init");
@@ -136,21 +136,24 @@ int main(int argc, char * argv[])
 
               for (int i = 0; i < sensors.get()->position_sensors_size(); i++) {
                 auto position_sensor = sensors.get()->position_sensors(i);
-                tachimawari::Joint joint(position_sensor.name(), position_sensor.value());
+                auto joint_name =
+                  position_sensor.name().substr(0, position_sensor.name().size() - 2);
+
+                tachimawari::Joint joint(joint_name, position_sensor.value());
+
                 joints.push_back(joint);
               }
               init_pose.set_joints(joints);
-              action_manager->set_current_action(id, init_pose); // 
+              action_manager->set_current_action(id, init_pose);
             }
-            break;  // done pose
+            break;
           }
           if (!find_action) {
-            std::cout << "-ERR action_name was not found" <<  std::endl;
+            std::cout << "-ERR action_name was not found" << std::endl;
           }
         } else {
-            std::cout << "-ERR command was not valid\n usage: run_action <action_name>" <<  std::endl;
+          std::cout << "-ERR command was not valid\n usage: run_action <action_name>" << std::endl;
         }
-
       }
     } catch (const std::runtime_error & exc) {
       std::cerr << "Runtime error: " << exc.what() << std::endl;

@@ -27,7 +27,7 @@ namespace akushon
 {
 
 Action::Action(std::string action_name)
-: name(action_name)
+: name(action_name), pose_index(0)
 {
 }
 
@@ -72,6 +72,11 @@ Pose Action::get_pose()
 void Action::next_pose()
 {
   pose_index++;
+}
+
+int Action::get_pose_index()
+{
+  return pose_index;
 }
 
 bool Action::is_finished()
