@@ -28,15 +28,14 @@
 
 #include <akushon/action_manager.hpp>
 #include <akushon/pose.hpp>
+#include <nlohmann/json.hpp>
 
 #include <fstream>
 #include <iostream>
-#include <string>
-
 #include <memory>
-#include <nlohmann/json.hpp>
-
-std::map<uint8_t, std::shared_ptr<akushon::Action>> load_action_data(std::vector<std::string> action_names);
+#include <string>
+#include <utility>
+#include <vector>
 
 int main(int argc, char * argv[])
 {
@@ -55,135 +54,108 @@ int main(int argc, char * argv[])
     return 1;
   }
 
+  auto action_manager =
+    std::make_shared<akushon::ActionManager>("action_manager", "motion_manager");
+
   std::vector<std::string> action_names = {
-      // "left_kick", 
-      "right_kick", 
-      // "back_standup", 
-      // "forward_standup", 
-      // "left_standup",
-      // "right_standup"
-    }; 
+    // "left_kick",
+    "right_kick",
+    // "back_standup",
+    // "forward_standup",
+    // "left_standup",
+    // "right_standup"
+  };
 
   robocup_client::MessageHandler message;
+  message.add_sensor_time_step("neck_yaw_s", 8);
+  message.add_sensor_time_step("neck_pitch_s", 8);
+  message.add_sensor_time_step("left_shoulder_pitch", 8);
+  message.add_sensor_time_step("left_shoulder_roll", 8);
+  message.add_sensor_time_step("left_elbow", 8);
+  message.add_sensor_time_step("right_shoulder_pitch", 8);
+  message.add_sensor_time_step("right_shoulder_roll", 8);
+  message.add_sensor_time_step("right_elbow", 8);
+  message.add_sensor_time_step("left_hip_yaw", 8);
+  message.add_sensor_time_step("left_hip_roll", 8);
+  message.add_sensor_time_step("left_hip_pitch", 8);
+  message.add_sensor_time_step("left_knee", 8);
+  message.add_sensor_time_step("left_ankle_roll", 8);
+  message.add_sensor_time_step("left_ankle_pitch", 8);
+  message.add_sensor_time_step("right_hip_yaw", 8);
+  message.add_sensor_time_step("right_hip_roll", 8);
+  message.add_sensor_time_step("right_hip_pitch", 8);
+  message.add_sensor_time_step("right_knee", 8);
+  message.add_sensor_time_step("right_ankle_roll", 8);
+  message.add_sensor_time_step("right_ankle_pitch", 8);
 
   client.send(*message.get_actuator_request());
 
   while (client.get_tcp_socket()->is_connected()) {
     try {
-      std::map<uint8_t, std::shared_ptr<akushon::Action>> action_list;
-      action_list = load_action_data(action_names);
-
-      std::string cmds[2];
-      std::cin >> cmds[0] >> cmds[1];
-
-      if (cmds[0] == "q") {
-        break;
-      }
-
-      std::cout << "cmd: " << cmds[0] << " " << cmds[1] << std::endl;
-
-      if (cmds[0] == "run_action")
-      {
-        bool find_action = false;
-        for (auto id = 0; id < action_names.size(); id++)
-        {
-          if (cmds[1] == action_names[id])
-          {
-            find_action = true;
-
-            auto action = action_list[id];
-
-            while (!action->is_finished())
-            {
-              akushon::Pose pose = action->get_pose();
-              std::cout << "joints at pose: " << pose.get_name() << "\n";
-
-              std::vector<tachimawari::Joint> joints = pose.get_joints();
-              std::cout << "JOINTS" << std::endl;
-              for (auto &joint : joints)
-              {
-                std::cout << "joints: " << joint.get_joint_name() << " at " << joint.get_position() << "\n";
-                 message.add_motor_position(joint.get_joint_name(), joint.get_position());
-              }
-              client.send(*message.get_actuator_request());
-
-              action->next_pose();
-            }
-            break; // done pose
-          }
-        }
-        // if doesn't find the action_name
-        if (!find_action) {
-          std::cout << "-ERR action_name was not found\n usage: run_action <action_name>" << std::endl;
-        }
-      }
-      else {
-        std::cout << "-ERR first command is not valid\n usage: run_action <action_name>" << std::endl;
-      }
+      message.clear_actuator_request();
 
       auto sensors = client.receive();
-
-      // Get Position Sensor Data
-      for (int i = 0; i < sensors.get()->position_sensors_size(); i++) {
-        auto position_sensor = sensors.get()->position_sensors(i);
-        std::cout << position_sensor.name() << " " << position_sensor.value() << std::endl;
-      }
-      std::cout << std::endl;
-
-    
-
-      // Get time
+      
+      // get time
       auto time = sensors.get()->time();
       std::cout << time << std::endl;
+
+      if (action_manager->is_running()) { //
+        auto robot_pose = action_manager->run_action(); //
+
+        for (auto & joint : robot_pose->get_joints()) {
+          std::string joint_name = joint.get_joint_name();
+
+          if (joint_name.find("shoulder_pitch") != std::string::npos) {
+            joint_name += " [shoulder]";
+          } else if (joint_name.find("hip_yaw") != std::string::npos) {
+            joint_name += " [hip]";
+          }
+          message.add_motor_position(joint_name, joint.get_position());
+        }
+
+        client.send(*message.get_actuator_request());
+        std::cout << "send" << std::endl;
+      } else {
+        std::string cmds[2];
+        std::cin >> cmds[0] >> cmds[1];
+
+        if (cmds[0] == "q") {
+          break;
+        }
+
+        action_manager->load_action_data(action_names);
+
+        if (cmds[0] == "run_action") {
+          bool find_action = false;
+          for (auto id = 0; id < action_names.size(); id++) {
+            if (cmds[1] == action_names[id]) {
+              find_action = true;
+              akushon::Pose init_pose("init");
+              std::vector<tachimawari::Joint> joints;
+
+              for (int i = 0; i < sensors.get()->position_sensors_size(); i++) {
+                auto position_sensor = sensors.get()->position_sensors(i);
+                tachimawari::Joint joint(position_sensor.name(), position_sensor.value());
+                joints.push_back(joint);
+              }
+              init_pose.set_joints(joints);
+              action_manager->set_current_action(id, init_pose); // 
+            }
+            break;  // done pose
+          }
+          if (!find_action) {
+            std::cout << "-ERR action_name was not found" <<  std::endl;
+          }
+        } else {
+            std::cout << "-ERR command was not valid\n usage: run_action <action_name>" <<  std::endl;
+        }
+
+      }
     } catch (const std::runtime_error & exc) {
       std::cerr << "Runtime error: " << exc.what() << std::endl;
     }
   }
 
   return 0;
-}
-
-std::map<uint8_t, std::shared_ptr<akushon::Action>> load_action_data(std::vector<std::string> action_names) {
-  uint8_t id = 0;
-  std::map<uint8_t, std::shared_ptr<akushon::Action>> action_list;
-  for (auto action_name : action_names)
-  {
-    std::string file_name = "/home/finesa/ichiro-2021/src/akushon/src/" + action_name + ".json";
-    std::ifstream file(file_name);
-    nlohmann::json action_data = nlohmann::json::parse(file);
-
-    auto action = std::make_shared<akushon::Action>(action_data["name"]);
-
-    for (auto &[key, val] : action_data.items())
-    {
-      if (key.find("step_") != std::string::npos)
-      {
-        akushon::Pose pose(key);
-        std::vector<tachimawari::Joint> joints;
-        for (auto &[steps_key, steps_val] : action_data[key].items())
-        {
-          if (!(steps_key.find("step_") != std::string::npos))
-          {
-            tachimawari::Joint joint(steps_key, static_cast<float>(steps_val)); //init join
-            joints.push_back(joint);
-          }
-          else if (steps_key == "step_pause")
-          {
-            pose.set_pause(static_cast<float>(steps_val));
-          }
-          else if (steps_key == "step_speed")
-          {
-            pose.set_speed(static_cast<float>(steps_val));
-          }
-        }
-        pose.set_joints(joints);
-        action->insert_pose(pose);
-      }
-    }
-    action_list.insert(std::pair<uint8_t, std::shared_ptr<akushon::Action>>(id, action));
-    // std::cout << "size" << action_list.size() << std::endl;
-    id++;
-  }
-
-  return action_list;
 }

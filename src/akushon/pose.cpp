@@ -61,6 +61,15 @@ std::string Pose::get_name()
   return name;
 }
 
+void Pose::interpolate() 
+{
+  for (auto & current_joint: this->joints) {
+    while(current_joint.get_position()!= current_joint.get_goal_position()) {
+      current_joint.interpolate();
+    }
+  }
+}
+
 void Pose::set_joints(std::vector<tachimawari::Joint> joints)
 {
   this->joints = joints;
@@ -69,6 +78,22 @@ void Pose::set_joints(std::vector<tachimawari::Joint> joints)
 std::vector<tachimawari::Joint> Pose::get_joints()
 {
   return joints;
+}
+
+bool Pose::is_equals(Pose other_pose) {
+  std::vector<tachimawari::Joint> joints = other_pose.get_joints();
+  
+  for (auto & joint: this->joints) {
+    for (auto & other_joint: other_pose.get_joints()) {
+      if(joint.get_joint_name() == other_joint.get_joint_name()) {
+        if(joint.get_position() != other_joint.get_goal_position()) {
+          return false;
+        }
+      }
+    }
+  }
+  
+  return true;
 }
 
 }  // namespace akushon
