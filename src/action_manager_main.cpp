@@ -95,14 +95,14 @@ int main(int argc, char * argv[])
 
   bool action_is_running = false;
   std::thread input_handler([&cmds, &action_is_running] {
-    while (true) {
-      if (!action_is_running) {
-        std::cout << "> ";
-        std::cin >> cmds[0] >> cmds[1];
-        action_is_running = true;
+      while (true) {
+        if (!action_is_running) {
+          std::cout << "> ";
+          std::cin >> cmds[0] >> cmds[1];
+          action_is_running = true;
+        }
       }
-    }
-  });
+    });
 
   while (client.get_tcp_socket()->is_connected()) {
     try {
