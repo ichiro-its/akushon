@@ -34,6 +34,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -90,6 +91,19 @@ int main(int argc, char * argv[])
 
   client.send(*message.get_actuator_request());
 
+  std::string cmds[2] = {};
+
+  bool action_is_running = false;
+  std::thread input_handler([&cmds, &action_is_running] {
+    while (true) {
+      if (!action_is_running) {
+        std::cout << "> ";
+        std::cin >> cmds[0] >> cmds[1];
+        action_is_running = true;
+      }
+    }
+  });
+
   while (client.get_tcp_socket()->is_connected()) {
     try {
       message.clear_actuator_request();
@@ -114,12 +128,11 @@ int main(int argc, char * argv[])
         }
 
         client.send(*message.get_actuator_request());
-      } else {
-        std::string cmds[2];
 
-        std::cout << "> ";
-        std::cin >> cmds[0] >> cmds[1];
-
+        if (action_manager->is_empty()) {
+          action_is_running = false;
+        }
+      } else if (!cmds[0].empty()) {
         if (cmds[0] == "q") {
           break;
         }
@@ -130,6 +143,7 @@ int main(int argc, char * argv[])
           bool find_action = false;
           for (uint id = 0; id < action_names.size(); id++) {
             if (cmds[1] == action_names[id]) {
+              std::cout << "Running action " << cmds[1] << std::endl;
               find_action = true;
               akushon::Pose init_pose("init");
               std::vector<tachimawari::Joint> joints;
@@ -145,8 +159,8 @@ int main(int argc, char * argv[])
               }
               init_pose.set_joints(joints);
               action_manager->set_current_action(id, init_pose);
+              break;
             }
-            break;
           }
           if (!find_action) {
             std::cout << "-ERR action_name was not found" << std::endl;
@@ -154,6 +168,8 @@ int main(int argc, char * argv[])
         } else {
           std::cout << "-ERR command was not valid\n usage: run_action <action_name>" << std::endl;
         }
+        cmds[0].clear();
+        cmds[1].clear();
       }
     } catch (const std::runtime_error & exc) {
       std::cerr << "Runtime error: " << exc.what() << std::endl;
