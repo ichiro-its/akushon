@@ -91,13 +91,13 @@ int main(int argc, char * argv[])
 
   client.send(*message.get_actuator_request());
 
-  std::string cmds[2] = {};
+  std::string cmds[3] = {};
 
   bool action_is_running = false;
   std::thread input_handler([&cmds, &action_is_running] {
       while (true) {
         if (!action_is_running) {
-          std::cout << "> ";
+          std::cout << "> run ";
           std::cin >> cmds[0] >> cmds[1];
           action_is_running = true;
         }
@@ -139,7 +139,7 @@ int main(int argc, char * argv[])
 
         action_manager->load_action_data(argv[3], action_names);
 
-        if (cmds[0] == "run") {
+        if (cmds[0] == "action") {
           bool find_action = false;
           for (uint id = 0; id < action_names.size(); id++) {
             if (cmds[1] == action_names[id]) {
@@ -165,11 +165,50 @@ int main(int argc, char * argv[])
           if (!find_action) {
             std::cout << "-ERR action_name was not found" << std::endl;
           }
+        } else if (cmds[0] == "pose") {
+          std::cout << "action > ";
+          std::cin >> cmds[1];
+          std::cout << "step > ";
+          std::cin >> cmds[2];
+ 
+          bool find_action = false;
+          for (uint id = 0; id < action_names.size(); id++) {
+            if (cmds[1] == action_names[id]) {
+              if (std::stoi(cmds[2]) >= 0 &&  std::stoi(cmds[2]) <= 6) {
+                std::cout << "Running action " << cmds[1] << "in pose - " << cmds[2] << std::endl;
+                find_action = true; 
+
+                std::shared_ptr<akushon::Action> current_action = ;
+                akushon::Pose current_pose = action_manager->get_action(id)->get_pose_at_index(std::stoi(cmds[2]));
+
+                 for (auto & joint : current_pose->get_joints()) {
+                  std::string joint_name = joint.get_joint_name();
+
+                  if (joint_name.find("shoulder_pitch") != std::string::npos) {
+                    joint_name += " [shoulder]";
+                  } else if (joint_name.find("hip_yaw") != std::string::npos) {
+                    joint_name += " [hip]";
+                  }
+                  message.add_motor_position(joint_name, joint.get_position() / 180 * 3.14);
+                }
+
+                client.send(*message.get_actuator_request());
+              } else {
+                std::cout << "-ERR step is not defined (step in range 0 - 6)" << std::endl;
+              }
+              
+              break;
+            }
+          }
+          if (!find_action) {
+            std::cout << "-ERR action_name was not found" << std::endl;
+          }
         } else {
           std::cout << "-ERR command was not valid\n usage: run_action <action_name>" << std::endl;
         }
         cmds[0].clear();
         cmds[1].clear();
+        cmds[2].clear();
       }
     } catch (const std::runtime_error & exc) {
       std::cerr << "Runtime error: " << exc.what() << std::endl;

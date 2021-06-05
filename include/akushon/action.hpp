@@ -44,6 +44,7 @@ public:
   std::string get_name();
   std::vector<Pose> get_poses();
   Pose get_pose();
+  Pose get_pose_at_index(uint8_t index);
 
   void next_pose();
   bool is_finished();

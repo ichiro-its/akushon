@@ -69,6 +69,11 @@ Pose Action::get_pose()
   return poses.at(pose_index);
 }
 
+Pose Action::get_pose_at_index(uint8_t id)
+{
+  return poses.at(id);
+}
+
 void Action::next_pose()
 {
   pose_index++;
