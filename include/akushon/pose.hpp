@@ -46,7 +46,7 @@ public:
   void set_joints(std::vector<tachimawari::Joint> joints);
   std::vector<tachimawari::Joint> get_joints();
 
-  void set_simulator_target_position(Pose target_pose);
+  void set_target_position(Pose target_pose);
 
   void interpolate();
   bool operator==(Pose other);

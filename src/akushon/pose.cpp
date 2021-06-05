@@ -77,14 +77,14 @@ std::vector<tachimawari::Joint> Pose::get_joints()
   return joints;
 }
 
-void Pose::set_simulator_target_position(Pose target_pose)
+void Pose::set_target_position(Pose target_pose)
 {
   std::vector<tachimawari::Joint> new_joints;
   for (auto & joint : get_joints()) {
     for (auto & target_joint : target_pose.get_joints()) {
       if (joint.get_joint_name() == target_joint.get_joint_name()) {
         tachimawari::Joint new_joint(joint.get_joint_name(), joint.get_position());
-        new_joint.set_simulator_target_position(
+        new_joint.set_target_position(
           target_joint.get_position(), target_pose.get_speed());
         new_joints.push_back(new_joint);
       }

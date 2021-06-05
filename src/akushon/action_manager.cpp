@@ -83,7 +83,7 @@ std::shared_ptr<Pose> ActionManager::run_action(int time)
   if (!is_running) {
     is_running = true;
     std::cout << "running pose " << current_action->get_pose().get_name() << std::endl;
-    robot_pose->set_simulator_target_position(current_action->get_pose());
+    robot_pose->set_target_position(current_action->get_pose());
   }
 
   if (*robot_pose.get() == target_pose) {
@@ -101,13 +101,13 @@ std::shared_ptr<Pose> ActionManager::run_action(int time)
         current_action.reset();
         current_action = nullptr;
         action_list.clear();
-        
+
         std::cout << "\nDone running action!\n" << std::endl;
 
         return robot_pose;
       }
 
-      robot_pose->set_simulator_target_position(current_action->get_pose());
+      robot_pose->set_target_position(current_action->get_pose());
       std::cout << "running pose " << current_action->get_pose().get_name() << std::endl;
     }
   }
