@@ -182,11 +182,13 @@ int main(int argc, char * argv[])
             if (cmds[1] == action_names[id]) {
               if (std::stoi(cmds[2]) >= 0) {
                 std::cout << "Running pose " << cmds[2] << " of " << cmds[1] << std::endl;
-                find_action = true; 
+                find_action = true;
 
-                akushon::Pose current_pose = action_manager->get_action(id).get_pose_at_index(std::stoi(cmds[2]));
+                akushon::Pose current_pose = action_manager->get_action(id).get_pose_at_index(
+                  std::stoi(
+                    cmds[2]));
 
-                 for (auto & joint : current_pose.get_joints()) {
+                for (auto & joint : current_pose.get_joints()) {
                   std::string joint_name = joint.get_joint_name();
 
                   if (joint_name.find("shoulder_pitch") != std::string::npos) {
@@ -202,7 +204,7 @@ int main(int argc, char * argv[])
               } else {
                 std::cout << "-ERR step is not defined (step in range 0 - 6)" << std::endl;
               }
-              
+
               break;
             }
           }
