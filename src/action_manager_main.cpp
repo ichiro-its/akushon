@@ -93,13 +93,24 @@ int main(int argc, char * argv[])
 
   std::string cmds[3] = {};
 
-  bool action_is_running = false;
-  std::thread input_handler([&cmds, &action_is_running] {
+  bool is_running = false;
+  std::thread input_handler([&cmds, &is_running] {
       while (true) {
-        if (!action_is_running) {
-          std::cout << "> run ";
-          std::cin >> cmds[0] >> cmds[1];
-          action_is_running = true;
+        if (!is_running) {
+          std::cout << "> run : ";
+          std::cin >> cmds[0];
+
+          std::cout << "  action : ";
+          std::cin >> cmds[1];
+
+          if (cmds[0] == "pose") {
+            std::cout << "  pose : ";
+            std::cin >> cmds[2];
+          } else {
+            cmds[2] = "empty";
+          }
+
+          is_running = true;
         }
       }
     });
@@ -113,7 +124,7 @@ int main(int argc, char * argv[])
       // get time
       auto time = sensors.get()->time();
 
-      if (!action_manager->is_empty()) {
+      if (action_manager->is_running()) {
         auto robot_pose = action_manager->run_action(time);
 
         for (auto & joint : robot_pose->get_joints()) {
@@ -129,17 +140,17 @@ int main(int argc, char * argv[])
 
         client.send(*message.get_actuator_request());
 
-        if (action_manager->is_empty()) {
-          action_is_running = false;
+        if (!action_manager->is_running()) {
+          is_running = false;
         }
-      } else if (!cmds[0].empty()) {
+      } else if (!cmds[0].empty() && !cmds[1].empty() && !cmds[2].empty()) {
         if (cmds[0] == "q") {
           break;
         }
 
         action_manager->load_action_data(argv[3], action_names);
 
-        if (cmds[0] == "action") {
+        if (cmds[0] == "action" && !cmds[1].empty()) {
           bool find_action = false;
           for (uint id = 0; id < action_names.size(); id++) {
             if (cmds[1] == action_names[id]) {
@@ -165,23 +176,17 @@ int main(int argc, char * argv[])
           if (!find_action) {
             std::cout << "-ERR action_name was not found" << std::endl;
           }
-        } else if (cmds[0] == "pose") {
-          std::cout << "action > ";
-          std::cin >> cmds[1];
-          std::cout << "step > ";
-          std::cin >> cmds[2];
- 
+        } else if (cmds[0] == "pose" && !cmds[2].empty()) {
           bool find_action = false;
           for (uint id = 0; id < action_names.size(); id++) {
             if (cmds[1] == action_names[id]) {
-              if (std::stoi(cmds[2]) >= 0 &&  std::stoi(cmds[2]) <= 6) {
-                std::cout << "Running action " << cmds[1] << "in pose - " << cmds[2] << std::endl;
+              if (std::stoi(cmds[2]) >= 0) {
+                std::cout << "Running pose " << cmds[2] << " of " << cmds[1] << std::endl;
                 find_action = true; 
 
-                std::shared_ptr<akushon::Action> current_action = ;
-                akushon::Pose current_pose = action_manager->get_action(id)->get_pose_at_index(std::stoi(cmds[2]));
+                akushon::Pose current_pose = action_manager->get_action(id).get_pose_at_index(std::stoi(cmds[2]));
 
-                 for (auto & joint : current_pose->get_joints()) {
+                 for (auto & joint : current_pose.get_joints()) {
                   std::string joint_name = joint.get_joint_name();
 
                   if (joint_name.find("shoulder_pitch") != std::string::npos) {
@@ -193,6 +198,7 @@ int main(int argc, char * argv[])
                 }
 
                 client.send(*message.get_actuator_request());
+                is_running = false;
               } else {
                 std::cout << "-ERR step is not defined (step in range 0 - 6)" << std::endl;
               }
@@ -202,9 +208,11 @@ int main(int argc, char * argv[])
           }
           if (!find_action) {
             std::cout << "-ERR action_name was not found" << std::endl;
+            is_running = false;
           }
         } else {
-          std::cout << "-ERR command was not valid\n usage: run_action <action_name>" << std::endl;
+          std::cout << "-ERR command was not valid\n" << std::endl;
+          is_running = false;
         }
         cmds[0].clear();
         cmds[1].clear();

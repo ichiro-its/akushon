@@ -47,11 +47,11 @@ namespace akushon
 
 ActionManager::ActionManager()
 : current_action(nullptr), robot_pose(std::make_shared<Pose>("robot_pose")),
-  pause_start_time(0), on_pause(false), is_running(false)
+  pause_start_time(0), on_pause(false), on_process(false)
 {
 }
 
-void ActionManager::insert_action(uint8_t id, std::shared_ptr<Action> action)
+void ActionManager::insert_action(uint8_t id, Action action)
 {
   action_list.insert({id, action});
 }
@@ -61,9 +61,9 @@ void ActionManager::delete_action(uint8_t id)
   action_list.erase(id);
 }
 
-std::shared_ptr<Action> ActionManager::get_action(uint8_t id)
+Action ActionManager::get_action(uint8_t id)
 {
-  return action_list[id];
+  return action_list.at(id);
 }
 
 bool ActionManager::is_ready()
@@ -80,8 +80,8 @@ std::shared_ptr<Pose> ActionManager::run_action(int time)
 {
   auto target_pose = current_action->get_pose();
 
-  if (!is_running) {
-    is_running = true;
+  if (!on_process) {
+    on_process = true;
     std::cout << "running pose " << current_action->get_pose().get_name() << std::endl;
     robot_pose->set_target_position(current_action->get_pose());
   }
@@ -97,10 +97,8 @@ std::shared_ptr<Pose> ActionManager::run_action(int time)
       on_pause = false;
 
       if (current_action->is_finished()) {
-        is_running = false;
-        current_action.reset();
         current_action = nullptr;
-        action_list.clear();
+        on_process = false;
 
         std::cout << "\nDone running action!\n" << std::endl;
 
@@ -121,7 +119,7 @@ std::shared_ptr<Pose> ActionManager::run_action(int time)
 
 void ActionManager::set_current_action(uint8_t action_id, Pose pose)
 {
-  current_action = action_list[action_id];
+  current_action = std::make_shared<Action>(action_list.at(action_id));
   robot_pose = std::make_shared<Pose>(pose);  // init pose
 }
 
@@ -133,7 +131,7 @@ void ActionManager::load_action_data(std::string path, std::vector<std::string> 
     std::ifstream file(file_name);
     nlohmann::json action_data = nlohmann::json::parse(file);
 
-    auto action = std::make_shared<akushon::Action>(action_data["name"]);
+    Action action(action_data["name"]);
 
     for (auto &[key, val] : action_data.items()) {
       if (key.find("step_") != std::string::npos) {
@@ -152,18 +150,29 @@ void ActionManager::load_action_data(std::string path, std::vector<std::string> 
         }
 
         pose.set_joints(joints);
-        action->insert_pose(pose);
+        action.insert_pose(pose);
       }
     }
 
-    action_list.insert(std::pair<uint8_t, std::shared_ptr<Action>>(id, action));
+    action_list.insert(std::pair<uint8_t, Action>(id, action));
     id++;
   }
 }
 
 bool ActionManager::is_empty()
 {
-  return current_action == nullptr;
+  return action_list.empty();
+}
+
+bool ActionManager::is_running()
+{
+  return current_action != nullptr;
+}
+
+void ActionManager::clear_action_list()
+{
+  current_action = nullptr;
+  action_list.clear();
 }
 
 // std::shared_future<std::shared_ptr<tachimawari_interfaces::srv::SetJoints::Response>>
