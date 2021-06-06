@@ -16,9 +16,9 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(robocup_client REQUIRED)
 find_package(tachimawari REQUIRED)
 find_package(tachimawari_interfaces REQUIRED)
-find_package(robocup_client REQUIRED)
 
 add_library(${PROJECT_NAME}
   "src/${PROJECT_NAME}/pose.cpp"
@@ -32,9 +32,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 ament_target_dependencies(${PROJECT_NAME}
   ament_index_cpp
   rclcpp
+  robocup_client
   tachimawari
-  tachimawari_interfaces
-  robocup_client)
+  tachimawari_interfaces)
 
 install(DIRECTORY "include" DESTINATION ".")
 
@@ -62,9 +62,9 @@ endif()
 
 ament_export_dependencies(
   rclcpp
+  robocup_client
   tachimawari
-  tachimawari_interfaces
-  robocup_client)
+  tachimawari_interfaces)
 ament_export_include_directories("include")
 ament_export_libraries(${PROJECT_NAME})
 ament_package()
