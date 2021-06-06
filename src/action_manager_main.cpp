@@ -29,6 +29,7 @@
 #include <akushon/action_manager.hpp>
 #include <akushon/pose.hpp>
 #include <nlohmann/json.hpp>
+#include <keisan/keisan.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -135,7 +136,7 @@ int main(int argc, char * argv[])
           } else if (joint_name.find("hip_yaw") != std::string::npos) {
             joint_name += " [hip]";
           }
-          message.add_motor_position(joint_name, joint.get_position() / 180 * 3.14);
+          message.add_motor_position_in_radian(joint_name, joint.get_position() / 180 * 3.14);
         }
 
         client.send(*message.get_actuator_request());
@@ -195,7 +196,7 @@ int main(int argc, char * argv[])
                   } else if (joint_name.find("hip_yaw") != std::string::npos) {
                     joint_name += " [hip]";
                   }
-                  message.add_motor_position(joint_name, joint.get_position() / 180 * 3.14);
+                  message.add_motor_position_in_radian(joint_name, joint.get_position() / 180 * 3.14);
                 }
 
                 client.send(*message.get_actuator_request());

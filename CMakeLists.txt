@@ -10,17 +10,17 @@ if(NOT CMAKE_CXX_STANDARD)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
+  add_compile_options(-Wall -Wextra -Wpedantic -fPIC)
 endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
-find_package(rclcpp REQUIRED)
 find_package(robocup_client REQUIRED)
+find_package(rclcpp REQUIRED)
 find_package(tachimawari REQUIRED)
 find_package(tachimawari_interfaces REQUIRED)
 
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} SHARED
   "src/${PROJECT_NAME}/pose.cpp"
   "src/${PROJECT_NAME}/action.cpp"
   "src/${PROJECT_NAME}/action_manager.cpp")
@@ -31,8 +31,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 ament_target_dependencies(${PROJECT_NAME}
   ament_index_cpp
-  rclcpp
   robocup_client
+  rclcpp
   tachimawari
   tachimawari_interfaces)
 
@@ -61,8 +61,8 @@ if(BUILD_TESTING)
 endif()
 
 ament_export_dependencies(
-  rclcpp
   robocup_client
+  rclcpp
   tachimawari
   tachimawari_interfaces)
 ament_export_include_directories("include")
