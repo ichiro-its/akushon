@@ -136,7 +136,7 @@ int main(int argc, char * argv[])
           } else if (joint_name.find("hip_yaw") != std::string::npos) {
             joint_name += " [hip]";
           }
-          message.add_motor_position_in_radian(joint_name, joint.get_position() / 180 * 3.14);
+          message.add_motor_position_in_degree(joint_name, joint.get_position());
         }
 
         client.send(*message.get_actuator_request());
@@ -196,7 +196,7 @@ int main(int argc, char * argv[])
                   } else if (joint_name.find("hip_yaw") != std::string::npos) {
                     joint_name += " [hip]";
                   }
-                  message.add_motor_position_in_radian(joint_name, joint.get_position() / 180 * 3.14);
+                  message.add_motor_position_in_degree(joint_name, joint.get_position());
                 }
 
                 client.send(*message.get_actuator_request());
