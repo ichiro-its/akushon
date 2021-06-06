@@ -22,53 +22,91 @@
 
 #include <string>
 #include <vector>
-
 namespace akushon
 {
 
-Pose::Pose(std::string pose_name)
+Pose::Pose(const std::string & pose_name)
 : name(pose_name)
 {
 }
 
-void Pose::set_speed(float speed)
+void Pose::set_speed(const float & speed)
 {
   this->speed = speed;
 }
 
-float Pose::get_speed()
+const float & Pose::get_speed() const
 {
   return speed;
 }
 
-void Pose::set_pause(float pause)
+void Pose::set_pause(const float & pause)
 {
   this->pause = pause;
 }
 
-float Pose::get_pause()
+const float & Pose::get_pause() const
 {
   return pause;
 }
 
-void Pose::set_name(std::string pose_name)
+void Pose::set_name(const std::string & pose_name)
 {
   name = pose_name;
 }
 
-std::string Pose::get_name()
+const std::string & Pose::get_name() const
 {
   return name;
 }
 
-void Pose::set_joints(std::vector<tachimawari::Joint> joints)
+void Pose::interpolate()
+{
+  for (auto & current_joint : joints) {
+    current_joint.interpolate();
+  }
+}
+
+void Pose::set_joints(const std::vector<tachimawari::Joint> & joints)
 {
   this->joints = joints;
 }
 
-std::vector<tachimawari::Joint> Pose::get_joints()
+const std::vector<tachimawari::Joint> & Pose::get_joints() const
 {
   return joints;
+}
+
+void Pose::set_target_position(const Pose & target_pose)
+{
+  std::vector<tachimawari::Joint> new_joints;
+  for (auto & joint : get_joints()) {
+    for (auto & target_joint : target_pose.get_joints()) {
+      if (joint.get_joint_name() == target_joint.get_joint_name()) {
+        tachimawari::Joint new_joint(joint.get_joint_name(), joint.get_position());
+        new_joint.set_target_position(
+          target_joint.get_position(), target_pose.get_speed());
+        new_joints.push_back(new_joint);
+      }
+    }
+  }
+
+  set_joints(new_joints);
+}
+
+bool Pose::operator==(const Pose & other_pose)
+{
+  for (auto & joint : joints) {
+    for (auto & other_joint : other_pose.get_joints()) {
+      if (joint.get_joint_name() == other_joint.get_joint_name()) {
+        if (joint.get_position() != other_joint.get_position()) {
+          return false;
+        }
+      }
+    }
+  }
+
+  return true;
 }
 
 }  // namespace akushon

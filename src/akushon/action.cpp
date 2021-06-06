@@ -26,57 +26,62 @@
 namespace akushon
 {
 
-Action::Action(std::string action_name)
-: name(action_name)
+Action::Action(const std::string & action_name)
+: name(action_name), current_pose_index(0)
 {
 }
 
-void Action::insert_pose(Pose pose)
+void Action::insert_pose(const Pose & pose)
 {
   poses.push_back(pose);
   pose_count = poses.size();
 }
 
-void Action::insert_pose(uint8_t id, Pose pose)
+void Action::insert_pose(const uint8_t & id, const Pose & pose)
 {
   poses.insert(poses.begin() + id, pose);
   pose_count = poses.size();
 }
 
-void Action::delete_pose(uint8_t id)
+void Action::delete_pose(const uint8_t & id)
 {
   poses.erase(poses.begin() + id);
   pose_count = poses.size();
 }
 
-void Action::set_name(std::string action_name)
+void Action::set_name(const std::string & action_name)
 {
   name = action_name;
 }
 
-std::string Action::get_name()
+const std::string & Action::get_name() const
 {
   return name;
 }
 
-std::vector<Pose> Action::get_poses()
+const std::vector<Pose> & Action::get_poses() const
 {
   return poses;
 }
 
-Pose Action::get_pose()
+const Pose & Action::get_current_pose() const
 {
-  return poses.at(pose_index);
+  return poses.at(current_pose_index);
+}
+
+const Pose & Action::get_pose_by_index(const uint8_t & id) const
+{
+  return poses.at(id);
 }
 
 void Action::next_pose()
 {
-  pose_index++;
+  current_pose_index++;
 }
 
-bool Action::is_finished()
+bool Action::is_finished() const
 {
-  return pose_index == pose_count;
+  return current_pose_index == pose_count;
 }
 
 }  // namespace akushon

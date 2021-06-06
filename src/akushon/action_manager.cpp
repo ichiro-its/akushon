@@ -18,117 +18,187 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#include <stdlib.h>
+#include <unistd.h>
+
+#include <akushon/action_manager.hpp>
+#include <nlohmann/json.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <tachimawari_interfaces/srv/set_joints.hpp>
 #include <tachimawari_interfaces/msg/joint.hpp>
 #include <tachimawari/joint.hpp>
 
-#include <akushon/action_manager.hpp>
-
-#include <string>
-#include <memory>
-#include <vector>
-
 #include <fstream>
-#include <nlohmann/json.hpp>
-#include <stdlib.h>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace akushon
 {
 
-ActionManager::ActionManager(std::string node_name, std::string service_name)
-: rclcpp::Node(node_name)
+// ActionManager::ActionManager(std::string node_name, std::string service_name)
+// : is_running(false), current_action(std::make_shared<Action>("current_action")),
+//   robot_pose(std::make_shared<Pose>("robot_pose"))
+// {
+// }
+
+ActionManager::ActionManager()
+: current_action(nullptr), robot_pose(std::make_shared<Pose>("robot_pose")),
+  pause_start_time(0), on_pause(false), on_process(false)
 {
-  {
-    using SetJoints = tachimawari_interfaces::srv::SetJoints;
-    set_joints_client = this->create_client<SetJoints>(service_name + "/set_joints");
-  }
 }
 
-void ActionManager::insert_action(uint8_t id, std::shared_ptr<Action> action)
+void ActionManager::insert_action(const uint8_t & id, const Action & action)
 {
   action_list.insert({id, action});
 }
 
-void ActionManager::delete_action(uint8_t id)
+void ActionManager::delete_action(const uint8_t & id)
 {
   action_list.erase(id);
 }
 
-std::shared_ptr<Action> ActionManager::get_action(uint8_t id)
+const Action & ActionManager::get_action_by_id(const uint8_t & id) const
 {
-  return action_list[id];
+  return action_list.at(id);
 }
 
-bool ActionManager::is_ready()
+bool ActionManager::is_ready() const
 {
-  if (!set_joints_client->wait_for_service()) {
-    RCLCPP_INFO(get_logger(), "service not available");
-    return false;
-  }
+  // if (!set_joints_client->wait_for_service()) {
+  // RCLCPP_INFO(get_logger(), "service not available");
+  //   return false;
+  // }
 
   return true;
 }
 
-void ActionManager::load_action_data(std::vector<std::string> action_names)
+std::shared_ptr<Pose> ActionManager::run_action(const int & time)
+{
+  auto target_pose = current_action->get_current_pose();
+
+  if (!on_process) {
+    on_process = true;
+    std::cout << "running pose " << current_action->get_current_pose().get_name() << std::endl;
+    robot_pose->set_target_position(current_action->get_current_pose());
+  }
+
+  if (*robot_pose.get() == target_pose) {
+    if (!on_pause) {
+      pause_start_time = time;
+      on_pause = true;
+    }
+
+    if (time - pause_start_time >= current_action->get_current_pose().get_pause() * 1000) {
+      current_action->next_pose();
+      on_pause = false;
+
+      if (current_action->is_finished()) {
+        current_action = nullptr;
+        on_process = false;
+
+        std::cout << "\nDone running action!\n" << std::endl;
+
+        return robot_pose;
+      }
+
+      robot_pose->set_target_position(current_action->get_current_pose());
+      std::cout << "running pose " << current_action->get_current_pose().get_name() << std::endl;
+    }
+  }
+
+  if (!on_pause) {
+    robot_pose->interpolate();
+  }
+
+  return robot_pose;
+}
+
+void ActionManager::set_current_action(const uint8_t & action_id, const Pose & pose)
+{
+  current_action = std::make_shared<Action>(action_list.at(action_id));
+  robot_pose = std::make_shared<Pose>(pose);  // init pose
+}
+
+void ActionManager::load_action_data(
+  const std::string & path,
+  const std::vector<std::string> & action_names)
 {
   uint8_t id = 0;
   for (auto action_name : action_names) {
-    std::string user = getenv("USER");
-    std::string file_name = "/home/" + user + "/ichiro-2021/src/akushon/src/" + action_name + ".json";
+    std::string file_name = path + "/" + action_name + ".json";
     std::ifstream file(file_name);
     nlohmann::json action_data = nlohmann::json::parse(file);
 
-    auto action = std::make_shared<akushon::Action>(action_data["name"]);
-    
-    for (auto& [key, val] : action_data.items()) {
+    Action action(action_data["name"]);
+
+    for (auto &[key, val] : action_data.items()) {
       if (key.find("step_") != std::string::npos) {
         Pose pose(key);
         std::vector<tachimawari::Joint> joints;
-        for (auto& [steps_key, steps_val] : action_data[key].items()) {
+
+        for (auto &[steps_key, steps_val] : action_data[key].items()) {
           if (!(steps_key.find("step_") != std::string::npos)) {
-            tachimawari::Joint joint(steps_key, static_cast<float>(steps_val)); //init join
+            tachimawari::Joint joint(steps_key, static_cast<float>(steps_val));  // init join
             joints.push_back(joint);
-          } 
-          else if (steps_key == "step_pause") {
+          } else if (steps_key == "step_pause") {
             pose.set_pause(static_cast<float>(steps_val));
-          }
-          else if (steps_key == "step_time") {
+          } else if (steps_key == "step_speed") {
             pose.set_speed(static_cast<float>(steps_val));
           }
         }
+
         pose.set_joints(joints);
-        action->insert_pose(pose);
+        action.insert_pose(pose);
       }
     }
-    this->action_list.insert(std::pair<uint8_t, std::shared_ptr<Action>>(id, action));
-    std::cout << this->action_list.size() << std::endl;
+
+    action_list.insert(std::pair<uint8_t, Action>(id, action));
     id++;
   }
 }
 
-std::shared_future<std::shared_ptr<tachimawari_interfaces::srv::SetJoints::Response>>
-ActionManager::send_joints_request(std::vector<tachimawari::Joint> joints, float speed)
+bool ActionManager::is_empty() const
 {
-  {
-    using SetJoints = tachimawari_interfaces::srv::SetJoints;
-
-    auto request = std::make_shared<SetJoints::Request>();
-    std::vector<tachimawari_interfaces::msg::Joint> joint_messages;
-
-    for (auto joint : joints) {
-      tachimawari_interfaces::msg::Joint joint_message;
-      joint_message.name = joint.get_joint_name();
-      joint_message.position = joint.get_goal_position();
-      joint_message.speed = speed;
-
-      joint_messages.push_back(joint_message);
-    }
-
-    request->joints = joint_messages;
-
-    return set_joints_client->async_send_request(request);
-  }
+  return action_list.empty();
 }
+
+bool ActionManager::is_running() const
+{
+  return current_action != nullptr;
+}
+
+void ActionManager::clear_action_list()
+{
+  current_action = nullptr;
+  action_list.clear();
+}
+
+// std::shared_future<std::shared_ptr<tachimawari_interfaces::srv::SetJoints::Response>>
+// ActionManager::send_joints_request(std::vector<tachimawari::Joint> joints, float speed)
+// {
+//   {
+//     using SetJoints = tachimawari_interfaces::srv::SetJoints;
+
+//     auto request = std::make_shared<SetJoints::Request>();
+//     std::vector<tachimawari_interfaces::msg::Joint> joint_messages;
+
+//     for (auto joint : joints) {
+//       tachimawari_interfaces::msg::Joint joint_message;
+//       joint_message.name = joint.get_joint_name();
+//       joint_message.position = joint.get_goal_position();
+//       joint_message.speed = speed;
+
+//       joint_messages.push_back(joint_message);
+//     }
+
+//     request->joints = joint_messages;
+
+//     return set_joints_client->async_send_request(request);
+//   }
+// }
 
 }  // namespace akushon
