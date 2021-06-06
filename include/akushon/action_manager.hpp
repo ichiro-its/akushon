@@ -42,18 +42,18 @@ public:
   // explicit ActionManager(std::string node_name, std::string service_name);
   ActionManager();
 
-  void insert_action(uint8_t id, Action action);
-  void delete_action(uint8_t id);
+  void insert_action(const uint8_t & id, const Action & action);
+  void delete_action(const uint8_t & id);
 
-  Action get_action(uint8_t id);
+  const Action & get_action_by_id(const uint8_t & id) const;
 
-  void load_action_data(std::string path, std::vector<std::string> action_names);
-  std::shared_ptr<Pose> run_action(int time);
-  void set_current_action(uint8_t action_id, Pose pose);
+  void load_action_data(const std::string & path, const std::vector<std::string> & action_names);
+  std::shared_ptr<Pose> run_action(const int & time);
+  void set_current_action(const uint8_t & action_id, const Pose & pose);
 
-  bool is_empty();
-  bool is_running();
-  bool is_ready();
+  bool is_empty() const;
+  bool is_running() const;
+  bool is_ready() const;
 
   void clear_action_list();
 

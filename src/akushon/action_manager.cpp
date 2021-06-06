@@ -51,22 +51,22 @@ ActionManager::ActionManager()
 {
 }
 
-void ActionManager::insert_action(uint8_t id, Action action)
+void ActionManager::insert_action(const uint8_t & id, const Action & action)
 {
   action_list.insert({id, action});
 }
 
-void ActionManager::delete_action(uint8_t id)
+void ActionManager::delete_action(const uint8_t & id)
 {
   action_list.erase(id);
 }
 
-Action ActionManager::get_action(uint8_t id)
+const Action & ActionManager::get_action_by_id(const uint8_t & id) const
 {
   return action_list.at(id);
 }
 
-bool ActionManager::is_ready()
+bool ActionManager::is_ready() const
 {
   // if (!set_joints_client->wait_for_service()) {
   // RCLCPP_INFO(get_logger(), "service not available");
@@ -76,14 +76,14 @@ bool ActionManager::is_ready()
   return true;
 }
 
-std::shared_ptr<Pose> ActionManager::run_action(int time)
+std::shared_ptr<Pose> ActionManager::run_action(const int & time)
 {
-  auto target_pose = current_action->get_pose();
+  auto target_pose = current_action->get_current_pose();
 
   if (!on_process) {
     on_process = true;
-    std::cout << "running pose " << current_action->get_pose().get_name() << std::endl;
-    robot_pose->set_target_position(current_action->get_pose());
+    std::cout << "running pose " << current_action->get_current_pose().get_name() << std::endl;
+    robot_pose->set_target_position(current_action->get_current_pose());
   }
 
   if (*robot_pose.get() == target_pose) {
@@ -92,7 +92,7 @@ std::shared_ptr<Pose> ActionManager::run_action(int time)
       on_pause = true;
     }
 
-    if (time - pause_start_time >= current_action->get_pose().get_pause() * 1000) {
+    if (time - pause_start_time >= current_action->get_current_pose().get_pause() * 1000) {
       current_action->next_pose();
       on_pause = false;
 
@@ -105,8 +105,8 @@ std::shared_ptr<Pose> ActionManager::run_action(int time)
         return robot_pose;
       }
 
-      robot_pose->set_target_position(current_action->get_pose());
-      std::cout << "running pose " << current_action->get_pose().get_name() << std::endl;
+      robot_pose->set_target_position(current_action->get_current_pose());
+      std::cout << "running pose " << current_action->get_current_pose().get_name() << std::endl;
     }
   }
 
@@ -117,13 +117,15 @@ std::shared_ptr<Pose> ActionManager::run_action(int time)
   return robot_pose;
 }
 
-void ActionManager::set_current_action(uint8_t action_id, Pose pose)
+void ActionManager::set_current_action(const uint8_t & action_id, const Pose & pose)
 {
   current_action = std::make_shared<Action>(action_list.at(action_id));
   robot_pose = std::make_shared<Pose>(pose);  // init pose
 }
 
-void ActionManager::load_action_data(std::string path, std::vector<std::string> action_names)
+void ActionManager::load_action_data(
+  const std::string & path,
+  const std::vector<std::string> & action_names)
 {
   uint8_t id = 0;
   for (auto action_name : action_names) {
@@ -159,12 +161,12 @@ void ActionManager::load_action_data(std::string path, std::vector<std::string> 
   }
 }
 
-bool ActionManager::is_empty()
+bool ActionManager::is_empty() const
 {
   return action_list.empty();
 }
 
-bool ActionManager::is_running()
+bool ActionManager::is_running() const
 {
   return current_action != nullptr;
 }

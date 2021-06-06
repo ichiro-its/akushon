@@ -25,37 +25,37 @@
 namespace akushon
 {
 
-Pose::Pose(std::string pose_name)
+Pose::Pose(const std::string & pose_name)
 : name(pose_name)
 {
 }
 
-void Pose::set_speed(float speed)
+void Pose::set_speed(const float & speed)
 {
   this->speed = speed;
 }
 
-float Pose::get_speed()
+const float & Pose::get_speed() const
 {
   return speed;
 }
 
-void Pose::set_pause(float pause)
+void Pose::set_pause(const float & pause)
 {
   this->pause = pause;
 }
 
-float Pose::get_pause()
+const float & Pose::get_pause() const
 {
   return pause;
 }
 
-void Pose::set_name(std::string pose_name)
+void Pose::set_name(const std::string & pose_name)
 {
   name = pose_name;
 }
 
-std::string Pose::get_name()
+const std::string & Pose::get_name() const
 {
   return name;
 }
@@ -67,17 +67,17 @@ void Pose::interpolate()
   }
 }
 
-void Pose::set_joints(std::vector<tachimawari::Joint> joints)
+void Pose::set_joints(const std::vector<tachimawari::Joint> & joints)
 {
   this->joints = joints;
 }
 
-std::vector<tachimawari::Joint> Pose::get_joints()
+const std::vector<tachimawari::Joint> & Pose::get_joints() const
 {
   return joints;
 }
 
-void Pose::set_target_position(Pose target_pose)
+void Pose::set_target_position(const Pose & target_pose)
 {
   std::vector<tachimawari::Joint> new_joints;
   for (auto & joint : get_joints()) {
@@ -94,7 +94,7 @@ void Pose::set_target_position(Pose target_pose)
   set_joints(new_joints);
 }
 
-bool Pose::operator==(Pose other_pose)
+bool Pose::operator==(const Pose & other_pose)
 {
   for (auto & joint : joints) {
     for (auto & other_joint : other_pose.get_joints()) {

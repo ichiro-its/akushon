@@ -32,24 +32,24 @@ namespace akushon
 class Pose
 {
 public:
-  explicit Pose(std::string pose_name);
+  explicit Pose(const std::string & pose_name);
 
-  void set_speed(float speed);
-  float get_speed();
+  void set_speed(const float & speed);
+  const float & get_speed() const;
 
-  void set_pause(float pause);
-  float get_pause();
+  void set_pause(const float & pause);
+  const float & get_pause() const;
 
-  void set_name(std::string pose_name);
-  std::string get_name();
+  void set_name(const std::string & pose_name);
+  const std::string & get_name() const;
 
-  void set_joints(std::vector<tachimawari::Joint> joints);
-  std::vector<tachimawari::Joint> get_joints();
+  void set_joints(const std::vector<tachimawari::Joint> & joints);
+  const std::vector<tachimawari::Joint> & get_joints() const;
 
-  void set_target_position(Pose target_pose);
+  void set_target_position(const Pose & target_pose);
 
   void interpolate();
-  bool operator==(Pose other);
+  bool operator==(const Pose & other);
 
 private:
   float speed;
