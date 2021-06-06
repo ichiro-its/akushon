@@ -61,6 +61,7 @@ if(BUILD_TESTING)
 endif()
 
 ament_export_dependencies(
+  ament_index_cpp
   robocup_client
   rclcpp
   tachimawari
