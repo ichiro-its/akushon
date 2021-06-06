@@ -150,6 +150,7 @@ int main(int argc, char * argv[])
         }
 
         action_manager->load_action_data(argv[3], action_names);
+        std::cout << "loaded data\n";
 
         if (cmds[0] == "action" && !cmds[1].empty()) {
           bool find_action = false;
