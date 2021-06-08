@@ -45,8 +45,9 @@ namespace akushon
 // {
 // }
 
-ActionManager::ActionManager()
-: current_action(nullptr), robot_pose(std::make_shared<Pose>("robot_pose")),
+ActionManager::ActionManager(std::vector<std::string> action_names)
+: action_names(action_names), action_list(std::map<uint8_t, Action>()),
+  current_action(nullptr), robot_pose(std::make_shared<Pose>("robot_pose")),
   pause_start_time(0), on_pause(false), on_process(false)
 {
 }
@@ -123,6 +124,29 @@ void ActionManager::set_current_action(const uint8_t & action_id, const Pose & p
   robot_pose = std::make_shared<Pose>(pose);  // init pose
 }
 
+bool ActionManager::set_current_action(const std::string & action_name)
+{
+  return set_current_action(action_name, *robot_pose);
+}
+
+bool ActionManager::set_current_action(const std::string & action_name, const Pose & robot_pose)
+{
+  for (uint id = 0; id < action_names.size(); id++) {
+    if (action_name == action_names[id]) {
+      std::cout << "Running action " << action_name << std::endl;
+      set_current_action(id, robot_pose);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+void ActionManager::load_action_data(const std::string & path)
+{
+  load_action_data(path, action_names);
+}
+
 void ActionManager::load_action_data(
   const std::string & path,
   const std::vector<std::string> & action_names)
@@ -170,6 +194,11 @@ bool ActionManager::is_empty() const
 bool ActionManager::is_running() const
 {
   return current_action != nullptr;
+}
+
+void ActionManager::clear_current_action()
+{
+  current_action = nullptr;
 }
 
 void ActionManager::clear_action_list()
