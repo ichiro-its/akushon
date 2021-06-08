@@ -152,6 +152,8 @@ void ActionManager::load_action_data(
   const std::vector<std::string> & action_names)
 {
   clear_action_list();
+  this->action_names = action_names;
+
   uint8_t id = 0;
   for (auto action_name : action_names) {
     std::string file_name = path + "/" + action_name + ".json";
