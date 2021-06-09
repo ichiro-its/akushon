@@ -44,14 +44,14 @@ namespace akushon
 // }
 
 ActionManager::ActionManager(std::vector<std::string> action_names)
-: action_names(action_names), action_list(std::map<uint8_t, Action>()),
+: action_names(action_names), action_list(std::map<uint8_t, std::shared_ptr<Action>>()),
   current_action(nullptr), robot_pose(std::make_shared<Pose>("robot_pose"))
 {
 }
 
 void ActionManager::insert_action(const uint8_t & id, const Action & action)
 {
-  action_list.insert({id, action});
+  action_list.insert({id, std::make_shared<Action>(action)});
 }
 
 void ActionManager::delete_action(const uint8_t & id)
@@ -61,7 +61,7 @@ void ActionManager::delete_action(const uint8_t & id)
 
 const Action & ActionManager::get_action_by_id(const uint8_t & id) const
 {
-  return action_list.at(id);
+  return *action_list.at(id);
 }
 
 bool ActionManager::is_ready() const
@@ -76,7 +76,7 @@ bool ActionManager::is_ready() const
 
 std::shared_ptr<Pose> ActionManager::process(const int & time)
 {
-  current_action->process(robot_pose, time);
+  robot_pose = std::make_shared<Pose>(current_action->process(*robot_pose, time));
 
   if (!current_action->is_running()) {
     current_action = nullptr;
@@ -89,7 +89,7 @@ std::shared_ptr<Pose> ActionManager::process(const int & time)
 
 void ActionManager::set_current_action(const uint8_t & action_id, const Pose & pose)
 {
-  current_action = std::make_shared<Action>(action_list.at(action_id));
+  current_action = action_list.at(action_id);
   robot_pose = std::make_shared<Pose>(pose);  // init pose
 }
 
@@ -126,10 +126,10 @@ void ActionManager::load_action_data(
   for (auto action_name : action_names) {
     std::string file_name = path + "/" + action_name + ".json";
 
-    Action action("action");
-    action.load_data(file_name);
+    std::shared_ptr<Action> action = std::make_shared<Action>("action");
+    action->load_data(file_name);
 
-    action_list.insert(std::pair<uint8_t, Action>(id, action));
+    action_list.insert(std::pair<uint8_t, std::shared_ptr<Action>>(id, action));
     id++;
   }
 }

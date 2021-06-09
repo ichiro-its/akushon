@@ -51,7 +51,7 @@ public:
   void next_pose();
   bool is_running() const;
 
-  void process(std::shared_ptr<Pose> robot_pose, const int & time);
+  Pose process(Pose robot_pose, const int & time);
   void reset();
 
 private:

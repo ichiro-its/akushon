@@ -115,16 +115,16 @@ bool Action::is_running() const
   return on_process;
 }
 
-void Action::process(std::shared_ptr<Pose> robot_pose, const int & time)
+Pose Action::process(Pose robot_pose, const int & time)
 {
   auto target_pose = get_current_pose();
 
   if (!on_process) {
     on_process = true;
-    robot_pose->set_target_position(get_current_pose());
+    robot_pose.set_target_position(get_current_pose());
   }
 
-  if (*robot_pose.get() == target_pose) {
+  if (robot_pose == target_pose) {
     if (!on_pause) {
       pause_start_time = time;
       on_pause = true;
@@ -137,17 +137,17 @@ void Action::process(std::shared_ptr<Pose> robot_pose, const int & time)
       if (current_pose_index == pose_count) {
         on_process = false;
         current_pose_index = 0;
-
-        return;
+      } else {
+        robot_pose.set_target_position(get_current_pose());
       }
-
-      robot_pose->set_target_position(get_current_pose());
     }
   }
 
   if (!on_pause) {
-    robot_pose->interpolate();
+    robot_pose.interpolate();
   }
+
+  return robot_pose;
 }
 
 void Action::reset()

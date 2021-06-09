@@ -68,7 +68,7 @@ public:
 
 private:
   std::vector<std::string> action_names;
-  std::map<uint8_t, Action> action_list;
+  std::map<uint8_t, std::shared_ptr<Action>> action_list;
   std::shared_ptr<Action> current_action;
   std::shared_ptr<Pose> robot_pose;
   // std::shared_ptr<rclcpp::Client<tachimawari_interfaces::srv::SetJoints>> set_joints_client;
