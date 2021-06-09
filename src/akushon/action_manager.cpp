@@ -28,7 +28,6 @@
 #include <tachimawari_interfaces/msg/joint.hpp>
 #include <tachimawari/joint.hpp>
 
-#include <fstream>
 #include <map>
 #include <memory>
 #include <string>
@@ -75,9 +74,9 @@ bool ActionManager::is_ready() const
   return true;
 }
 
-std::shared_ptr<Pose> ActionManager::run_action(const int & time)
+std::shared_ptr<Pose> ActionManager::process(const int & time)
 {
-  current_action->start(robot_pose, time);
+  current_action->process(robot_pose, time);
 
   if (!current_action->is_running()) {
     current_action = nullptr;
@@ -126,10 +125,9 @@ void ActionManager::load_action_data(
   uint8_t id = 0;
   for (auto action_name : action_names) {
     std::string file_name = path + "/" + action_name + ".json";
-    std::ifstream file(file_name);
-    nlohmann::json action_data = nlohmann::json::parse(file);
 
-    Action action(action_data);
+    Action action("action");
+    action.load_data(file_name);
 
     action_list.insert(std::pair<uint8_t, Action>(id, action));
     id++;

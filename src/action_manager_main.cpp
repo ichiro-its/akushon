@@ -130,7 +130,7 @@ int main(int argc, char * argv[])
       auto time = sensors.get()->time();
 
       if (action_manager->is_running()) {
-        auto robot_pose = action_manager->run_action(time);
+        auto robot_pose = action_manager->process(time);
 
         for (auto & joint : robot_pose->get_joints()) {
           std::string joint_name = joint.get_joint_name();

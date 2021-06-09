@@ -35,12 +35,12 @@ class Action
 {
 public:
   explicit Action(const std::string & action_name);
-  explicit Action(const nlohmann::json & action_data);
 
   void insert_pose(const Pose & pose);
   void insert_pose(const uint8_t & id, const Pose & pose);
   void delete_pose(const uint8_t & id);
 
+  void load_data(const std::string & path);
   void set_name(const std::string & action_name);
 
   const std::string & get_name() const;
@@ -51,7 +51,8 @@ public:
   void next_pose();
   bool is_running() const;
 
-  void start(std::shared_ptr<Pose> robot_pose, const int & time);
+  void process(std::shared_ptr<Pose> robot_pose, const int & time);
+  void reset();
 
 private:
   std::string name;

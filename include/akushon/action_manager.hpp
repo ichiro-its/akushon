@@ -49,7 +49,8 @@ public:
 
   void load_action_data(const std::string & path);
   void load_action_data(const std::string & path, const std::vector<std::string> & action_names);
-  std::shared_ptr<Pose> run_action(const int & time);
+
+  std::shared_ptr<Pose> process(const int & time);
 
   void set_current_action(const uint8_t & action_id, const Pose & pose);
   bool set_current_action(const std::string & action_name);

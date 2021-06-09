@@ -20,6 +20,7 @@
 
 #include <akushon/action.hpp>
 
+#include <fstream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -33,9 +34,30 @@ Action::Action(const std::string & action_name)
 {
 }
 
-Action::Action(const nlohmann::json & action_data)
-: Action(static_cast<std::string>(action_data["name"]))
+void Action::insert_pose(const Pose & pose)
 {
+  poses.push_back(pose);
+  pose_count = poses.size();
+}
+
+void Action::insert_pose(const uint8_t & id, const Pose & pose)
+{
+  poses.insert(poses.begin() + id, pose);
+  pose_count = poses.size();
+}
+
+void Action::delete_pose(const uint8_t & id)
+{
+  poses.erase(poses.begin() + id);
+  pose_count = poses.size();
+}
+
+void Action::load_data(const std::string & path)
+{
+  std::ifstream file(path);
+  nlohmann::json action_data = nlohmann::json::parse(file);
+
+  name = action_data["name"];
   for (auto &[key, val] : action_data.items()) {
     if (key.find("step_") != std::string::npos) {
       Pose pose(key);
@@ -56,24 +78,6 @@ Action::Action(const nlohmann::json & action_data)
       insert_pose(pose);
     }
   }
-}
-
-void Action::insert_pose(const Pose & pose)
-{
-  poses.push_back(pose);
-  pose_count = poses.size();
-}
-
-void Action::insert_pose(const uint8_t & id, const Pose & pose)
-{
-  poses.insert(poses.begin() + id, pose);
-  pose_count = poses.size();
-}
-
-void Action::delete_pose(const uint8_t & id)
-{
-  poses.erase(poses.begin() + id);
-  pose_count = poses.size();
 }
 
 void Action::set_name(const std::string & action_name)
@@ -111,7 +115,7 @@ bool Action::is_running() const
   return on_process;
 }
 
-void Action::start(std::shared_ptr<Pose> robot_pose, const int & time)
+void Action::process(std::shared_ptr<Pose> robot_pose, const int & time)
 {
   auto target_pose = get_current_pose();
 
@@ -144,6 +148,14 @@ void Action::start(std::shared_ptr<Pose> robot_pose, const int & time)
   if (!on_pause) {
     robot_pose->interpolate();
   }
+}
+
+void Action::reset()
+{
+  current_pose_index = 0;
+  pause_start_time = 0;
+  on_pause = false;
+  on_process = false;
 }
 
 }  // namespace akushon
