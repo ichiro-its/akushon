@@ -33,6 +33,31 @@ Action::Action(const std::string & action_name)
 {
 }
 
+Action::Action(const nlohmann::json & action_data)
+: Action(static_cast<std::string>(action_data["name"]))
+{
+  for (auto &[key, val] : action_data.items()) {
+    if (key.find("step_") != std::string::npos) {
+      Pose pose(key);
+      std::vector<tachimawari::Joint> joints;
+
+      for (auto &[steps_key, steps_val] : action_data[key].items()) {
+        if (!(steps_key.find("step_") != std::string::npos)) {
+          tachimawari::Joint joint(steps_key, static_cast<float>(steps_val));  // init join
+          joints.push_back(joint);
+        } else if (steps_key == "step_pause") {
+          pose.set_pause(static_cast<float>(steps_val));
+        } else if (steps_key == "step_speed") {
+          pose.set_speed(static_cast<float>(steps_val));
+        }
+      }
+
+      pose.set_joints(joints);
+      insert_pose(pose);
+    }
+  }
+}
+
 void Action::insert_pose(const Pose & pose)
 {
   poses.push_back(pose);
@@ -81,9 +106,9 @@ void Action::next_pose()
   current_pose_index++;
 }
 
-bool Action::is_finished() const
+bool Action::is_running() const
 {
-  return current_pose_index == pose_count;
+  return on_process;
 }
 
 void Action::start(std::shared_ptr<Pose> robot_pose, const int & time)
@@ -105,8 +130,9 @@ void Action::start(std::shared_ptr<Pose> robot_pose, const int & time)
       next_pose();
       on_pause = false;
 
-      if (is_finished()) {
+      if (current_pose_index == pose_count) {
         on_process = false;
+        current_pose_index = 0;
 
         return;
       }

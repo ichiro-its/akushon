@@ -22,6 +22,7 @@
 #define AKUSHON__ACTION_HPP_
 
 #include <akushon/pose.hpp>
+#include <nlohmann/json.hpp>
 
 #include <memory>
 #include <string>
@@ -34,6 +35,7 @@ class Action
 {
 public:
   explicit Action(const std::string & action_name);
+  explicit Action(const nlohmann::json & action_data);
 
   void insert_pose(const Pose & pose);
   void insert_pose(const uint8_t & id, const Pose & pose);
@@ -47,7 +49,7 @@ public:
   const Pose & get_pose_by_index(const uint8_t & index) const;
 
   void next_pose();
-  bool is_finished() const;
+  bool is_running() const;
 
   void start(std::shared_ptr<Pose> robot_pose, const int & time);
 
