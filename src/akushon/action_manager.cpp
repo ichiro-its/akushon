@@ -29,7 +29,6 @@
 #include <tachimawari/joint.hpp>
 
 #include <fstream>
-#include <iostream>
 #include <map>
 #include <memory>
 #include <string>
@@ -47,8 +46,7 @@ namespace akushon
 
 ActionManager::ActionManager(std::vector<std::string> action_names)
 : action_names(action_names), action_list(std::map<uint8_t, Action>()),
-  current_action(nullptr), robot_pose(std::make_shared<Pose>("robot_pose")),
-  pause_start_time(0), on_pause(false), on_process(false)
+  current_action(nullptr), robot_pose(std::make_shared<Pose>("robot_pose"))
 {
 }
 
@@ -79,40 +77,12 @@ bool ActionManager::is_ready() const
 
 std::shared_ptr<Pose> ActionManager::run_action(const int & time)
 {
-  auto target_pose = current_action->get_current_pose();
+  current_action->start(robot_pose, time);
 
-  if (!on_process) {
-    on_process = true;
-    std::cout << "running pose " << current_action->get_current_pose().get_name() << std::endl;
-    robot_pose->set_target_position(current_action->get_current_pose());
-  }
+  if (current_action->is_finished()) {
+    current_action = nullptr;
 
-  if (*robot_pose.get() == target_pose) {
-    if (!on_pause) {
-      pause_start_time = time;
-      on_pause = true;
-    }
-
-    if (time - pause_start_time >= current_action->get_current_pose().get_pause() * 1000) {
-      current_action->next_pose();
-      on_pause = false;
-
-      if (current_action->is_finished()) {
-        current_action = nullptr;
-        on_process = false;
-
-        std::cout << "\nDone running action!\n" << std::endl;
-
-        return robot_pose;
-      }
-
-      robot_pose->set_target_position(current_action->get_current_pose());
-      std::cout << "running pose " << current_action->get_current_pose().get_name() << std::endl;
-    }
-  }
-
-  if (!on_pause) {
-    robot_pose->interpolate();
+    return robot_pose;
   }
 
   return robot_pose;
@@ -134,7 +104,6 @@ bool ActionManager::set_current_action(const std::string & action_name, const Po
   auto result = std::find(action_names.begin(), action_names.end(), action_name);
 
   if (result != action_names.end()) {
-    std::cout << "Running action " << action_name << std::endl;
     set_current_action(result - action_names.begin(), robot_pose);
     return true;
   }

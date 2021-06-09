@@ -20,6 +20,7 @@
 
 #include <akushon/action.hpp>
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -27,7 +28,8 @@ namespace akushon
 {
 
 Action::Action(const std::string & action_name)
-: name(action_name), current_pose_index(0)
+: name(action_name), current_pose_index(0),
+  pause_start_time(0), on_pause(false), on_process(false)
 {
 }
 
@@ -82,6 +84,40 @@ void Action::next_pose()
 bool Action::is_finished() const
 {
   return current_pose_index == pose_count;
+}
+
+void Action::start(std::shared_ptr<Pose> robot_pose, const int & time)
+{
+  auto target_pose = get_current_pose();
+
+  if (!on_process) {
+    on_process = true;
+    robot_pose->set_target_position(get_current_pose());
+  }
+
+  if (*robot_pose.get() == target_pose) {
+    if (!on_pause) {
+      pause_start_time = time;
+      on_pause = true;
+    }
+
+    if (time - pause_start_time >= get_current_pose().get_pause() * 1000) {
+      next_pose();
+      on_pause = false;
+
+      if (is_finished()) {
+        on_process = false;
+
+        return;
+      }
+
+      robot_pose->set_target_position(get_current_pose());
+    }
+  }
+
+  if (!on_pause) {
+    robot_pose->interpolate();
+  }
 }
 
 }  // namespace akushon

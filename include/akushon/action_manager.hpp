@@ -70,10 +70,6 @@ private:
   std::map<uint8_t, Action> action_list;
   std::shared_ptr<Action> current_action;
   std::shared_ptr<Pose> robot_pose;
-
-  int pause_start_time;
-  bool on_pause;
-  bool on_process;
   // std::shared_ptr<rclcpp::Client<tachimawari_interfaces::srv::SetJoints>> set_joints_client;
 };
 

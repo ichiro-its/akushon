@@ -49,6 +49,8 @@ public:
   void next_pose();
   bool is_finished() const;
 
+  void start(std::shared_ptr<Pose> robot_pose, const int & time);
+
 private:
   std::string name;
 
@@ -57,6 +59,10 @@ private:
   uint8_t next_motion_id;
 
   std::vector<Pose> poses;
+
+  int pause_start_time;
+  bool on_pause;
+  bool on_process;
 };
 
 }  // namespace akushon
