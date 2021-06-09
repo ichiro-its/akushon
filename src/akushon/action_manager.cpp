@@ -131,12 +131,12 @@ bool ActionManager::set_current_action(const std::string & action_name)
 
 bool ActionManager::set_current_action(const std::string & action_name, const Pose & robot_pose)
 {
-  for (uint id = 0; id < action_names.size(); id++) {
-    if (action_name == action_names[id]) {
-      std::cout << "Running action " << action_name << std::endl;
-      set_current_action(id, robot_pose);
-      return true;
-    }
+  auto result = std::find(action_names.begin(), action_names.end(), action_name);
+
+  if (result != action_names.end()) {
+    std::cout << "Running action " << action_name << std::endl;
+    set_current_action(result - action_names.begin(), robot_pose);
+    return true;
   }
 
   return false;

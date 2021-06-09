@@ -59,6 +59,7 @@ int main(int argc, char * argv[])
 
   std::vector<std::string> action_names = {
     // "left_kick",
+    "b_up",
     "f_up",
     "init",
     "walkready",
@@ -156,7 +157,21 @@ int main(int argc, char * argv[])
         std::cout << "loaded data\n";
 
         if (cmds[0] == "action" && !cmds[1].empty()) {
-          bool find_action = action_manager->set_current_action(cmds[1]);
+          std::vector<tachimawari::Joint> joints;
+          akushon::Pose robot_pose("robot");
+
+          for (int i = 0; i < sensors.get()->position_sensors_size(); i++) {
+            auto position_sensor = sensors.get()->position_sensors(i);
+            auto joint_name =
+              position_sensor.name().substr(0, position_sensor.name().size() - 2);
+
+            tachimawari::Joint joint(joint_name, position_sensor.value());
+
+            joints.push_back(joint);
+          }
+          robot_pose.set_joints(joints);
+
+          bool find_action = action_manager->set_current_action(cmds[1], robot_pose);
 
           if (!find_action) {
             std::cout << "-ERR action_name was not found" << std::endl;
