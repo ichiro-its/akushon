@@ -184,8 +184,8 @@ int main(int argc, char * argv[])
                 std::cout << "Running pose " << cmds[2] << " of " << cmds[1] << std::endl;
                 find_action = true;
 
-                akushon::Pose current_pose = action_manager->get_action_by_id(id).
-                  get_pose_by_index(std::stoi(cmds[2]));
+                auto action = action_manager->get_action_by_id(id);
+                auto current_pose = action->get_pose_by_index(std::stoi(cmds[2]));
 
                 for (auto & joint : current_pose.get_joints()) {
                   std::string joint_name = joint.get_joint_name();

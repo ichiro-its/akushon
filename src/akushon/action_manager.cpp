@@ -49,9 +49,9 @@ ActionManager::ActionManager(std::vector<std::string> action_names)
 {
 }
 
-void ActionManager::insert_action(const uint8_t & id, const Action & action)
+void ActionManager::insert_action(const uint8_t & id, std::shared_ptr<Action> action)
 {
-  action_list.insert({id, std::make_shared<Action>(action)});
+  action_list.insert({id, action});
 }
 
 void ActionManager::delete_action(const uint8_t & id)
@@ -59,9 +59,9 @@ void ActionManager::delete_action(const uint8_t & id)
   action_list.erase(id);
 }
 
-const Action & ActionManager::get_action_by_id(const uint8_t & id) const
+std::shared_ptr<Action> ActionManager::get_action_by_id(const uint8_t & id) const
 {
-  return *action_list.at(id);
+  return action_list.at(id);
 }
 
 bool ActionManager::is_ready() const

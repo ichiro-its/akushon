@@ -42,10 +42,10 @@ public:
   // explicit ActionManager(std::string node_name, std::string service_name);
   explicit ActionManager(std::vector<std::string> action_names = {});
 
-  void insert_action(const uint8_t & id, const Action & action);
+  void insert_action(const uint8_t & id, std::shared_ptr<Action> action);
   void delete_action(const uint8_t & id);
 
-  const Action & get_action_by_id(const uint8_t & id) const;
+  std::shared_ptr<Action> get_action_by_id(const uint8_t & id) const;
 
   void load_action_data(const std::string & path);
   void load_action_data(const std::string & path, const std::vector<std::string> & action_names);
