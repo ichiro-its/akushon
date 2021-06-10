@@ -20,6 +20,8 @@
 
 #include <akushon/action.hpp>
 
+#include <fstream>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -27,7 +29,8 @@ namespace akushon
 {
 
 Action::Action(const std::string & action_name)
-: name(action_name), current_pose_index(0)
+: name(action_name), current_pose_index(0),
+  pause_start_time(0), on_pause(false), on_process(false)
 {
 }
 
@@ -47,6 +50,34 @@ void Action::delete_pose(const uint8_t & id)
 {
   poses.erase(poses.begin() + id);
   pose_count = poses.size();
+}
+
+void Action::load_data(const std::string & path)
+{
+  std::ifstream file(path);
+  nlohmann::json action_data = nlohmann::json::parse(file);
+
+  name = action_data["name"];
+  for (auto &[key, val] : action_data.items()) {
+    if (key.find("step_") != std::string::npos) {
+      Pose pose(key);
+      std::vector<tachimawari::Joint> joints;
+
+      for (auto &[steps_key, steps_val] : action_data[key].items()) {
+        if (!(steps_key.find("step_") != std::string::npos)) {
+          tachimawari::Joint joint(steps_key, static_cast<float>(steps_val));  // init join
+          joints.push_back(joint);
+        } else if (steps_key == "step_pause") {
+          pose.set_pause(static_cast<float>(steps_val));
+        } else if (steps_key == "step_speed") {
+          pose.set_speed(static_cast<float>(steps_val));
+        }
+      }
+
+      pose.set_joints(joints);
+      insert_pose(pose);
+    }
+  }
 }
 
 void Action::set_name(const std::string & action_name)
@@ -79,9 +110,52 @@ void Action::next_pose()
   current_pose_index++;
 }
 
-bool Action::is_finished() const
+bool Action::is_running() const
 {
-  return current_pose_index == pose_count;
+  return on_process;
+}
+
+Pose Action::process(Pose robot_pose, const int & time)
+{
+  auto target_pose = get_current_pose();
+
+  if (!on_process) {
+    on_process = true;
+    robot_pose.set_target_position(get_current_pose());
+  }
+
+  if (robot_pose == target_pose) {
+    if (!on_pause) {
+      pause_start_time = time;
+      on_pause = true;
+    }
+
+    if (time - pause_start_time >= get_current_pose().get_pause() * 1000) {
+      next_pose();
+      on_pause = false;
+
+      if (current_pose_index == pose_count) {
+        on_process = false;
+        current_pose_index = 0;
+      } else {
+        robot_pose.set_target_position(get_current_pose());
+      }
+    }
+  }
+
+  if (!on_pause) {
+    robot_pose.interpolate();
+  }
+
+  return robot_pose;
+}
+
+void Action::reset()
+{
+  current_pose_index = 0;
+  pause_start_time = 0;
+  on_pause = false;
+  on_process = false;
 }
 
 }  // namespace akushon

@@ -57,16 +57,20 @@ int main(int argc, char * argv[])
     return 1;
   }
 
-  auto action_manager = std::make_shared<akushon::ActionManager>();
-
   std::vector<std::string> action_names = {
     // "left_kick",
+    "b_up",
+    "f_up",
+    "init",
+    "walkready",
     "right_kick",
     // "back_standup",
     // "forward_standup",
     // "left_standup",
     // "right_standup"
   };
+
+  auto action_manager = std::make_shared<akushon::ActionManager>(action_names);
 
   robocup_client::MessageHandler message;
   message.add_sensor_time_step("neck_yaw_s", 8);
@@ -126,7 +130,7 @@ int main(int argc, char * argv[])
       auto time = sensors.get()->time();
 
       if (action_manager->is_running()) {
-        auto robot_pose = action_manager->run_action(time);
+        auto robot_pose = action_manager->process(time);
 
         for (auto & joint : robot_pose->get_joints()) {
           std::string joint_name = joint.get_joint_name();
@@ -153,28 +157,22 @@ int main(int argc, char * argv[])
         std::cout << "loaded data\n";
 
         if (cmds[0] == "action" && !cmds[1].empty()) {
-          bool find_action = false;
-          for (uint id = 0; id < action_names.size(); id++) {
-            if (cmds[1] == action_names[id]) {
-              std::cout << "Running action " << cmds[1] << std::endl;
-              find_action = true;
-              akushon::Pose init_pose("init");
-              std::vector<tachimawari::Joint> joints;
+          std::vector<tachimawari::Joint> joints;
+          akushon::Pose robot_pose("robot");
 
-              for (int i = 0; i < sensors.get()->position_sensors_size(); i++) {
-                auto position_sensor = sensors.get()->position_sensors(i);
-                auto joint_name =
-                  position_sensor.name().substr(0, position_sensor.name().size() - 2);
+          for (int i = 0; i < sensors.get()->position_sensors_size(); i++) {
+            auto position_sensor = sensors.get()->position_sensors(i);
+            auto joint_name =
+              position_sensor.name().substr(0, position_sensor.name().size() - 2);
 
-                tachimawari::Joint joint(joint_name, position_sensor.value());
+            tachimawari::Joint joint(joint_name, position_sensor.value());
 
-                joints.push_back(joint);
-              }
-              init_pose.set_joints(joints);
-              action_manager->set_current_action(id, init_pose);
-              break;
-            }
+            joints.push_back(joint);
           }
+          robot_pose.set_joints(joints);
+
+          bool find_action = action_manager->set_current_action(cmds[1], robot_pose);
+
           if (!find_action) {
             std::cout << "-ERR action_name was not found" << std::endl;
           }
@@ -186,8 +184,8 @@ int main(int argc, char * argv[])
                 std::cout << "Running pose " << cmds[2] << " of " << cmds[1] << std::endl;
                 find_action = true;
 
-                akushon::Pose current_pose = action_manager->get_action_by_id(id).
-                  get_pose_by_index(std::stoi(cmds[2]));
+                auto action = action_manager->get_action_by_id(id);
+                auto current_pose = action->get_pose_by_index(std::stoi(cmds[2]));
 
                 for (auto & joint : current_pose.get_joints()) {
                   std::string joint_name = joint.get_joint_name();

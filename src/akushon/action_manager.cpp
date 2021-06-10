@@ -28,8 +28,6 @@
 #include <tachimawari_interfaces/msg/joint.hpp>
 #include <tachimawari/joint.hpp>
 
-#include <fstream>
-#include <iostream>
 #include <map>
 #include <memory>
 #include <string>
@@ -45,13 +43,13 @@ namespace akushon
 // {
 // }
 
-ActionManager::ActionManager()
-: current_action(nullptr), robot_pose(std::make_shared<Pose>("robot_pose")),
-  pause_start_time(0), on_pause(false), on_process(false)
+ActionManager::ActionManager(std::vector<std::string> action_names)
+: action_names(action_names), action_list(std::map<uint8_t, std::shared_ptr<Action>>()),
+  current_action(nullptr), robot_pose(std::make_shared<Pose>("robot_pose"))
 {
 }
 
-void ActionManager::insert_action(const uint8_t & id, const Action & action)
+void ActionManager::insert_action(const uint8_t & id, std::shared_ptr<Action> action)
 {
   action_list.insert({id, action});
 }
@@ -61,7 +59,7 @@ void ActionManager::delete_action(const uint8_t & id)
   action_list.erase(id);
 }
 
-const Action & ActionManager::get_action_by_id(const uint8_t & id) const
+std::shared_ptr<Action> ActionManager::get_action_by_id(const uint8_t & id) const
 {
   return action_list.at(id);
 }
@@ -76,42 +74,14 @@ bool ActionManager::is_ready() const
   return true;
 }
 
-std::shared_ptr<Pose> ActionManager::run_action(const int & time)
+std::shared_ptr<Pose> ActionManager::process(const int & time)
 {
-  auto target_pose = current_action->get_current_pose();
+  robot_pose = std::make_shared<Pose>(current_action->process(*robot_pose, time));
 
-  if (!on_process) {
-    on_process = true;
-    std::cout << "running pose " << current_action->get_current_pose().get_name() << std::endl;
-    robot_pose->set_target_position(current_action->get_current_pose());
-  }
+  if (!current_action->is_running()) {
+    current_action = nullptr;
 
-  if (*robot_pose.get() == target_pose) {
-    if (!on_pause) {
-      pause_start_time = time;
-      on_pause = true;
-    }
-
-    if (time - pause_start_time >= current_action->get_current_pose().get_pause() * 1000) {
-      current_action->next_pose();
-      on_pause = false;
-
-      if (current_action->is_finished()) {
-        current_action = nullptr;
-        on_process = false;
-
-        std::cout << "\nDone running action!\n" << std::endl;
-
-        return robot_pose;
-      }
-
-      robot_pose->set_target_position(current_action->get_current_pose());
-      std::cout << "running pose " << current_action->get_current_pose().get_name() << std::endl;
-    }
-  }
-
-  if (!on_pause) {
-    robot_pose->interpolate();
+    return robot_pose;
   }
 
   return robot_pose;
@@ -119,8 +89,30 @@ std::shared_ptr<Pose> ActionManager::run_action(const int & time)
 
 void ActionManager::set_current_action(const uint8_t & action_id, const Pose & pose)
 {
-  current_action = std::make_shared<Action>(action_list.at(action_id));
+  current_action = action_list.at(action_id);
   robot_pose = std::make_shared<Pose>(pose);  // init pose
+}
+
+bool ActionManager::set_current_action(const std::string & action_name)
+{
+  return set_current_action(action_name, *robot_pose);
+}
+
+bool ActionManager::set_current_action(const std::string & action_name, const Pose & robot_pose)
+{
+  auto result = std::find(action_names.begin(), action_names.end(), action_name);
+
+  if (result != action_names.end()) {
+    set_current_action(result - action_names.begin(), robot_pose);
+    return true;
+  }
+
+  return false;
+}
+
+void ActionManager::load_action_data(const std::string & path)
+{
+  load_action_data(path, action_names);
 }
 
 void ActionManager::load_action_data(
@@ -128,36 +120,16 @@ void ActionManager::load_action_data(
   const std::vector<std::string> & action_names)
 {
   clear_action_list();
+  this->action_names = action_names;
+
   uint8_t id = 0;
   for (auto action_name : action_names) {
     std::string file_name = path + "/" + action_name + ".json";
-    std::ifstream file(file_name);
-    nlohmann::json action_data = nlohmann::json::parse(file);
 
-    Action action(action_data["name"]);
+    std::shared_ptr<Action> action = std::make_shared<Action>("action");
+    action->load_data(file_name);
 
-    for (auto &[key, val] : action_data.items()) {
-      if (key.find("step_") != std::string::npos) {
-        Pose pose(key);
-        std::vector<tachimawari::Joint> joints;
-
-        for (auto &[steps_key, steps_val] : action_data[key].items()) {
-          if (!(steps_key.find("step_") != std::string::npos)) {
-            tachimawari::Joint joint(steps_key, static_cast<float>(steps_val));  // init join
-            joints.push_back(joint);
-          } else if (steps_key == "step_pause") {
-            pose.set_pause(static_cast<float>(steps_val));
-          } else if (steps_key == "step_speed") {
-            pose.set_speed(static_cast<float>(steps_val));
-          }
-        }
-
-        pose.set_joints(joints);
-        action.insert_pose(pose);
-      }
-    }
-
-    action_list.insert(std::pair<uint8_t, Action>(id, action));
+    action_list.insert(std::pair<uint8_t, std::shared_ptr<Action>>(id, action));
     id++;
   }
 }
@@ -170,6 +142,11 @@ bool ActionManager::is_empty() const
 bool ActionManager::is_running() const
 {
   return current_action != nullptr;
+}
+
+void ActionManager::clear_current_action()
+{
+  current_action = nullptr;
 }
 
 void ActionManager::clear_action_list()

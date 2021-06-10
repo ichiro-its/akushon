@@ -22,6 +22,7 @@
 #define AKUSHON__ACTION_HPP_
 
 #include <akushon/pose.hpp>
+#include <nlohmann/json.hpp>
 
 #include <memory>
 #include <string>
@@ -39,6 +40,7 @@ public:
   void insert_pose(const uint8_t & id, const Pose & pose);
   void delete_pose(const uint8_t & id);
 
+  void load_data(const std::string & path);
   void set_name(const std::string & action_name);
 
   const std::string & get_name() const;
@@ -47,7 +49,10 @@ public:
   const Pose & get_pose_by_index(const uint8_t & index) const;
 
   void next_pose();
-  bool is_finished() const;
+  bool is_running() const;
+
+  Pose process(Pose robot_pose, const int & time);
+  void reset();
 
 private:
   std::string name;
@@ -57,6 +62,10 @@ private:
   uint8_t next_motion_id;
 
   std::vector<Pose> poses;
+
+  int pause_start_time;
+  bool on_pause;
+  bool on_process;
 };
 
 }  // namespace akushon
