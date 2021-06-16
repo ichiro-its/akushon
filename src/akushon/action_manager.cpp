@@ -110,12 +110,12 @@ bool ActionManager::set_current_action(const std::string & action_name, const Po
   return false;
 }
 
-void ActionManager::load_action_data(const std::string & path)
+void ActionManager::load_data(const std::string & path)
 {
-  load_action_data(path, action_names);
+  load_data(path, action_names);
 }
 
-void ActionManager::load_action_data(
+void ActionManager::load_data(
   const std::string & path,
   const std::vector<std::string> & action_names)
 {
@@ -124,7 +124,7 @@ void ActionManager::load_action_data(
 
   uint8_t id = 0;
   for (auto action_name : action_names) {
-    std::string file_name = path + "/" + action_name + ".json";
+    std::string file_name = path + "action/" + action_name + ".json";
 
     std::shared_ptr<Action> action = std::make_shared<Action>("action");
     action->load_data(file_name);

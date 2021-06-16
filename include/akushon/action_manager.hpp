@@ -47,8 +47,8 @@ public:
 
   std::shared_ptr<Action> get_action_by_id(const uint8_t & id) const;
 
-  void load_action_data(const std::string & path);
-  void load_action_data(const std::string & path, const std::vector<std::string> & action_names);
+  void load_data(const std::string & path);
+  void load_data(const std::string & path, const std::vector<std::string> & action_names);
 
   std::shared_ptr<Pose> process(const int & time);
 

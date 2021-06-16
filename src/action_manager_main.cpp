@@ -39,7 +39,7 @@
 #include <utility>
 #include <vector>
 
-int main(int argc, char * argv[])
+int main(int argc, char ** argv)
 {
   if (argc < 4) {
     std::cerr << "Please specify the host, the port, and the path!" << std::endl;
@@ -48,6 +48,7 @@ int main(int argc, char * argv[])
 
   std::string host = argv[1];
   int port = std::stoi(argv[2]);
+  std::string path = argv[3];
 
   robocup_client::RobotClient client(host, port);
   if (!client.connect()) {
@@ -58,17 +59,17 @@ int main(int argc, char * argv[])
   }
 
   std::vector<std::string> action_names = {
-    // "left_kick",
-    "b_up",
-    "f_up",
     "init",
     "walkready",
+    "left_kick",
     "right_kick",
-    // "back_standup",
-    // "forward_standup",
-    // "left_standup",
-    // "right_standup"
+    "back_standup",
+    "front_standup",
+    "left_standup",
+    "right_standup",
+    // "catch_ball"
   };
+
 
   auto action_manager = std::make_shared<akushon::ActionManager>(action_names);
 
@@ -153,7 +154,7 @@ int main(int argc, char * argv[])
           break;
         }
 
-        action_manager->load_action_data(argv[3], action_names);
+        action_manager->load_data(path, action_names);
         std::cout << "loaded data\n";
 
         if (cmds[0] == "action" && !cmds[1].empty()) {
