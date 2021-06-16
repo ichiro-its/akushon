@@ -48,6 +48,7 @@ int main(int argc, char * argv[])
 
   std::string host = argv[1];
   int port = std::stoi(argv[2]);
+  std::string path = argv[3] + "action/";
 
   robocup_client::RobotClient client(host, port);
   if (!client.connect()) {
@@ -153,7 +154,7 @@ int main(int argc, char * argv[])
           break;
         }
 
-        action_manager->load_action_data(argv[3], action_names);
+        action_manager->load_data(path, action_names);
         std::cout << "loaded data\n";
 
         if (cmds[0] == "action" && !cmds[1].empty()) {
