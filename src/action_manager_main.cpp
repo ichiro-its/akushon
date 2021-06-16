@@ -59,17 +59,17 @@ int main(int argc, char * argv[])
   }
 
   std::vector<std::string> action_names = {
-    // "left_kick",
-    "b_up",
-    "f_up",
     "init",
     "walkready",
+    "left_kick",
     "right_kick",
-    // "back_standup",
-    // "forward_standup",
-    // "left_standup",
-    // "right_standup"
+    "back_standup",
+    "front_standup",
+    "left_standup",
+    "right_standup",
+    // "catch_ball"
   };
+
 
   auto action_manager = std::make_shared<akushon::ActionManager>(action_names);
 
