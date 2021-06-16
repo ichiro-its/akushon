@@ -39,7 +39,7 @@
 #include <utility>
 #include <vector>
 
-int main(int argc, char * argv[])
+int main(int argc, char ** argv)
 {
   if (argc < 4) {
     std::cerr << "Please specify the host, the port, and the path!" << std::endl;
@@ -48,7 +48,7 @@ int main(int argc, char * argv[])
 
   std::string host = argv[1];
   int port = std::stoi(argv[2]);
-  std::string path = argv[3] + "action/";
+  std::string path = argv[3];
 
   robocup_client::RobotClient client(host, port);
   if (!client.connect()) {

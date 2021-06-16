@@ -124,7 +124,7 @@ void ActionManager::load_data(
 
   uint8_t id = 0;
   for (auto action_name : action_names) {
-    std::string file_name = path + action_name + ".json";
+    std::string file_name = path + "action/" + action_name + ".json";
 
     std::shared_ptr<Action> action = std::make_shared<Action>("action");
     action->load_data(file_name);
