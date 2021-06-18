@@ -155,7 +155,7 @@ void ActionManager::clear_action_list()
   action_list.clear();
 }
 
-std::vector<tachimawari::Joint> ActionManager::get_joints()
+const std::vector<tachimawari::Joint> & ActionManager::get_joints() const
 {
   return robot_pose->get_joints();
 }
