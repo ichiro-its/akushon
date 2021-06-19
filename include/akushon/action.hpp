@@ -66,6 +66,9 @@ private:
   int pause_start_time;
   bool on_pause;
   bool on_process;
+
+  int start_stop_time;
+  bool is_start;
 };
 
 }  // namespace akushon

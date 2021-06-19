@@ -63,6 +63,9 @@ public:
   void clear_current_action();
   void clear_action_list();
 
+  const std::vector<tachimawari::Joint> & get_joints() const;
+  void set_current_pose(std::shared_ptr<Pose> pose);
+
   // std::shared_future<std::shared_ptr<tachimawari_interfaces::srv::SetJoints::Response>>
   // send_joints_request(std::vector<tachimawari::Joint> joints, float speed = 1);
 

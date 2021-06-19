@@ -155,6 +155,17 @@ void ActionManager::clear_action_list()
   action_list.clear();
 }
 
+const std::vector<tachimawari::Joint> & ActionManager::get_joints() const
+{
+  return robot_pose->get_joints();
+}
+
+
+void ActionManager::set_current_pose(std::shared_ptr<Pose> pose)
+{
+  robot_pose = pose;
+}
+
 // std::shared_future<std::shared_ptr<tachimawari_interfaces::srv::SetJoints::Response>>
 // ActionManager::send_joints_request(std::vector<tachimawari::Joint> joints, float speed)
 // {
