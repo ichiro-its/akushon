@@ -117,34 +117,44 @@ bool Action::is_running() const
 
 Pose Action::process(Pose robot_pose, const int & time)
 {
-  auto target_pose = get_current_pose();
-
-  if (!on_process) {
-    on_process = true;
-    robot_pose.set_target_position(get_current_pose());
+  if (!is_start && !on_process) {
+    start_stop_time = time;
+    is_start = true;
   }
 
-  if (robot_pose == target_pose) {
-    if (!on_pause) {
-      pause_start_time = time;
-      on_pause = true;
+  if (time - start_stop_time > 1000 && is_start) {
+    auto target_pose = get_current_pose();
+
+    if (!on_process) {
+      on_process = true;
+      robot_pose.set_target_position(get_current_pose());
     }
 
-    if (time - pause_start_time >= get_current_pose().get_pause() * 1000) {
-      next_pose();
-      on_pause = false;
+    if (robot_pose == target_pose) {
+      if (!on_pause) {
+        pause_start_time = time;
+        on_pause = true;
+      }
 
-      if (current_pose_index == pose_count) {
-        on_process = false;
-        current_pose_index = 0;
-      } else {
-        robot_pose.set_target_position(get_current_pose());
+      if (time - pause_start_time >= get_current_pose().get_pause() * 1000) {
+        next_pose();
+        on_pause = false;
+
+        if (current_pose_index == pose_count) {
+          start_stop_time = time;
+          is_start = false;
+        } else {
+          robot_pose.set_target_position(get_current_pose());
+        }
       }
     }
-  }
 
-  if (!on_pause) {
-    robot_pose.interpolate();
+    if (!on_pause) {
+      robot_pose.interpolate();
+    }
+  } else if (time - start_stop_time > 1000) {
+    on_process = false;
+    current_pose_index = 0;
   }
 
   return robot_pose;
