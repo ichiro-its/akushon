@@ -30,7 +30,8 @@ namespace akushon
 
 Action::Action(const std::string & action_name)
 : name(action_name), current_pose_index(0),
-  pause_start_time(0), on_pause(false), on_process(false)
+  pause_start_time(0), on_pause(false), on_process(false),
+  is_start(false), start_stop_time(0)
 {
 }
 
@@ -152,7 +153,7 @@ Pose Action::process(Pose robot_pose, const int & time)
     if (!on_pause) {
       robot_pose.interpolate();
     }
-  } else if (time - start_stop_time > 2000 && !is_start) {
+  } else if (time - start_stop_time > 2000) {
     on_process = false;
     current_pose_index = 0;
   }
