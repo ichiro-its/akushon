@@ -67,6 +67,9 @@ int main(int argc, char ** argv)
     "front_standup",
     "left_standup",
     "right_standup",
+    "keeper",
+    "right_keeper",
+    "left_keeper"
     // "catch_ball"
   };
 
@@ -141,7 +144,8 @@ int main(int argc, char ** argv)
           } else if (joint_name.find("hip_yaw") != std::string::npos) {
             joint_name += " [hip]";
           }
-          message.add_motor_position_in_radian(joint_name, joint.get_position());
+
+          message.add_motor_position_in_degree(joint_name, joint.get_position());
         }
 
         client.send(*message.get_actuator_request());
@@ -155,7 +159,6 @@ int main(int argc, char ** argv)
         }
 
         action_manager->load_data(path, action_names);
-        std::cout << "loaded data\n";
 
         if (cmds[0] == "action" && !cmds[1].empty()) {
           std::vector<tachimawari::Joint> joints;
@@ -166,7 +169,7 @@ int main(int argc, char ** argv)
             auto joint_name =
               position_sensor.name().substr(0, position_sensor.name().size() - 2);
 
-            tachimawari::Joint joint(joint_name, position_sensor.value());
+            tachimawari::Joint joint(joint_name, position_sensor.value() * 180.0 / M_PI);
 
             joints.push_back(joint);
           }
