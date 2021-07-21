@@ -69,7 +69,9 @@ int main(int argc, char ** argv)
     "right_standup",
     "keeper",
     "right_keeper",
-    "left_keeper"
+    "left_keeper",
+    "right_sidekick",
+    "left_sidekick",
     // "catch_ball"
   };
 
