@@ -28,8 +28,9 @@
 
 #include <akushon/action_manager.hpp>
 #include <akushon/pose.hpp>
-#include <nlohmann/json.hpp>
 #include <keisan/keisan.hpp>
+
+#include <nlohmann/json.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -54,29 +55,10 @@ int main(int argc, char ** argv)
   if (!client.connect()) {
     std::cerr << "Failed to connect to server on port " <<
       client.get_port() << "!" << std::endl;
-
     return 1;
   }
 
-  std::vector<std::string> action_names = {
-    "init",
-    "walkready",
-    "left_kick",
-    "right_kick",
-    "back_standup",
-    "front_standup",
-    "left_standup",
-    "right_standup",
-    "keeper",
-    "right_keeper",
-    "left_keeper",
-    "right_sidekick",
-    "left_sidekick",
-    // "catch_ball"
-  };
-
-
-  auto action_manager = std::make_shared<akushon::ActionManager>(action_names);
+  auto action_manager = std::make_shared<akushon::ActionManager>(path);
 
   robocup_client::MessageHandler message;
   message.add_sensor_time_step("neck_yaw_s", 8);
@@ -160,7 +142,7 @@ int main(int argc, char ** argv)
           break;
         }
 
-        action_manager->load_data(path, action_names);
+        action_manager->load_data(path);
 
         if (cmds[0] == "action" && !cmds[1].empty()) {
           std::vector<tachimawari::Joint> joints;

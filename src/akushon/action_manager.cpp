@@ -22,12 +22,16 @@
 #include <unistd.h>
 
 #include <akushon/action_manager.hpp>
-#include <nlohmann/json.hpp>
+
 #include <rclcpp/rclcpp.hpp>
 #include <tachimawari_interfaces/srv/set_joints.hpp>
 #include <tachimawari_interfaces/msg/joint.hpp>
 #include <tachimawari/joint.hpp>
 
+#include <nlohmann/json.hpp>
+
+#include <fstream>
+#include <iostream>
 #include <map>
 #include <memory>
 #include <string>
@@ -43,10 +47,11 @@ namespace akushon
 // {
 // }
 
-ActionManager::ActionManager(std::vector<std::string> action_names)
-: action_names(action_names), action_list(std::map<uint8_t, std::shared_ptr<Action>>()),
-  current_action(nullptr), robot_pose(std::make_shared<Pose>("robot_pose"))
+ActionManager::ActionManager(std::string config_path)
+: action_list(std::map<uint8_t, std::shared_ptr<Action>>()), current_action(nullptr),
+  robot_pose(std::make_shared<Pose>("robot_pose"))
 {
+  load_data(config_path);
 }
 
 void ActionManager::insert_action(const uint8_t & id, std::shared_ptr<Action> action)
@@ -112,25 +117,30 @@ bool ActionManager::set_current_action(const std::string & action_name, const Po
 
 void ActionManager::load_data(const std::string & path)
 {
-  load_data(path, action_names);
-}
+  std::string file_name =
+    path + "action/" + "action_names.json";
+  std::ifstream file(file_name);
+  nlohmann::json action_data = nlohmann::json::parse(file);
 
-void ActionManager::load_data(
-  const std::string & path,
-  const std::vector<std::string> & action_names)
-{
-  clear_action_list();
-  this->action_names = action_names;
+  try {
+    action_data.at("actions").get_to(action_names);
 
-  uint8_t id = 0;
-  for (auto action_name : action_names) {
-    std::string file_name = path + "action/" + action_name + ".json";
+    if (action_names.size() != 0) {
+      uint8_t id = 0;
+      for (auto action_name : action_names) {
+        std::string action_file_name = path + "action/" + action_name + ".json";
 
-    std::shared_ptr<Action> action = std::make_shared<Action>("action");
-    action->load_data(file_name);
+        std::shared_ptr<Action> action = std::make_shared<Action>("action");
+        action->load_data(action_file_name);
 
-    action_list.insert(std::pair<uint8_t, std::shared_ptr<Action>>(id, action));
-    id++;
+        action_list.insert(std::pair<uint8_t, std::shared_ptr<Action>>(id, action));
+        id++;
+      }
+    }
+  } catch (nlohmann::json::parse_error & ex) {
+    std::cerr << "parse error at byte " << ex.byte << std::endl;
+  } catch (std::exception & ex) {
+    std::cerr << "parse error, " << ex.what() << std::endl;
   }
 }
 

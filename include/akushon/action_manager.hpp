@@ -40,7 +40,7 @@ class ActionManager
 {
 public:
   // explicit ActionManager(std::string node_name, std::string service_name);
-  explicit ActionManager(std::vector<std::string> action_names = {});
+  explicit ActionManager(std::string config_path);
 
   void insert_action(const uint8_t & id, std::shared_ptr<Action> action);
   void delete_action(const uint8_t & id);
@@ -48,7 +48,6 @@ public:
   std::shared_ptr<Action> get_action_by_id(const uint8_t & id) const;
 
   void load_data(const std::string & path);
-  void load_data(const std::string & path, const std::vector<std::string> & action_names);
 
   std::shared_ptr<Pose> process(const int & time);
 

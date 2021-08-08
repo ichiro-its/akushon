@@ -15,7 +15,6 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
-find_package(robocup_client REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(tachimawari REQUIRED)
 find_package(tachimawari_interfaces REQUIRED)
@@ -31,7 +30,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 ament_target_dependencies(${PROJECT_NAME}
   ament_index_cpp
-  robocup_client
   rclcpp
   tachimawari
   tachimawari_interfaces)
@@ -44,17 +42,6 @@ install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION "lib"
   RUNTIME DESTINATION "bin")
 
-add_executable(action_manager "src/action_manager_main.cpp")
-target_include_directories(action_manager PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
-
-target_link_libraries(action_manager ${PROJECT_NAME})
-
-install(TARGETS
-  action_manager
-  DESTINATION lib/${PROJECT_NAME})
-
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
@@ -62,7 +49,6 @@ endif()
 
 ament_export_dependencies(
   ament_index_cpp
-  robocup_client
   rclcpp
   tachimawari
   tachimawari_interfaces)

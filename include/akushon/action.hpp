@@ -22,6 +22,7 @@
 #define AKUSHON__ACTION_HPP_
 
 #include <akushon/pose.hpp>
+
 #include <nlohmann/json.hpp>
 
 #include <memory>
@@ -40,7 +41,7 @@ public:
   void insert_pose(const uint8_t & id, const Pose & pose);
   void delete_pose(const uint8_t & id);
 
-  void load_data(const std::string & path);
+  void load_data(const std::string & action_file_path);
   void set_name(const std::string & action_name);
 
   const std::string & get_name() const;
@@ -56,6 +57,8 @@ public:
 
 private:
   std::string name;
+  int delay_before;
+  int delay_after;
 
   int current_pose_index = 0;
   int pose_count = 0;

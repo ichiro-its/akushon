@@ -21,6 +21,7 @@
 #include <akushon/action.hpp>
 
 #include <fstream>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -29,7 +30,7 @@ namespace akushon
 {
 
 Action::Action(const std::string & action_name)
-: name(action_name), current_pose_index(0),
+: name(action_name), delay_before(0), delay_after(0), current_pose_index(0),
   pause_start_time(0), on_pause(false), on_process(false),
   is_start(false), start_stop_time(0)
 {
@@ -53,31 +54,42 @@ void Action::delete_pose(const uint8_t & id)
   pose_count = poses.size();
 }
 
-void Action::load_data(const std::string & path)
+void Action::load_data(const std::string & action_file_path)
 {
-  std::ifstream file(path);
+  std::ifstream file(action_file_path);
   nlohmann::json action_data = nlohmann::json::parse(file);
 
-  name = action_data["name"];
-  for (auto &[key, val] : action_data.items()) {
-    if (key.find("step_") != std::string::npos) {
-      Pose pose(key);
-      std::vector<tachimawari::Joint> joints;
+  try {
+    for (auto &[key, val] : action_data.items()) {
+      if (key.find("step_") != std::string::npos) {
+        Pose pose(key);
+        std::vector<tachimawari::Joint> joints;
 
-      for (auto &[steps_key, steps_val] : action_data[key].items()) {
-        if (!(steps_key.find("step_") != std::string::npos)) {
-          tachimawari::Joint joint(steps_key, static_cast<float>(steps_val));  // init join
-          joints.push_back(joint);
-        } else if (steps_key == "step_pause") {
-          pose.set_pause(static_cast<float>(steps_val));
-        } else if (steps_key == "step_speed") {
-          pose.set_speed(static_cast<float>(steps_val));
+        for (auto &[steps_key, steps_val] : action_data[key].items()) {
+          if (!(steps_key.find("step_") != std::string::npos)) {
+            tachimawari::Joint joint(steps_key, static_cast<float>(steps_val));  // init join
+            joints.push_back(joint);
+          } else if (steps_key == "step_pause") {
+            pose.set_pause(static_cast<float>(steps_val));
+          } else if (steps_key == "step_speed") {
+            pose.set_speed(static_cast<float>(steps_val));
+          }
         }
-      }
 
-      pose.set_joints(joints);
-      insert_pose(pose);
+        pose.set_joints(joints);
+        insert_pose(pose);
+      } else if (key == "name") {
+        name = val;
+      } else if (key == "delay_before") {
+        delay_before = val;
+      } else if (key == "delay_after") {
+        delay_after = val;
+      }
     }
+  } catch (nlohmann::json::parse_error & ex) {
+    std::cerr << "parse error at byte " << ex.byte << std::endl;
+  } catch (std::exception & ex) {
+    std::cerr << "parse error, " << ex.what() << std::endl;
   }
 }
 
@@ -123,7 +135,7 @@ Pose Action::process(Pose robot_pose, const int & time)
     is_start = true;
   }
 
-  if (time - start_stop_time > 1000 && is_start) {
+  if (time - start_stop_time > delay_before && is_start) {
     auto target_pose = get_current_pose();
 
     if (!on_process) {
@@ -153,7 +165,7 @@ Pose Action::process(Pose robot_pose, const int & time)
     if (!on_pause) {
       robot_pose.interpolate();
     }
-  } else if (time - start_stop_time > 2000) {
+  } else if (time - start_stop_time > delay_after) {
     on_process = false;
     current_pose_index = 0;
   }
