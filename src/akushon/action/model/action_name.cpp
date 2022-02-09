@@ -18,21 +18,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef AKUSHON__ACTION__MODEL__ACTION_NAME_HPP_
-#define AKUSHON__ACTION__MODEL__ACTION_NAME_HPP_
-
 #include <map>
 #include <string>
+
+#include "akushon/action/model/action_name.hpp"
+#include "akushon/action/model/action.hpp"
 
 namespace akushon
 {
 
-class ActionName
-{
-public:
-  static const std::map<std::string, int> map;
+const std::map<std::string, int> ActionName::map = {
+  {"init", Action::INIT},
+  {"walk_ready", Action::WALKREADY},
+  {"sit_down", Action::SIT_DOWN},
+  {"forward_up", Action::FORWARD_UP},
+  {"backward_up", Action::BACKWARD_UP},
+  {"leftward_up", Action::LEFTWARD_UP},
+  {"rightward_up", Action::RIGHTWARD_UP},
+  {"right_kick", Action::RIGHT_KICK},
+  {"left_kick", Action::LEFT_KICK},
+  {"right_kick_short", Action::RIGHT_KICK_SHORT},
+  {"left_kick_short", Action::LEGT_KICK_SHORT},
+  {"left_sidekick", Action::LEFT_SIDEKICK},
+  {"right_sidekick", Action::RIGHT_SIDEKICK},
+  {"keeper_sit", Action::KEEPER_SIT},
+  {"keeper_up", Action::KEEPER_UP},
 };
 
 }  // namespace akushon
-
-#endif  // AKUSHON__ACTION__MODEL__ACTION_NAME_HPP_

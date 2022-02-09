@@ -18,20 +18,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__ACTION_MANAGER_HPP_
-#define AKUSHON__ACTION_MANAGER_HPP_
-
-#include <rclcpp/rclcpp.hpp>
-// #include <tachimawari_interfaces/srv/set_joints.hpp>
-#include <tachimawari/joint.hpp>
-
-#include <akushon/action.hpp>
-#include <akushon/pose.hpp>
+#ifndef AKUSHON__ACTION__NODE__ACTION_MANAGER_HPP_
+#define AKUSHON__ACTION__NODE__ACTION_MANAGER_HPP_
 
 #include <string>
 #include <map>
 #include <vector>
 #include <memory>
+
+#include "akushon/action/model/action.hpp"
+#include "akushon/action/model/pose.hpp"
 
 namespace akushon
 {
@@ -39,44 +35,22 @@ namespace akushon
 class ActionManager
 {
 public:
-  // explicit ActionManager(std::string node_name, std::string service_name);
-  explicit ActionManager(std::vector<std::string> action_names = {});
+  ActionManager();
 
-  void insert_action(const uint8_t & id, std::shared_ptr<Action> action);
-  void delete_action(const uint8_t & id);
-
-  std::shared_ptr<Action> get_action_by_id(const uint8_t & id) const;
+  void insert_action(const int & index, std::shared_ptr<Action> action);
+  void delete_action(const int & index);
+  std::shared_ptr<Action> get_action(const int & index) const;
 
   void load_data(const std::string & path);
-  void load_data(const std::string & path, const std::vector<std::string> & action_names);
 
   std::shared_ptr<Pose> process(const int & time);
 
-  void set_current_action(const uint8_t & action_id, const Pose & pose);
-  bool set_current_action(const std::string & action_name);
-  bool set_current_action(const std::string & action_name, const Pose & pose);
-
-  bool is_empty() const;
   bool is_running() const;
-  bool is_ready() const;
-
-  void clear_current_action();
-  void clear_action_list();
-
-  const std::vector<tachimawari::Joint> & get_joints() const;
-  void set_current_pose(std::shared_ptr<Pose> pose);
-
-  // std::shared_future<std::shared_ptr<tachimawari_interfaces::srv::SetJoints::Response>>
-  // send_joints_request(std::vector<tachimawari::Joint> joints, float speed = 1);
 
 private:
-  std::vector<std::string> action_names;
-  std::map<uint8_t, std::shared_ptr<Action>> action_list;
-  std::shared_ptr<Action> current_action;
-  std::shared_ptr<Pose> robot_pose;
-  // std::shared_ptr<rclcpp::Client<tachimawari_interfaces::srv::SetJoints>> set_joints_client;
+  std::map<int, std::shared_ptr<Action>> actions;
 };
 
 }  // namespace akushon
 
-#endif  // AKUSHON__ACTION_MANAGER_HPP_
+#endif  // AKUSHON__ACTION__NODE__ACTION_MANAGER_HPP_

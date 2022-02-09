@@ -18,10 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include <akushon/pose.hpp>
-
 #include <string>
 #include <vector>
+
+#include "akushon/action/model/pose.hpp"
+
+#include "tachimawari/joint/model/joint.hpp"
+
 namespace akushon
 {
 
@@ -60,53 +63,14 @@ const std::string & Pose::get_name() const
   return name;
 }
 
-void Pose::interpolate()
-{
-  for (auto & current_joint : joints) {
-    current_joint.interpolate();
-  }
-}
-
-void Pose::set_joints(const std::vector<tachimawari::Joint> & joints)
+void Pose::set_joints(const std::vector<tachimawari::joint::Joint> & joints)
 {
   this->joints = joints;
 }
 
-const std::vector<tachimawari::Joint> & Pose::get_joints() const
+const std::vector<tachimawari::joint::Joint> & Pose::get_joints() const
 {
   return joints;
-}
-
-void Pose::set_target_position(const Pose & target_pose)
-{
-  std::vector<tachimawari::Joint> new_joints;
-  for (auto & joint : get_joints()) {
-    for (auto & target_joint : target_pose.get_joints()) {
-      if (joint.get_joint_name() == target_joint.get_joint_name()) {
-        tachimawari::Joint new_joint(joint.get_joint_name(), joint.get_position());
-        new_joint.set_target_position(
-          target_joint.get_position(), target_pose.get_speed());
-        new_joints.push_back(new_joint);
-      }
-    }
-  }
-
-  set_joints(new_joints);
-}
-
-bool Pose::operator==(const Pose & other_pose)
-{
-  for (auto & joint : joints) {
-    for (auto & other_joint : other_pose.get_joints()) {
-      if (joint.get_joint_name() == other_joint.get_joint_name()) {
-        if (joint.get_position() != other_joint.get_position()) {
-          return false;
-        }
-      }
-    }
-  }
-
-  return true;
 }
 
 }  // namespace akushon

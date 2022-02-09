@@ -18,15 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__ACTION_HPP_
-#define AKUSHON__ACTION_HPP_
-
-#include <akushon/pose.hpp>
-#include <nlohmann/json.hpp>
+#ifndef AKUSHON__ACTION__MODEL__ACTION_HPP_
+#define AKUSHON__ACTION__MODEL__ACTION_HPP_
 
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "akushon/action/model/pose.hpp"
 
 namespace akushon
 {
@@ -34,43 +33,50 @@ namespace akushon
 class Action
 {
 public:
+  enum
+  {
+    INIT,
+    WALKREADY,
+    SIT_DOWN,
+    FORWARD_UP,
+    BACKWARD_UP,
+    LEFTWARD_UP,
+    RIGHTWARD_UP,
+    RIGHT_KICK,
+    LEFT_KICK,
+    RIGHT_KICK_SHORT,
+    LEGT_KICK_SHORT,
+    LEFT_SIDEKICK,
+    RIGHT_SIDEKICK,
+    KEEPER_SIT,
+    KEEPER_UP,
+    TOTAL
+  };
+
   explicit Action(const std::string & action_name);
 
-  void insert_pose(const Pose & pose);
-  void insert_pose(const uint8_t & id, const Pose & pose);
-  void delete_pose(const uint8_t & id);
-
-  void load_data(const std::string & path);
-  void set_name(const std::string & action_name);
-
-  const std::string & get_name() const;
+  void add_pose(const Pose & pose);
+  void set_pose(const int & index, const Pose & pose);
+  void delete_pose(const int & index);
+  const Pose & get_pose(const int & index) const;
   const std::vector<Pose> & get_poses() const;
-  const Pose & get_current_pose() const;
-  const Pose & get_pose_by_index(const uint8_t & index) const;
 
-  void next_pose();
-  bool is_running() const;
+  void set_name(const std::string & action_name);
+  const std::string & get_name() const;
 
-  Pose process(Pose robot_pose, const int & time);
+  const int & get_pose_count() const;
+
   void reset();
 
 private:
   std::string name;
 
-  int current_pose_index = 0;
-  int pose_count = 0;
-  uint8_t next_motion_id;
-
   std::vector<Pose> poses;
 
-  int pause_start_time;
-  bool on_pause;
-  bool on_process;
-
-  int start_stop_time;
-  bool is_start;
+  int stop_delay;
+  int start_delay;
 };
 
 }  // namespace akushon
 
-#endif  // AKUSHON__ACTION_HPP_
+#endif  // AKUSHON__ACTION__MODEL__ACTION_HPP_

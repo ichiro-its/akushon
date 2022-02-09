@@ -18,13 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__POSE_HPP_
-#define AKUSHON__POSE_HPP_
-
-#include <tachimawari/joint.hpp>
+#ifndef AKUSHON__ACTION__MODEL__POSE_HPP_
+#define AKUSHON__ACTION__MODEL__POSE_HPP_
 
 #include <string>
 #include <vector>
+
+#include "tachimawari/joint/model/joint.hpp"
 
 namespace akushon
 {
@@ -43,13 +43,10 @@ public:
   void set_name(const std::string & pose_name);
   const std::string & get_name() const;
 
-  void set_joints(const std::vector<tachimawari::Joint> & joints);
-  const std::vector<tachimawari::Joint> & get_joints() const;
+  void set_joints(const std::vector<tachimawari::joint::Joint> & joints);
+  const std::vector<tachimawari::joint::Joint> & get_joints() const;
 
   void set_target_position(const Pose & target_pose);
-
-  void interpolate();
-  bool operator==(const Pose & other);
 
 private:
   float speed;
@@ -57,9 +54,9 @@ private:
 
   std::string name;
 
-  std::vector<tachimawari::Joint> joints;
+  std::vector<tachimawari::joint::Joint> joints;
 };
 
 }  // namespace akushon
 
-#endif  // AKUSHON__POSE_HPP_
+#endif  // AKUSHON__ACTION__MODEL__POSE_HPP_

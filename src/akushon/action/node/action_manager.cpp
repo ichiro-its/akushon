@@ -18,30 +18,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include <stdlib.h>
-#include <unistd.h>
-
-#include <akushon/action_manager.hpp>
-#include <nlohmann/json.hpp>
-#include <rclcpp/rclcpp.hpp>
-#include <tachimawari_interfaces/srv/set_joints.hpp>
-#include <tachimawari_interfaces/msg/joint.hpp>
-#include <tachimawari/joint.hpp>
-
 #include <map>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "akushon/action/node/action_manager.hpp"
+#include "nlohmann/json.hpp"
+
+#include "stdlib.h"  // NOLINT
+#include "unistd.h"  // NOLINT
+
 namespace akushon
 {
-
-// ActionManager::ActionManager(std::string node_name, std::string service_name)
-// : is_running(false), current_action(std::make_shared<Action>("current_action")),
-//   robot_pose(std::make_shared<Pose>("robot_pose"))
-// {
-// }
 
 ActionManager::ActionManager(std::vector<std::string> action_names)
 : action_names(action_names), action_list(std::map<uint8_t, std::shared_ptr<Action>>()),
