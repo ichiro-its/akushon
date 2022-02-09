@@ -28,6 +28,7 @@
 
 #include "akushon/action/model/action.hpp"
 #include "akushon/action/model/pose.hpp"
+#include "tachimawari/joint/model/joint.hpp"
 
 namespace akushon
 {
@@ -37,18 +38,20 @@ class ActionManager
 public:
   ActionManager();
 
-  void insert_action(const int & index, std::shared_ptr<Action> action);
+  void insert_action(const int & index, Action action);
   void delete_action(const int & index);
-  std::shared_ptr<Action> get_action(const int & index) const;
+  Action get_action(const int & index) const;
+
+  std::vector<tachimawari::joint::Joint> get_joints() const;
 
   void load_data(const std::string & path);
 
-  std::shared_ptr<Pose> process(const int & time);
+  void process(const int & time);
 
   bool is_running() const;
 
 private:
-  std::map<int, std::shared_ptr<Action>> actions;
+  std::map<int, Action> actions;
 };
 
 }  // namespace akushon

@@ -69,32 +69,40 @@ Pose Action::process(Pose robot_pose, const int & time)
   return robot_pose;
 }
 
-void Action::load_data(const std::string & path)
+void ActionManager::process(const int & time)
 {
-  std::ifstream file(path);
-  nlohmann::json action_data = nlohmann::json::parse(file);
+  robot_pose = std::make_shared<Pose>(current_action->process(*robot_pose, time));
 
-  name = action_data["name"];
-  for (auto &[key, val] : action_data.items()) {
-    if (key.find("step_") != std::string::npos) {
-      Pose pose(key);
-      std::vector<tachimawari::Joint> joints;
+  if (!current_action->is_running()) {
+    current_action = nullptr;
 
-      for (auto &[steps_key, steps_val] : action_data[key].items()) {
-        if (!(steps_key.find("step_") != std::string::npos)) {
-          tachimawari::Joint joint(steps_key, static_cast<float>(steps_val));  // init join
-          joints.push_back(joint);
-        } else if (steps_key == "step_pause") {
-          pose.set_pause(static_cast<float>(steps_val));
-        } else if (steps_key == "step_speed") {
-          pose.set_speed(static_cast<float>(steps_val));
-        }
-      }
-
-      pose.set_joints(joints);
-      insert_pose(pose);
-    }
+    return robot_pose;
   }
+
+  return robot_pose;
+}
+
+void ActionManager::set_current_action(const uint8_t & action_id, const Pose & pose)
+{
+  current_action = actions.at(action_id);
+  robot_pose = std::make_shared<Pose>(pose);  // init pose
+}
+
+bool ActionManager::set_current_action(const std::string & action_name)
+{
+  return set_current_action(action_name, *robot_pose);
+}
+
+bool ActionManager::set_current_action(const std::string & action_name, const Pose & robot_pose)
+{
+  auto result = std::find(action_names.begin(), action_names.end(), action_name);
+
+  if (result != action_names.end()) {
+    set_current_action(result - action_names.begin(), robot_pose);
+    return true;
+  }
+
+  return false;
 }
 
 #include <tachimawari/joint.hpp>
