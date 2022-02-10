@@ -31,7 +31,7 @@ namespace akushon
 {
 
 Action::Action(const std::string & action_name)
-: name(action_name)
+: name(action_name), poses({}), start_delay(0), stop_delay(0)
 {
 }
 
@@ -40,12 +40,12 @@ void Action::add_pose(const Pose & pose)
   poses.push_back(pose);
 }
 
-void Action::set_pose(const int & index, const Pose & pose)
+void Action::set_pose(int index, const Pose & pose)
 {
   poses.insert(poses.begin() + index, pose);
 }
 
-void Action::delete_pose(const int & index)
+void Action::delete_pose(int index)
 {
   poses.erase(poses.begin() + index);
 }
@@ -65,14 +65,34 @@ const std::vector<Pose> & Action::get_poses() const
   return poses;
 }
 
-const Pose & Action::get_pose(const int & index) const
+const Pose & Action::get_pose(int index) const
 {
   return poses.at(index);
 }
 
-const int & Action::get_pose_count() const
+int Action::get_pose_count() const
 {
   return poses.size();
+}
+
+void Action::set_start_delay(int start_delay)
+{
+  this->start_delay = start_delay;
+}
+
+int Action::get_start_delay() const
+{
+  return start_delay;
+}
+
+void Action::set_stop_delay(int stop_delay)
+{
+  this->stop_delay = stop_delay;
+}
+
+int Action::get_stop_delay() const
+{
+  return stop_delay;
 }
 
 void Action::reset()

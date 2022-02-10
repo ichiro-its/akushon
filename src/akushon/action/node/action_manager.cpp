@@ -41,28 +41,28 @@ ActionManager::ActionManager()
 {
 }
 
-void ActionManager::insert_action(const int & index, Action action)
+void ActionManager::insert_action(int index, const Action & action)
 {
   actions.insert({index, action});
 }
 
-void ActionManager::delete_action(const int & index)
+void ActionManager::delete_action(int index)
 {
   actions.erase(index);
 }
 
-Action ActionManager::get_action(const int & index) const
+const Action & ActionManager::get_action(int index) const
 {
   return actions.at(index);
 }
 
-std::vector<tachimawari::joint::Joint> ActionManager::get_joints() const
+const std::vector<tachimawari::joint::Joint> & ActionManager::get_joints() const
 {
 }
 
 void ActionManager::load_data(const std::string & path)
 {
-  for (auto const & [name, id] : ActionName::map) {
+  for (auto [name, id] : ActionName::map) {
     std::string file_name = path + "/action/" + name + ".json";
     Action action = Action(name);
 
@@ -73,12 +73,12 @@ void ActionManager::load_data(const std::string & path)
 
       action.set_name(action_data["name"]);
 
-      for (auto const & [key, val] : action_data.items()) {
+      for (auto [key, val] : action_data.items()) {
         if (key.find("step_") != std::string::npos) {
           Pose pose(key);
           std::vector<tachimawari::joint::Joint> joints;
 
-          for (auto &[steps_key, steps_val] : action_data[key].items()) {
+          for (auto [steps_key, steps_val] : action_data[key].items()) {
             if (!(steps_key.find("step_") != std::string::npos)) {
               tachimawari::joint::Joint joint(
                 tachimawari::joint::JointId::by_name[steps_key],
@@ -99,7 +99,8 @@ void ActionManager::load_data(const std::string & path)
 
       is_load_success = true;
     } catch (nlohmann::json::parse_error & ex) {
-      std::cerr << "parse error at byte " << ex.byte << std::endl;
+      // TODO(maroqijalil): will be used for logging
+      // std::cerr << "parse error at byte " << ex.byte << std::endl;
     }
 
     if (is_load_success) {
@@ -108,7 +109,7 @@ void ActionManager::load_data(const std::string & path)
   }
 }
 
-void ActionManager::process(const int & time)
+void ActionManager::process(int time)
 {
 }
 

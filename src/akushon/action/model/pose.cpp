@@ -33,22 +33,22 @@ Pose::Pose(const std::string & pose_name)
 {
 }
 
-void Pose::set_speed(const float & speed)
+void Pose::set_speed(float speed)
 {
   this->speed = speed;
 }
 
-const float & Pose::get_speed() const
+float Pose::get_speed() const
 {
   return speed;
 }
 
-void Pose::set_pause(const float & pause)
+void Pose::set_pause(float pause)
 {
   this->pause = pause;
 }
 
-const float & Pose::get_pause() const
+float Pose::get_pause() const
 {
   return pause;
 }

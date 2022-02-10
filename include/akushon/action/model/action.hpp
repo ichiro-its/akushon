@@ -56,15 +56,21 @@ public:
   explicit Action(const std::string & action_name);
 
   void add_pose(const Pose & pose);
-  void set_pose(const int & index, const Pose & pose);
-  void delete_pose(const int & index);
-  const Pose & get_pose(const int & index) const;
+  void set_pose(int index, const Pose & pose);
+  void delete_pose(int index);
+  const Pose & get_pose(int index) const;
   const std::vector<Pose> & get_poses() const;
 
   void set_name(const std::string & action_name);
   const std::string & get_name() const;
 
-  const int & get_pose_count() const;
+  int get_pose_count() const;
+
+  void set_start_delay(int start_delay);
+  int get_start_delay() const;
+
+  void set_stop_delay(int start_delay);
+  int get_stop_delay() const;
 
   void reset();
 

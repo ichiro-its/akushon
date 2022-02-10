@@ -18,42 +18,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__ACTION__NODE__ACTION_MANAGER_HPP_
-#define AKUSHON__ACTION__NODE__ACTION_MANAGER_HPP_
+#ifndef AKUSHON__ACTION__PROCESS__JOINT_PROCESS_HPP_
+#define AKUSHON__ACTION__PROCESS__JOINT_PROCESS_HPP_
 
 #include <string>
-#include <map>
 #include <vector>
-#include <memory>
 
-#include "akushon/action/model/action.hpp"
-#include "akushon/action/model/pose.hpp"
 #include "tachimawari/joint/model/joint.hpp"
 
 namespace akushon
 {
 
-class ActionManager
+class JointProcess
 {
 public:
-  ActionManager();
+  explicit JointProcess(uint8_t joint_id, float position = 0.0);
 
-  void insert_action(int index, const Action & action);
-  void delete_action(int index);
-  const Action & get_action(int index) const;
+  void set_target_position(float target_position, float speed = 1.0);
+  void set_initial_position(float initial_position);
 
-  const std::vector<tachimawari::joint::Joint> & get_joints() const;
+  void interpolate();
 
-  void load_data(const std::string & path);
+  bool is_finished() const;
 
-  void process(int time);
-
-  bool is_running() const;
+  operator tachimawari::joint::Joint() const;
 
 private:
-  std::map<int, Action> actions;
+  tachimawari::joint::Joint joint;
+
+  float target_position;
+  float initial_position;
+  float additional_position;
 };
 
 }  // namespace akushon
 
-#endif  // AKUSHON__ACTION__NODE__ACTION_MANAGER_HPP_
+#endif  // AKUSHON__ACTION__PROCESS__JOINT_PROCESS_HPP_

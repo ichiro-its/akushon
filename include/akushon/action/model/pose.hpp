@@ -34,11 +34,11 @@ class Pose
 public:
   explicit Pose(const std::string & pose_name);
 
-  void set_speed(const float & speed);
-  const float & get_speed() const;
+  void set_speed(float speed);
+  float get_speed() const;
 
-  void set_pause(const float & pause);
-  const float & get_pause() const;
+  void set_pause(float pause);
+  float get_pause() const;
 
   void set_name(const std::string & pose_name);
   const std::string & get_name() const;

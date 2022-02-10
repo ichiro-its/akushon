@@ -1,215 +1,80 @@
+// Copyright (c) 2021 Ichiro ITS
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+// THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
 
-
-void Pose::interpolate()
-{
-  for (auto & current_joint : joints) {
-    current_joint.interpolate();
-  }
-}
-
-void Pose::set_target_position(const Pose & target_pose)
-{
-  std::vector<tachimawari::Joint> new_joints;
-  for (auto & joint : get_joints()) {
-    for (auto & target_joint : target_pose.get_joints()) {
-      if (joint.get_joint_name() == target_joint.get_joint_name()) {
-        tachimawari::Joint new_joint(joint.get_joint_name(), joint.get_position());
-        new_joint.set_target_position(
-          target_joint.get_position(), target_pose.get_speed());
-        new_joints.push_back(new_joint);
-      }
-    }
-  }
-
-  set_joints(new_joints);
-}
-
-Pose Action::process(Pose robot_pose, const int & time)
-{
-  if (!is_start && !on_process) {
-    start_stop_time = time;
-    is_start = true;
-  }
-
-  if (time - start_stop_time > 1000 && is_start) {
-    auto target_pose = get_current_pose();
-
-    if (!on_process) {
-      on_process = true;
-      robot_pose.set_target_position(get_current_pose());
-    }
-
-    if (robot_pose == target_pose) {
-      if (!on_pause) {
-        pause_start_time = time;
-        on_pause = true;
-      }
-
-      if (time - pause_start_time >= get_current_pose().get_pause() * 1000) {
-        next_pose();
-        on_pause = false;
-
-        if (current_pose_index == pose_count) {
-          start_stop_time = time;
-          is_start = false;
-        } else {
-          robot_pose.set_target_position(get_current_pose());
-        }
-      }
-    }
-
-    if (!on_pause) {
-      robot_pose.interpolate();
-    }
-  } else if (time - start_stop_time > 2000) {
-    on_process = false;
-    current_pose_index = 0;
-  }
-
-  return robot_pose;
-}
-
-void ActionManager::process(const int & time)
-{
-  robot_pose = std::make_shared<Pose>(current_action->process(*robot_pose, time));
-
-  if (!current_action->is_running()) {
-    current_action = nullptr;
-
-    return robot_pose;
-  }
-
-  return robot_pose;
-}
-
-void ActionManager::set_current_action(const uint8_t & action_id, const Pose & pose)
-{
-  current_action = actions.at(action_id);
-  robot_pose = std::make_shared<Pose>(pose);  // init pose
-}
-
-bool ActionManager::set_current_action(const std::string & action_name)
-{
-  return set_current_action(action_name, *robot_pose);
-}
-
-bool ActionManager::set_current_action(const std::string & action_name, const Pose & robot_pose)
-{
-  auto result = std::find(action_names.begin(), action_names.end(), action_name);
-
-  if (result != action_names.end()) {
-    set_current_action(result - action_names.begin(), robot_pose);
-    return true;
-  }
-
-  return false;
-}
-
-#include <tachimawari/joint.hpp>
+#ifndef AKUSHON__ACTION__PROCESS__INTERPOLATOR_HPP_
+#define AKUSHON__ACTION__PROCESS__INTERPOLATOR_HPP_
 
 #include <map>
 #include <string>
 #include <vector>
-#include <cmath>
-#include <cstdlib>
 
-namespace tachimawari
+#include "akushon/action/model/action.hpp"
+#include "akushon/action/model/pose.hpp"
+#include "akushon/action/process/joint_process.hpp"
+
+namespace akushon
 {
 
-const std::map<std::string, uint8_t> Joint::ids = {
-  // head motors
-  {"neck_yaw", 19},
-  {"neck_pitch", 20},
+class Interpolator
+{
+public:
+  enum
+  {
+    START_DELAY,
+    PLAYING,
+    STOP_DELAY,
+    END
+  };
 
-  // left arm motors
-  {"left_shoulder_pitch", 2},
-  {"left_shoulder_roll", 4},
-  {"left_elbow", 6},
+  explicit Interpolator(const Action & action);
 
-  // right arm motors
-  {"right_shoulder_pitch", 1},
-  {"right_shoulder_roll", 3},
-  {"right_elbow", 5},
+  void initialize(const Pose & initial_pose);
 
-  // left leg motors
-  {"left_hip_yaw", 8},
-  {"left_hip_roll", 10},
-  {"left_hip_pitch", 12},
-  {"left_knee", 14},
-  {"left_ankle_roll", 16},
-  {"left_ankle_pitch", 18},
+  void process(int time);
 
-  // right leg motors
-  {"right_hip_yaw", 7},
-  {"right_hip_roll", 9},
-  {"right_hip_pitch", 11},
-  {"right_knee", 13},
-  {"right_ankle_roll", 15},
-  {"right_ankle_pitch", 17},
+  const std::vector<tachimawari::joint::Joint> & get_joints() const;
+
+private:
+  bool check_for_next();
+  void next_pose();
+
+  void change_state(int state);
+
+  Action action;
+
+  int state;
+  bool init_state;
+
+  int start_stop_time;
+  bool init_pause;
+  int pause_time;
+
+  int current_pose_index;
+
+  bool on_process;
+
+  bool is_start;
+
+  std::map<uint8_t, JointProcess> joint_processes;
 };
 
-Joint::Joint(const std::string & joint_name, const float & present_position)
-: id(Joint::ids.at(joint_name)), name(joint_name), position(present_position)
-{
-}
+}  // namespace akushon
 
-void Joint::set_target_position(const float & target_position, const float & speed)
-{
-  goal_position = target_position;
-  additional_position = (goal_position - position) * speed;
-}
-
-void Joint::set_present_position(const float & present_position)
-{
-  position = present_position;
-}
-
-void Joint::set_pid_gain(const float & p, const float & i, const float & d)
-{
-  p_gain = p;
-  i_gain = i;
-  d_gain = d;
-}
-
-void Joint::interpolate()
-{
-  bool goal_position_is_reached = false;
-  goal_position_is_reached |= (additional_position >= 0 &&
-    position + additional_position >= goal_position);
-  goal_position_is_reached |= (additional_position <= 0 &&
-    position + additional_position < goal_position);
-
-  if (goal_position_is_reached) {
-    position = goal_position;
-    additional_position = 0.0;
-  } else {
-    position = position + additional_position;
-  }
-}
-
-const uint8_t & Joint::get_id() const
-{
-  return id;
-}
-
-const std::string & Joint::get_joint_name() const
-{
-  return name;
-}
-
-const float & Joint::get_position() const
-{
-  return position;
-}
-
-const float & Joint::get_goal_position() const
-{
-  return goal_position;
-}
-
-std::vector<float> Joint::get_pid_gain() const  // temporary
-{
-  return {p_gain, i_gain, d_gain};
-}
-
-}  // namespace tachimawari
+#endif  // AKUSHON__ACTION__PROCESS__INTERPOLATOR_HPP_
