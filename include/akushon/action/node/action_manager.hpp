@@ -43,14 +43,14 @@ public:
   void delete_action(int index);
   const Action & get_action(int index) const;
 
-  const std::vector<tachimawari::joint::Joint> & get_joints() const;
-
   void load_data(const std::string & path);
 
-  void start(int action_id, const Pose & initial_pose);
+  bool start(int action_id, const Pose & initial_pose);
   void process(int time);
 
-  bool is_running() const;
+  bool is_playing() const;
+
+  const std::vector<tachimawari::joint::Joint> & get_joints() const;
 
 private:
   std::map<int, Action> actions;

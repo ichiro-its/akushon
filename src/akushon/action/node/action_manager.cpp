@@ -57,10 +57,6 @@ const Action & ActionManager::get_action(int index) const
   return actions.at(index);
 }
 
-const std::vector<tachimawari::joint::Joint> & ActionManager::get_joints() const
-{
-}
-
 void ActionManager::load_data(const std::string & path)
 {
   for (auto [name, id] : ActionName::map) {
@@ -116,7 +112,7 @@ void ActionManager::load_data(const std::string & path)
   }
 }
 
-void ActionManager::start(int action_id, const Pose & initial_pose)
+bool ActionManager::start(int action_id, const Pose & initial_pose)
 {
   if (actions.find(action_id) != actions.end()) {
     std::vector<Action> target_actions;
@@ -140,6 +136,8 @@ void ActionManager::start(int action_id, const Pose & initial_pose)
     interpolator = std::make_shared<Interpolator>(target_actions, initial_pose);
     is_running = true;
   }
+
+  return is_playing();
 }
 
 void ActionManager::process(int time)
@@ -153,9 +151,18 @@ void ActionManager::process(int time)
   }
 }
 
-bool ActionManager::is_running() const
+bool ActionManager::is_playing() const
 {
   return is_running;
+}
+
+const std::vector<tachimawari::joint::Joint> & ActionManager::get_joints() const
+{
+  if (interpolator) {
+    return interpolator->get_joints();
+  }
+
+  return {};
 }
 
 // std::shared_future<std::shared_ptr<tachimawari_interfaces::srv::SetJoints::Response>>

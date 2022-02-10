@@ -21,42 +21,50 @@
 #ifndef AKUSHON__ACTION__NODE__ACTION_NODE_HPP_
 #define AKUSHON__ACTION__NODE__ACTION_NODE_HPP_
 
-#include <string>
-#include <map>
-#include <vector>
 #include <memory>
+#include <string>
 
-#include "akushon/action/model/action.hpp"
-#include "akushon/action/model/pose.hpp"
-#include "akushon/action/process/interpolator.hpp"
-#include "tachimawari/joint/model/joint.hpp"
+#include "akushon/action/node/action_manager.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include "tachimawari_interfaces/msg/set_joints.hpp"
+#include "tachimawari_interfaces/srv/get_joints.hpp"
 
 namespace akushon
 {
 
-class ActionManager
+class ActionNode
 {
 public:
-  ActionManager();
+  enum
+  {
+    READY,
+    LOADING,
+    PLAYING,
+    CANCELLED,
+    FAILED
+  };
 
-  void insert_action(int index, const Action & action);
-  void delete_action(int index);
-  const Action & get_action(int index) const;
+  explicit ActionNode(
+    rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> action_manager);
 
-  const std::vector<tachimawari::joint::Joint> & get_joints() const;
-
-  void load_data(const std::string & path);
-
-  void start(int action_id, const Pose & initial_pose);
+  void start(int action_id);
   void process(int time);
 
-  bool is_running() const;
+  int get_status() const;
 
 private:
-  std::map<int, Action> actions;
+  std::string get_node_prefix() const;
 
-  std::shared_ptr<Interpolator> interpolator;
-  bool is_running;
+  void publish_joints();
+
+  rclcpp::Node::SharedPtr node;
+
+  std::shared_ptr<ActionManager> action_manager;
+
+  rclcpp::Publisher<tachimawari_interfaces::msg::SetJoints>::SharedPtr set_joints_publisher;
+  rclcpp::Client<tachimawari_interfaces::srv::GetJoints>::SharedPtr get_joints_client;
+
+  int status;
 };
 
 }  // namespace akushon
