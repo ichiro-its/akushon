@@ -48,7 +48,7 @@ public:
   void process(int time);
   bool is_finished() const;
 
-  const std::vector<tachimawari::joint::Joint> & get_joints() const;
+  std::vector<tachimawari::joint::Joint> get_joints() const;
 
 private:
   bool check_for_next();

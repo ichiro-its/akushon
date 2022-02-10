@@ -28,13 +28,13 @@
 namespace akushon
 {
 
-JointProcess::JointProcess(uint8_t joint_id, float position = 0.0)
+JointProcess::JointProcess(uint8_t joint_id, float position)
 : joint(tachimawari::joint::Joint(joint_id, position)), initial_position(position),
   target_position(position), additional_position(0.0)
 {
 }
 
-void JointProcess::set_target_position(float target_position, float speed = 1.0)
+void JointProcess::set_target_position(float target_position, float speed)
 {
   this->target_position = target_position;
   additional_position = (this->target_position - initial_position) * speed;

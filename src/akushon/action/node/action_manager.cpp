@@ -78,7 +78,7 @@ void ActionManager::load_data(const std::string & path)
           for (auto [steps_key, steps_val] : action_data[key].items()) {
             if (!(steps_key.find("step_") != std::string::npos)) {
               tachimawari::joint::Joint joint(
-                tachimawari::joint::JointId::by_name[steps_key],
+                tachimawari::joint::JointId::by_name.at(steps_key),
                 static_cast<float>(steps_val));
 
               joints.push_back(joint);
@@ -116,12 +116,12 @@ bool ActionManager::start(int action_id, const Pose & initial_pose)
 {
   if (actions.find(action_id) != actions.end()) {
     std::vector<Action> target_actions;
-    
-    while (true) {
-      target_actions.push_back(actions[action_id]);
 
-      if (actions[action_id].get_next_action() != "") {
-        int next_action_id = ActionName::map.at(actions[action_id].get_next_action());
+    while (true) {
+      target_actions.push_back(actions.at(action_id));
+
+      if (actions.at(action_id).get_next_action() != "") {
+        int next_action_id = ActionName::map.at(actions.at(action_id).get_next_action());
 
         if (actions.find(next_action_id) != actions.end()) {
           action_id = next_action_id;
@@ -156,7 +156,7 @@ bool ActionManager::is_playing() const
   return is_running;
 }
 
-const std::vector<tachimawari::joint::Joint> & ActionManager::get_joints() const
+std::vector<tachimawari::joint::Joint> ActionManager::get_joints() const
 {
   if (interpolator) {
     return interpolator->get_joints();
@@ -164,29 +164,5 @@ const std::vector<tachimawari::joint::Joint> & ActionManager::get_joints() const
 
   return {};
 }
-
-// std::shared_future<std::shared_ptr<tachimawari_interfaces::srv::SetJoints::Response>>
-// ActionManager::send_joints_request(std::vector<tachimawari::Joint> joints, float speed)
-// {
-//   {
-//     using SetJoints = tachimawari_interfaces::srv::SetJoints;
-
-//     auto request = std::make_shared<SetJoints::Request>();
-//     std::vector<tachimawari_interfaces::msg::Joint> joint_messages;
-
-//     for (auto joint : joints) {
-//       tachimawari_interfaces::msg::Joint joint_message;
-//       joint_message.name = joint.get_joint_name();
-//       joint_message.position = joint.get_goal_position();
-//       joint_message.speed = speed;
-
-//       joint_messages.push_back(joint_message);
-//     }
-
-//     request->joints = joint_messages;
-
-//     return set_joints_client->async_send_request(request);
-//   }
-// }
 
 }  // namespace akushon

@@ -22,6 +22,7 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include <vector>
 
 #include "akushon/action/node/action_node.hpp"
 
@@ -57,42 +58,43 @@ void ActionNode::start(int action_id)
 {
   status = LOADING;
 
-  std::thread action_gate([this] (int action_id) {
-    while (!get_joints_client->wait_for_service(1s)) {
-      if (rclcpp::ok()) {
-        // service not available, waiting again...
-      } else {
-        // Interrupted while waiting for the service. Exiting.
-        status = FAILED;
-      }
-    }
-
-    if (status != FAILED) {
-      auto result = get_joints_client->async_send_request(
-        std::make_shared<tachimawari_interfaces::srv::GetJoints::Request>());
-      if (rclcpp::spin_until_future_complete(node, result) ==
-        rclcpp::FutureReturnCode::SUCCESS) {
-        Pose pose("initial_pose");
-        std::vector<tachimawari::joint::Joint> joints;
-
-        for (const auto & joint : result.get()->joints) {
-          joints.push_back(
-            tachimawari::joint::Joint(joint.id, joint.position));
-        }
-        pose.set_joints(joints);
-
-        if (action_manager->start(action_id, pose)) {
-          status = PLAYING;
+  std::thread action_gate([this](int action_id) {
+      while (!get_joints_client->wait_for_service(1s)) {
+        if (rclcpp::ok()) {
+          // service not available, waiting again...
         } else {
-          // action is not found
+          // Interrupted while waiting for the service. Exiting.
           status = FAILED;
         }
-      } else {
-        // Failed to call service
-        status = FAILED;
       }
-    }
-  }, action_id);
+
+      if (status != FAILED) {
+        auto result = get_joints_client->async_send_request(
+          std::make_shared<tachimawari_interfaces::srv::GetJoints::Request>());
+        if (rclcpp::spin_until_future_complete(node, result) ==
+        rclcpp::FutureReturnCode::SUCCESS)
+        {
+          Pose pose("initial_pose");
+          std::vector<tachimawari::joint::Joint> joints;
+
+          for (const auto & joint : result.get()->joints) {
+            joints.push_back(
+              tachimawari::joint::Joint(joint.id, joint.position));
+          }
+          pose.set_joints(joints);
+
+          if (action_manager->start(action_id, pose)) {
+            status = PLAYING;
+          } else {
+            // action is not found
+            status = FAILED;
+          }
+        } else {
+          // Failed to call service
+          status = FAILED;
+        }
+      }
+    }, action_id);
 }
 
 void ActionNode::process(int time)

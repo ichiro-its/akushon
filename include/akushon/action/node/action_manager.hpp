@@ -50,7 +50,7 @@ public:
 
   bool is_playing() const;
 
-  const std::vector<tachimawari::joint::Joint> & get_joints() const;
+  std::vector<tachimawari::joint::Joint> get_joints() const;
 
 private:
   std::map<int, Action> actions;

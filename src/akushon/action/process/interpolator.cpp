@@ -36,71 +36,74 @@ Interpolator::Interpolator(const std::vector<Action> & actions, const Pose & ini
   init_state(true), current_action_index(0)
 {
   for (const auto & joint : initial_pose.get_joints()) {
-    joint_processes.insert({joint.get_id(),
-      JointProcess(joint.get_id(), joint.get_position())});
+    joint_processes.insert(
+      {joint.get_id(),
+        JointProcess(joint.get_id(), joint.get_position())});
   }
 }
 
 void Interpolator::process(int time)
 {
   switch (state) {
-  case START_DELAY:
-    {
-      if (init_state) {
-        init_state = false;
-        start_stop_time = time;
-      }
-
-      if ((time - start_stop_time) > (actions[current_action_index].get_start_delay() * 1000)) {
-        change_state(PLAYING);
-      }
-
-      break;
-    }
-
-  case PLAYING:
-    {
-      if (check_for_next()) {
-        if (init_pause) {
-          init_pause = false;
-          pause_time = time;
+    case START_DELAY:
+      {
+        if (init_state) {
+          init_state = false;
+          start_stop_time = time;
         }
 
-        if (current_pose_index == actions[current_action_index].get_pose_count()) {
-          change_state(STOP_DELAY);
-          init_pause = true;
-        } else if ((time - pause_time) > (actions[current_action_index].get_pose(current_pose_index).get_pause() * 1000)) {
-          next_pose();
-          init_pause = true;
+        if ((time - start_stop_time) > (actions[current_action_index].get_start_delay() * 1000)) {
+          change_state(PLAYING);
         }
+
+        break;
       }
 
-      break;
-    }
+    case PLAYING:
+      {
+        if (check_for_next()) {
+          if (init_pause) {
+            init_pause = false;
+            pause_time = time;
+          }
 
-  case STOP_DELAY:
-    {
-      if (init_state) {
-        init_state = false;
-        start_stop_time = time;
-      }
-
-      if ((time - start_stop_time) > (actions[current_action_index].get_stop_delay() * 1000)) {
-        current_action_index++;
-
-        if (current_action_index == actions.size()) {
-          change_state(END);
-        } else {
-          change_state(START_DELAY);
+          if (current_pose_index == actions[current_action_index].get_pose_count()) {
+            change_state(STOP_DELAY);
+            init_pause = true;
+          } else if ((time - pause_time) >  // NOLINT
+            (actions[current_action_index].get_pose(current_pose_index).get_pause() * 1000))
+          {
+            next_pose();
+            init_pause = true;
+          }
         }
+
+        break;
       }
 
-      break;
-    }
+    case STOP_DELAY:
+      {
+        if (init_state) {
+          init_state = false;
+          start_stop_time = time;
+        }
+
+        if ((time - start_stop_time) > (actions[current_action_index].get_stop_delay() * 1000)) {
+          current_action_index++;
+
+          if (current_action_index == actions.size()) {
+            change_state(END);
+          } else {
+            change_state(START_DELAY);
+          }
+        }
+
+        break;
+      }
   }
 
   for (auto [id, joint] : joint_processes) {
-    joint_processes[id].interpolate();
+    joint_processes.at(id).interpolate();
   }
 }
 
@@ -111,9 +114,11 @@ bool Interpolator::is_finished() const
 
 void Interpolator::next_pose()
 {
-  for (const auto & joint : actions[current_action_index].get_pose(current_pose_index).get_joints()) {
+  for (const auto & joint :
+    actions[current_action_index].get_pose(current_pose_index).get_joints())
+  {
     if (joint_processes.find(joint.get_id()) != joint_processes.end()) {
-      joint_processes[joint.get_id()].set_target_position(joint.get_position());
+      joint_processes.at(joint.get_id()).set_target_position(joint.get_position());
     }
   }
   current_pose_index++;
@@ -137,7 +142,7 @@ void Interpolator::change_state(int state)
   init_state = true;
 }
 
-const std::vector<tachimawari::joint::Joint> & Interpolator::get_joints() const
+std::vector<tachimawari::joint::Joint> Interpolator::get_joints() const
 {
   std::vector<tachimawari::joint::Joint> joints;
 
