@@ -27,6 +27,7 @@
 
 #include "akushon/action/model/action_name.hpp"
 #include "akushon/action/node/action_manager.hpp"
+#include "akushon/action/process/interpolator.hpp"
 #include "nlohmann/json.hpp"
 #include "tachimawari/joint/joint.hpp"
 
@@ -37,7 +38,7 @@ namespace akushon
 {
 
 ActionManager::ActionManager()
-: actions({})
+: actions({}), interpolator(nullptr), is_running(false)
 {
 }
 
@@ -94,6 +95,12 @@ void ActionManager::load_data(const std::string & path)
 
           pose.set_joints(joints);
           action.add_pose(pose);
+        } else if (key == "start_delay") {
+          action.set_start_delay(val);
+        } else if (key == "stop_delay") {
+          action.set_stop_delay(val);
+        } else if (key == "next_action") {
+          action.set_next_action(val);
         }
       }
 
@@ -109,12 +116,46 @@ void ActionManager::load_data(const std::string & path)
   }
 }
 
+void ActionManager::start(int action_id, const Pose & initial_pose)
+{
+  if (actions.find(action_id) != actions.end()) {
+    std::vector<Action> target_actions;
+    
+    while (true) {
+      target_actions.push_back(actions[action_id]);
+
+      if (actions[action_id].get_next_action() != "") {
+        int next_action_id = ActionName::map.at(actions[action_id].get_next_action());
+
+        if (actions.find(next_action_id) != actions.end()) {
+          action_id = next_action_id;
+        } else {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+
+    interpolator = std::make_shared<Interpolator>(target_actions, initial_pose);
+    is_running = true;
+  }
+}
+
 void ActionManager::process(int time)
 {
+  if (is_running && interpolator) {
+    interpolator->process(time);
+
+    if (interpolator->is_finished()) {
+      is_running = false;
+    }
+  }
 }
 
 bool ActionManager::is_running() const
 {
+  return is_running;
 }
 
 // std::shared_future<std::shared_ptr<tachimawari_interfaces::srv::SetJoints::Response>>

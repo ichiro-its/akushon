@@ -43,11 +43,10 @@ public:
     END
   };
 
-  explicit Interpolator(const Action & action);
-
-  void initialize(const Pose & initial_pose);
+  explicit Interpolator(const std::vector<Action> & actions, const Pose & initial_pose);
 
   void process(int time);
+  bool is_finished() const;
 
   const std::vector<tachimawari::joint::Joint> & get_joints() const;
 
@@ -57,7 +56,7 @@ private:
 
   void change_state(int state);
 
-  Action action;
+  std::vector<Action> actions;
 
   int state;
   bool init_state;
@@ -66,11 +65,8 @@ private:
   bool init_pause;
   int pause_time;
 
+  int current_action_index;
   int current_pose_index;
-
-  bool on_process;
-
-  bool is_start;
 
   std::map<uint8_t, JointProcess> joint_processes;
 };

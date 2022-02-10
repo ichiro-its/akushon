@@ -28,6 +28,7 @@
 
 #include "akushon/action/model/action.hpp"
 #include "akushon/action/model/pose.hpp"
+#include "akushon/action/process/interpolator.hpp"
 #include "tachimawari/joint/model/joint.hpp"
 
 namespace akushon
@@ -46,12 +47,16 @@ public:
 
   void load_data(const std::string & path);
 
+  void start(int action_id, const Pose & initial_pose);
   void process(int time);
 
   bool is_running() const;
 
 private:
   std::map<int, Action> actions;
+
+  std::shared_ptr<Interpolator> interpolator;
+  bool is_running;
 };
 
 }  // namespace akushon

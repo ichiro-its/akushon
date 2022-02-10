@@ -31,7 +31,7 @@ namespace akushon
 {
 
 Action::Action(const std::string & action_name)
-: name(action_name), poses({}), start_delay(0), stop_delay(0)
+: name(action_name), poses({}), start_delay(0), stop_delay(0), next_action("")
 {
 }
 
@@ -94,6 +94,17 @@ int Action::get_stop_delay() const
 {
   return stop_delay;
 }
+
+void Action::set_next_action(std::string next_action)
+{
+  this->next_action = next_action;
+}
+
+std::string Action::get_next_action() const
+{
+  return next_action;
+}
+
 
 void Action::reset()
 {

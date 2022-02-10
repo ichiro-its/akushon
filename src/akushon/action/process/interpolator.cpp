@@ -30,14 +30,10 @@
 namespace akushon
 {
 
-Interpolator::Interpolator(const Action & Action)
-: action(action), joint_processes({}), current_pose_index(0),
-  pause_time(0), init_pause(false), on_process(false), is_start(false),
-  start_stop_time(0), state(START_DELAY), init_state(true)
-{
-}
-
-void Interpolator::initialize(const Pose & initial_pose)
+Interpolator::Interpolator(const std::vector<Action> & actions, const Pose & initial_pose)
+: actions(actions), joint_processes({}), current_pose_index(0),
+  pause_time(0), init_pause(false), start_stop_time(0), state(START_DELAY),
+  init_state(true), current_action_index(0)
 {
   for (const auto & joint : initial_pose.get_joints()) {
     joint_processes.insert({joint.get_id(),
@@ -47,8 +43,7 @@ void Interpolator::initialize(const Pose & initial_pose)
 
 void Interpolator::process(int time)
 {
-  switch (state)
-  {
+  switch (state) {
   case START_DELAY:
     {
       if (init_state) {
@@ -56,7 +51,7 @@ void Interpolator::process(int time)
         start_stop_time = time;
       }
 
-      if ((time - start_stop_time) > (action.get_start_delay() * 1000)) {
+      if ((time - start_stop_time) > (actions[current_action_index].get_start_delay() * 1000)) {
         change_state(PLAYING);
       }
 
@@ -71,10 +66,12 @@ void Interpolator::process(int time)
           pause_time = time;
         }
 
-        if (current_pose_index == action.get_pose_count()) {
+        if (current_pose_index == actions[current_action_index].get_pose_count()) {
           change_state(STOP_DELAY);
-        } else if ((time - pause_time) > (action.get_pose(current_pose_index).get_pause() * 1000)) {
+          init_pause = true;
+        } else if ((time - pause_time) > (actions[current_action_index].get_pose(current_pose_index).get_pause() * 1000)) {
           next_pose();
+          init_pause = true;
         }
       }
 
@@ -88,8 +85,14 @@ void Interpolator::process(int time)
         start_stop_time = time;
       }
 
-      if ((time - start_stop_time) > (action.get_stop_delay() * 1000)) {
-        change_state(END);
+      if ((time - start_stop_time) > (actions[current_action_index].get_stop_delay() * 1000)) {
+        current_action_index++;
+
+        if (current_action_index == actions.size()) {
+          change_state(END);
+        } else {
+          change_state(START_DELAY);
+        }
       }
 
       break;
@@ -101,9 +104,14 @@ void Interpolator::process(int time)
   }
 }
 
+bool Interpolator::is_finished() const
+{
+  return state == END;
+}
+
 void Interpolator::next_pose()
 {
-  for (const auto & joint : action.get_pose(current_pose_index).get_joints()) {
+  for (const auto & joint : actions[current_action_index].get_pose(current_pose_index).get_joints()) {
     if (joint_processes.find(joint.get_id()) != joint_processes.end()) {
       joint_processes[joint.get_id()].set_target_position(joint.get_position());
     }

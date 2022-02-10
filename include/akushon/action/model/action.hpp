@@ -69,8 +69,11 @@ public:
   void set_start_delay(int start_delay);
   int get_start_delay() const;
 
-  void set_stop_delay(int start_delay);
+  void set_stop_delay(int stop_delay);
   int get_stop_delay() const;
+
+  void set_next_action(std::string next_action);
+  std::string get_next_action() const;
 
   void reset();
 
@@ -81,6 +84,8 @@ private:
 
   int stop_delay;
   int start_delay;
+
+  std::string next_action;
 };
 
 }  // namespace akushon
