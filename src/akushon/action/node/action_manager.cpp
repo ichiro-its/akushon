@@ -42,19 +42,23 @@ ActionManager::ActionManager()
 {
 }
 
-void ActionManager::insert_action(int index, const Action & action)
+void ActionManager::insert_action(int action_id, const Action & action)
 {
-  actions.insert({index, action});
+  actions.insert({action_id, action});
 }
 
-void ActionManager::delete_action(int index)
+void ActionManager::delete_action(int action_id)
 {
-  actions.erase(index);
+  actions.erase(action_id);
 }
 
-const Action & ActionManager::get_action(int index) const
+const Action & ActionManager::get_action(int action_id) const
 {
-  return actions.at(index);
+  if (actions.find(action_id) != actions.end()) {
+    return actions.at(action_id);
+  }
+
+  return Action("");
 }
 
 void ActionManager::load_data(const std::string & path)

@@ -39,9 +39,9 @@ class ActionManager
 public:
   ActionManager();
 
-  void insert_action(int index, const Action & action);
-  void delete_action(int index);
-  const Action & get_action(int index) const;
+  void insert_action(int action_id, const Action & action);
+  void delete_action(int action_id);
+  const Action & get_action(int action_id) const;
 
   void load_data(const std::string & path);
 

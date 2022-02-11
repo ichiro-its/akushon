@@ -47,6 +47,9 @@ public:
   explicit ActionNode(
     rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> action_manager);
 
+  bool is_action_exist(int action_id) const;
+  bool is_action_exist(std::string action_name) const;
+
   void start(int action_id);
   void process(int time);
 

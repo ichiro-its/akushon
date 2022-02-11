@@ -27,6 +27,7 @@
 #include "akushon/action/node/action_node.hpp"
 
 #include "akushon/action/node/action_manager.hpp"
+#include "akushon/action/model/action_name.hpp"
 #include "akushon/action/model/pose.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "tachimawari/joint/model/joint.hpp"
@@ -49,6 +50,20 @@ ActionNode::ActionNode(
     "/joint/get_joints");
 }
 
+bool ActionNode::is_action_exist(int action_id) const
+{
+  if (action_manager->get_action(action_id).get_name() != "") {
+    return true;
+  }
+
+  return false;
+}
+
+bool ActionNode::is_action_exist(std::string action_name) const
+{
+  return is_action_exist(ActionName::map.at(action_name));
+}
+
 int ActionNode::get_status() const
 {
   return status;
@@ -58,7 +73,7 @@ void ActionNode::start(int action_id)
 {
   status = LOADING;
 
-  std::thread action_gate([this](int action_id) {
+  std::thread{[this](int action_id) {
       while (!get_joints_client->wait_for_service(1s)) {
         if (rclcpp::ok()) {
           // service not available, waiting again...
@@ -94,13 +109,15 @@ void ActionNode::start(int action_id)
           status = FAILED;
         }
       }
-    }, action_id);
+    }, action_id};
 }
 
 void ActionNode::process(int time)
 {
   if (status == PLAYING) {
     action_manager->process(time);
+
+    publish_joints();
 
     if (!action_manager->is_playing()) {
       status = READY;
