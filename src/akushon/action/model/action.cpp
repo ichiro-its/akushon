@@ -105,7 +105,6 @@ std::string Action::get_next_action() const
   return next_action;
 }
 
-
 void Action::reset()
 {
   poses.clear();

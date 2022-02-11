@@ -69,6 +69,11 @@ int ActionNode::get_status() const
   return status;
 }
 
+void ActionNode::start(std::string action_name)
+{
+  start(ActionName::map.at(action_name));
+}
+
 void ActionNode::start(int action_id)
 {
   status = LOADING;
@@ -98,12 +103,8 @@ void ActionNode::start(int action_id)
           }
           pose.set_joints(joints);
 
-          if (action_manager->start(action_id, pose)) {
-            status = PLAYING;
-          } else {
-            // action is not found
-            status = FAILED;
-          }
+          action_manager->start(action_id, pose);
+          status = PLAYING;
         } else {
           // Failed to call service
           status = FAILED;
@@ -114,14 +115,12 @@ void ActionNode::start(int action_id)
 
 void ActionNode::process(int time)
 {
-  if (status == PLAYING) {
-    action_manager->process(time);
+  action_manager->process(time);
 
+  if (action_manager->is_playing()) {
     publish_joints();
-
-    if (!action_manager->is_playing()) {
-      status = READY;
-    }
+  } else {
+    status = READY;
   }
 }
 

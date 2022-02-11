@@ -45,7 +45,7 @@ public:
 
   void load_data(const std::string & path);
 
-  bool start(int action_id, const Pose & initial_pose);
+  void start(int action_id, const Pose & initial_pose);
   void process(int time);
 
   bool is_playing() const;

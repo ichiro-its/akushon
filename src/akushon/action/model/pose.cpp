@@ -29,7 +29,7 @@ namespace akushon
 {
 
 Pose::Pose(const std::string & pose_name)
-: name(pose_name)
+: name(pose_name), speed(0.0), pause(0.0), joints({})
 {
 }
 

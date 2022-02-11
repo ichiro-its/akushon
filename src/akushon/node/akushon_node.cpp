@@ -20,6 +20,7 @@
 
 #include <memory>
 #include <string>
+#include <thread>
 
 #include "akushon/node/akushon_node.hpp"
 
@@ -28,6 +29,8 @@
 #include "akushon_interfaces/action/run_action.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
+
+using namespace std::chrono_literals;  // NOLINT
 
 namespace akushon
 {
@@ -66,7 +69,37 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
         return rclcpp_action::CancelResponse::ACCEPT;
       },
       [this] (const std::shared_ptr<GoalHandleRunAction> goal_handle) {
-        
+        std::thread{[this] (const std::shared_ptr<GoalHandleRunAction> goal_handle) {
+            rclcpp::Rate rcl_rate(8ms);
+
+            const auto goal = goal_handle->get_goal();
+            auto feedback = std::make_shared<RunAction::Feedback>();
+            auto result = std::make_shared<RunAction::Result>();
+
+            if (goal->action_id >= 0) {
+              action_node->start(goal->action_id);
+            } else if (goal->action_name != "") {
+              action_node->start(goal->action_name);
+            }
+
+            while (rclcpp::ok()) {
+              if (action_node->get_status() == ActionNode::PLAYING) {
+                action_node->process(this->node->now().seconds() * 1000);
+              } else if (action_node->get_status() == ActionNode::READY || action_node->get_status() == ActionNode::FAILED) {
+                break;
+              }
+
+              feedback->status = action_node->get_status();
+              goal_handle->publish_feedback(feedback);
+
+              rcl_rate.sleep();
+            }
+
+            if (rclcpp::ok()) {
+              result->status = action_node->get_status();
+              goal_handle->succeed(result);
+            }
+          }, goal_handle}.join();
       });
   }
 }

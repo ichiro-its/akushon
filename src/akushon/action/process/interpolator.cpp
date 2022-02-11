@@ -32,13 +32,19 @@ namespace akushon
 
 Interpolator::Interpolator(const std::vector<Action> & actions, const Pose & initial_pose)
 : actions(actions), joint_processes({}), current_pose_index(0),
-  pause_time(0), init_pause(false), start_stop_time(0), state(START_DELAY),
-  init_state(true), current_action_index(0)
+  pause_time(0), init_pause(false), start_stop_time(0), init_state(true),
+  current_action_index(0)
 {
   for (const auto & joint : initial_pose.get_joints()) {
     joint_processes.insert(
       {joint.get_id(),
         JointProcess(joint.get_id(), joint.get_position())});
+  }
+
+  if (actions.size() != 0) {
+    state = START_DELAY;
+  } else {
+    state = END;
   }
 }
 

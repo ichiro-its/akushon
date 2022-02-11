@@ -38,7 +38,7 @@ namespace akushon
 {
 
 ActionManager::ActionManager()
-: actions({}), interpolator(nullptr), is_running(false)
+: actions({}), interpolator({}, Pose("")), is_running(false)
 {
 }
 
@@ -116,42 +116,36 @@ void ActionManager::load_data(const std::string & path)
   }
 }
 
-bool ActionManager::start(int action_id, const Pose & initial_pose)
+void ActionManager::start(int action_id, const Pose & initial_pose)
 {
-  if (actions.find(action_id) != actions.end()) {
-    std::vector<Action> target_actions;
+  std::vector<Action> target_actions;
 
-    while (true) {
-      target_actions.push_back(actions.at(action_id));
+  while (true) {
+    target_actions.push_back(actions.at(action_id));
 
-      if (actions.at(action_id).get_next_action() != "") {
-        int next_action_id = ActionName::map.at(actions.at(action_id).get_next_action());
+    if (actions.at(action_id).get_next_action() != "") {
+      int next_action_id = ActionName::map.at(actions.at(action_id).get_next_action());
 
-        if (actions.find(next_action_id) != actions.end()) {
-          action_id = next_action_id;
-        } else {
-          break;
-        }
+      if (actions.find(next_action_id) != actions.end()) {
+        action_id = next_action_id;
       } else {
         break;
       }
+    } else {
+      break;
     }
-
-    interpolator = std::make_shared<Interpolator>(target_actions, initial_pose);
-    is_running = true;
   }
 
-  return is_playing();
+  interpolator = std::make_shared<Interpolator>(target_actions, initial_pose);
+  is_running = true;
 }
 
 void ActionManager::process(int time)
 {
-  if (is_running && interpolator) {
-    interpolator->process(time);
+  interpolator->process(time);
 
-    if (interpolator->is_finished()) {
-      is_running = false;
-    }
+  if (interpolator->is_finished()) {
+    is_running = false;
   }
 }
 
