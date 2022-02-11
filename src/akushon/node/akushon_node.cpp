@@ -36,7 +36,7 @@ namespace akushon
 {
 
 AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
-: node(node)
+: node(node), action_node(nullptr)
 {
   {
     using akushon_interfaces::action::RunAction;
@@ -51,7 +51,7 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
       [this] (const rclcpp_action::GoalUUID & uuid, std::shared_ptr<const RunAction::Goal> goal) -> rclcpp_action::GoalResponse {
         bool is_action_exist = false;
 
-        if (action_node->get_status() == ActionNode::READY) {
+        if (action_node->get_status() == ActionNode::READY && action_node) {
           if (goal->action_id >= 0) {
             is_action_exist = action_node->is_action_exist(goal->action_id);
           } else if (goal->action_name != "") {

@@ -18,36 +18,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__NODE__AKUSHON_NODE_HPP_
-#define AKUSHON__NODE__AKUSHON_NODE_HPP_
-
 #include <memory>
-#include <string>
 
 #include "akushon/action/node/action_manager.hpp"
-#include "akushon/action/node/action_node.hpp"
-#include "akushon_interfaces/action/run_action.hpp"
+#include "akushon/node/akushon_node.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "rclcpp_action/rclcpp_action.hpp"
 
-namespace akushon
+int main(int argc, char * argv[])
 {
+  rclcpp::init(argc, argv);
 
-class AkushonNode
-{
-public:
-  explicit AkushonNode(rclcpp::Node::SharedPtr node);
+  auto node = std::make_shared<rclcpp::Node>("akushon_node");
+  auto akushon_node = std::make_shared<akushon::AkushonNode>(node);
 
-  void set_action_manager(std::shared_ptr<ActionManager> action_manager);
+  auto action_manager = std::make_shared<akushon::ActionManager>();
 
-private:
-  rclcpp::Node::SharedPtr node;
+  akushon_node->set_action_manager(action_manager);
 
-  std::shared_ptr<ActionNode> action_node;
+  rclcpp::spin(node);
+  rclcpp::shutdown();
 
-  rclcpp_action::Server<akushon_interfaces::action::RunAction>::SharedPtr run_action_server;
-};
-
-}  // namespace akushon
-
-#endif  // AKUSHON__NODE__AKUSHON_NODE_HPP_
+  return 0;
+}
