@@ -48,7 +48,8 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
       node->get_node_logging_interface(),
       node->get_node_waitables_interface(),
       "run_action",
-      [this] (const rclcpp_action::GoalUUID & uuid, std::shared_ptr<const RunAction::Goal> goal) -> rclcpp_action::GoalResponse {
+      [this](const rclcpp_action::GoalUUID & uuid,
+      std::shared_ptr<const RunAction::Goal> goal) -> rclcpp_action::GoalResponse {
         bool is_action_exist = false;
 
         if (action_node->get_status() == ActionNode::READY && action_node) {
@@ -65,11 +66,12 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
           return rclcpp_action::GoalResponse::REJECT;
         }
       },
-      [this] (const std::shared_ptr<GoalHandleRunAction> goal_handle) -> rclcpp_action::CancelResponse {
+      [this](
+        const std::shared_ptr<GoalHandleRunAction> goal_handle) -> rclcpp_action::CancelResponse {
         return rclcpp_action::CancelResponse::ACCEPT;
       },
-      [this] (const std::shared_ptr<GoalHandleRunAction> goal_handle) {
-        std::thread{[this] (const std::shared_ptr<GoalHandleRunAction> goal_handle) {
+      [this](const std::shared_ptr<GoalHandleRunAction> goal_handle) {
+        std::thread{[this](const std::shared_ptr<GoalHandleRunAction> goal_handle) {
             rclcpp::Rate rcl_rate(8ms);
 
             const auto goal = goal_handle->get_goal();
@@ -85,7 +87,9 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
             while (rclcpp::ok()) {
               if (action_node->get_status() == ActionNode::PLAYING) {
                 action_node->process(this->node->now().seconds() * 1000);
-              } else if (action_node->get_status() == ActionNode::READY || action_node->get_status() == ActionNode::FAILED) {
+              } else if (action_node->get_status() == ActionNode::READY ||  // NOLINT
+              action_node->get_status() == ActionNode::FAILED)
+              {
                 break;
               }
 

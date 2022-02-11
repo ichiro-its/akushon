@@ -38,8 +38,9 @@ namespace akushon
 {
 
 ActionManager::ActionManager()
-: actions({}), interpolator({}, Pose("")), is_running(false)
+: actions({}), is_running(false)
 {
+  interpolator = std::make_shared<Interpolator>(std::vector<Action>(), Pose(""));
 }
 
 void ActionManager::insert_action(int action_id, const Action & action)

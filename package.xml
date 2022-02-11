@@ -8,8 +8,10 @@
   <license>MIT License</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>ament_index_cpp</depend>
+  <depend>akushon_interfaces</depend>
   <depend>nlohmann-json3-dev</depend>
   <depend>rclcpp</depend>
+  <depend>rclcpp_action</depend>
   <depend>tachimawari</depend>
   <depend>tachimawari_interfaces</depend>
   <test_depend>ament_lint_auto</test_depend>

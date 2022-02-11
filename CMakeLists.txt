@@ -15,7 +15,9 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
+find_package(akushon_interfaces REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(tachimawari REQUIRED)
 find_package(tachimawari_interfaces REQUIRED)
 
@@ -35,7 +37,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 ament_target_dependencies(${PROJECT_NAME}
   ament_index_cpp
+  akushon_interfaces
   rclcpp
+  rclcpp_action
   tachimawari
   tachimawari_interfaces)
 
@@ -64,7 +68,9 @@ endif()
 
 ament_export_dependencies(
   ament_index_cpp
+  akushon_interfaces
   rclcpp
+  rclcpp_action
   tachimawari
   tachimawari_interfaces)
 ament_export_include_directories("include")

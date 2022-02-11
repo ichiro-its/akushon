@@ -92,7 +92,7 @@ void ActionNode::start(int action_id)
         auto result = get_joints_client->async_send_request(
           std::make_shared<tachimawari_interfaces::srv::GetJoints::Request>());
         if (rclcpp::spin_until_future_complete(node, result) ==
-        rclcpp::FutureReturnCode::SUCCESS)
+          rclcpp::FutureReturnCode::SUCCESS)
         {
           Pose pose("initial_pose");
           std::vector<tachimawari::joint::Joint> joints;
