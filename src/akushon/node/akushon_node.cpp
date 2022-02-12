@@ -85,6 +85,8 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
             }
 
             while (rclcpp::ok()) {
+              rcl_rate.sleep();
+
               if (action_node->get_status() == ActionNode::PLAYING) {
                 action_node->process(this->node->now().seconds() * 1000);
               } else if (action_node->get_status() == ActionNode::READY ||  // NOLINT
@@ -93,10 +95,7 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
                 break;
               }
 
-              feedback->status = action_node->get_status();
               goal_handle->publish_feedback(feedback);
-
-              rcl_rate.sleep();
             }
 
             if (rclcpp::ok()) {

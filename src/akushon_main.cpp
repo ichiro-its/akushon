@@ -32,6 +32,7 @@ int main(int argc, char * argv[])
   auto akushon_node = std::make_shared<akushon::AkushonNode>(node);
 
   auto action_manager = std::make_shared<akushon::ActionManager>();
+  action_manager->load_data("");
 
   akushon_node->set_action_manager(action_manager);
 
