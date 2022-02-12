@@ -78,28 +78,39 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
             auto feedback = std::make_shared<RunAction::Feedback>();
             auto result = std::make_shared<RunAction::Result>();
 
+            bool is_ready = false;
             if (goal->action_id >= 0) {
-              action_node->start(goal->action_id);
+              is_ready = action_node->start(goal->action_id);
             } else if (goal->action_name != "") {
-              action_node->start(goal->action_name);
+              is_ready = action_node->start(goal->action_name);
             }
 
-            while (rclcpp::ok()) {
-              rcl_rate.sleep();
+            if (is_ready) {
+              while (rclcpp::ok()) {
+                rcl_rate.sleep();
 
-              if (action_node->get_status() == ActionNode::PLAYING) {
-                action_node->process(this->node->now().seconds() * 1000);
-              } else if (action_node->get_status() == ActionNode::READY ||  // NOLINT
-              action_node->get_status() == ActionNode::FAILED)
-              {
-                break;
+                if (goal_handle->is_canceling()) {
+                  result->status = CANCELED;
+                  goal_handle->canceled(result);
+                  return;
+                }
+
+                if (action_node->get_status() == ActionNode::PLAYING) {
+                  action_node->process(this->node->now().seconds() * 1000);
+                } else if (action_node->get_status() == ActionNode::READY) {
+                  break;
+                }
+
+                goal_handle->publish_feedback(feedback);
               }
-
-              goal_handle->publish_feedback(feedback);
             }
 
             if (rclcpp::ok()) {
-              result->status = action_node->get_status();
+              if (is_ready) {
+                result->status = SUCCEEDED;
+              } else {
+                result->status = FAILED;
+              }
               goal_handle->succeed(result);
             }
           }, goal_handle}.join();

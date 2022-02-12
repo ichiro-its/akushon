@@ -36,6 +36,13 @@ namespace akushon
 class AkushonNode
 {
 public:
+  enum
+  {
+    SUCCEEDED,
+    CANCELED,
+    FAILED
+  };
+
   explicit AkushonNode(rclcpp::Node::SharedPtr node);
 
   void set_action_manager(std::shared_ptr<ActionManager> action_manager);

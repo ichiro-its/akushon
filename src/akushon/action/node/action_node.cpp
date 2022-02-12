@@ -69,48 +69,45 @@ int ActionNode::get_status() const
   return status;
 }
 
-void ActionNode::start(std::string action_name)
+bool ActionNode::start(std::string action_name)
 {
-  start(ActionName::map.at(action_name));
+  return start(ActionName::map.at(action_name));
 }
 
-void ActionNode::start(int action_id)
+bool ActionNode::start(int action_id)
 {
-  status = LOADING;
+  while (!get_joints_client->wait_for_service(1s)) {
+    if (rclcpp::ok()) {
+      // service not available, waiting again...
+    } else {
+      // Interrupted while waiting for the service. Exiting.
+      return false;
+    }
+  }
 
-  std::thread{[this](int action_id) {
-      while (!get_joints_client->wait_for_service(1s)) {
-        if (rclcpp::ok()) {
-          // service not available, waiting again...
-        } else {
-          // Interrupted while waiting for the service. Exiting.
-          status = FAILED;
-        }
-      }
+  auto result = get_joints_client->async_send_request(
+    std::make_shared<tachimawari_interfaces::srv::GetJoints::Request>());
 
-      if (status != FAILED) {
-        auto result = get_joints_client->async_send_request(
-          std::make_shared<tachimawari_interfaces::srv::GetJoints::Request>());
-        if (rclcpp::spin_until_future_complete(node, result) ==
-          rclcpp::FutureReturnCode::SUCCESS)
-        {
-          Pose pose("initial_pose");
-          std::vector<tachimawari::joint::Joint> joints;
+  if (rclcpp::spin_until_future_complete(node, result) ==
+    rclcpp::FutureReturnCode::SUCCESS)
+  {
+    Pose pose("initial_pose");
+    std::vector<tachimawari::joint::Joint> joints;
 
-          for (const auto & joint : result.get()->joints) {
-            joints.push_back(
-              tachimawari::joint::Joint(joint.id, joint.position));
-          }
-          pose.set_joints(joints);
+    for (const auto & joint : result.get()->joints) {
+      joints.push_back(
+        tachimawari::joint::Joint(joint.id, joint.position));
+    }
+    pose.set_joints(joints);
 
-          action_manager->start(action_id, pose);
-          status = PLAYING;
-        } else {
-          // Failed to call service
-          status = FAILED;
-        }
-      }
-    }, action_id};
+    action_manager->start(action_id, pose);
+    status = PLAYING;
+  } else {
+    // Failed to call service
+    return false;
+  }
+
+  return true;
 }
 
 void ActionNode::process(int time)

@@ -38,9 +38,7 @@ public:
   enum
   {
     READY,
-    LOADING,
-    PLAYING,
-    FAILED
+    PLAYING
   };
 
   explicit ActionNode(
@@ -49,8 +47,9 @@ public:
   bool is_action_exist(int action_id) const;
   bool is_action_exist(std::string action_name) const;
 
-  void start(std::string action_name);
-  void start(int action_id);
+  bool start(std::string action_name);
+  bool start(int action_id);
+
   void process(int time);
 
   int get_status() const;
