@@ -100,7 +100,7 @@ void Action::set_next_action(std::string next_action)
   this->next_action = next_action;
 }
 
-std::string Action::get_next_action() const
+const std::string & Action::get_next_action() const
 {
   return next_action;
 }

@@ -45,9 +45,9 @@ public:
     rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> action_manager);
 
   bool is_action_exist(int action_id) const;
-  bool is_action_exist(std::string action_name) const;
+  bool is_action_exist(const std::string & action_name) const;
 
-  bool start(std::string action_name);
+  bool start(const std::string & action_name);
   bool start(int action_id);
 
   void process(int time);

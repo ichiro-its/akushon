@@ -52,14 +52,10 @@ ActionNode::ActionNode(
 
 bool ActionNode::is_action_exist(int action_id) const
 {
-  if (action_manager->get_action(action_id).get_name() != "") {
-    return true;
-  }
-
-  return false;
+  return action_manager->get_action(action_id).get_name().empty();
 }
 
-bool ActionNode::is_action_exist(std::string action_name) const
+bool ActionNode::is_action_exist(const std::string & action_name) const
 {
   return is_action_exist(ActionName::map.at(action_name));
 }
@@ -69,7 +65,7 @@ int ActionNode::get_status() const
   return status;
 }
 
-bool ActionNode::start(std::string action_name)
+bool ActionNode::start(const std::string & action_name)
 {
   return start(ActionName::map.at(action_name));
 }
@@ -128,19 +124,16 @@ std::string ActionNode::get_node_prefix() const
 
 void ActionNode::publish_joints()
 {
-  std::vector<tachimawari_interfaces::msg::Joint> joints;
-
-  for (const auto & joint : action_manager->get_joints()) {
-    auto joint_msg = tachimawari_interfaces::msg::Joint();
-
-    joint_msg.id = joint.get_id();
-    joint_msg.position = joint.get_position();
-
-    joints.push_back(joint_msg);
-  }
-
   auto joints_msg = tachimawari_interfaces::msg::SetJoints();
-  joints_msg.joints = joints;
+
+  const auto & joints = action_manager->get_joints();
+  auto & joint_msgs = joints_msg.joints;
+
+  joint_msgs.resize(joints.size());
+  for (size_t i = 0; i < joints.size() && i < joint_msgs.size(); ++i) {
+    joint_msgs[i].id = joints[i].get_id();
+    joint_msgs[i].position = joints[i].get_position();
+  }
 
   set_joints_publisher->publish(joints_msg);
 }

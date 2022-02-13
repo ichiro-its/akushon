@@ -36,8 +36,11 @@ JointProcess::JointProcess(uint8_t joint_id, float position)
 
 void JointProcess::set_target_position(float target_position, float speed)
 {
+  float filtered_speed = (speed > 1.0) ? 1.0 : speed;
+  filtered_speed = (filtered_speed < 0.0) ? 0.0 : filtered_speed;
+
   this->target_position = target_position;
-  additional_position = (this->target_position - initial_position) * speed;
+  additional_position = (this->target_position - initial_position) * filtered_speed;
 }
 
 void JointProcess::set_initial_position(float initial_position)

@@ -30,92 +30,96 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 
-using namespace std::chrono_literals;  // NOLINT
+using namespace std::chrono_literals;
+using namespace std::placeholders;
 
 namespace akushon
 {
 
+using akushon_interfaces::action::RunAction;
+using GoalHandleRunAction = rclcpp_action::ServerGoalHandle<RunAction>;
+
 AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
 : node(node), action_node(nullptr)
 {
-  {
-    using akushon_interfaces::action::RunAction;
-    using GoalHandleRunAction = rclcpp_action::ServerGoalHandle<RunAction>;
+  run_action_server = rclcpp_action::create_server<RunAction>(
+    node->get_node_base_interface(),
+    node->get_node_clock_interface(),
+    node->get_node_logging_interface(),
+    node->get_node_waitables_interface(),
+    "run_action",
+    std::bind(&AkushonNode::handle_goal, this, _1, _2),
+    std::bind(&AkushonNode::handle_cancel, this, _1),
+    std::bind(&AkushonNode::handle_accepted, this, _1));
+}
 
-    run_action_server = rclcpp_action::create_server<RunAction>(
-      node->get_node_base_interface(),
-      node->get_node_clock_interface(),
-      node->get_node_logging_interface(),
-      node->get_node_waitables_interface(),
-      "run_action",
-      [this](const rclcpp_action::GoalUUID & uuid,
-      std::shared_ptr<const RunAction::Goal> goal) -> rclcpp_action::GoalResponse {
-        bool is_action_exist = false;
+rclcpp_action::GoalResponse AkushonNode::handle_goal(
+  const rclcpp_action::GoalUUID & uuid,
+  std::shared_ptr<const RunAction::Goal> goal)
+{
+  bool is_action_exist = false;
 
-        if (action_node->get_status() == ActionNode::READY && action_node) {
-          if (goal->action_id >= 0) {
-            is_action_exist = action_node->is_action_exist(goal->action_id);
-          } else if (goal->action_name != "") {
-            is_action_exist = action_node->is_action_exist(goal->action_name);
-          }
-        }
-
-        if (is_action_exist) {
-          return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
-        } else {
-          return rclcpp_action::GoalResponse::REJECT;
-        }
-      },
-      [this](
-        const std::shared_ptr<GoalHandleRunAction> goal_handle) -> rclcpp_action::CancelResponse {
-        return rclcpp_action::CancelResponse::ACCEPT;
-      },
-      [this](const std::shared_ptr<GoalHandleRunAction> goal_handle) {
-        std::thread{[this](const std::shared_ptr<GoalHandleRunAction> goal_handle) {
-            rclcpp::Rate rcl_rate(8ms);
-
-            const auto goal = goal_handle->get_goal();
-            auto feedback = std::make_shared<RunAction::Feedback>();
-            auto result = std::make_shared<RunAction::Result>();
-
-            bool is_ready = false;
-            if (goal->action_id >= 0) {
-              is_ready = action_node->start(goal->action_id);
-            } else if (goal->action_name != "") {
-              is_ready = action_node->start(goal->action_name);
-            }
-
-            if (is_ready) {
-              while (rclcpp::ok()) {
-                rcl_rate.sleep();
-
-                if (goal_handle->is_canceling()) {
-                  result->status = CANCELED;
-                  goal_handle->canceled(result);
-                  return;
-                }
-
-                if (action_node->get_status() == ActionNode::PLAYING) {
-                  action_node->process(this->node->now().seconds() * 1000);
-                } else if (action_node->get_status() == ActionNode::READY) {
-                  break;
-                }
-
-                goal_handle->publish_feedback(feedback);
-              }
-            }
-
-            if (rclcpp::ok()) {
-              if (is_ready) {
-                result->status = SUCCEEDED;
-              } else {
-                result->status = FAILED;
-              }
-              goal_handle->succeed(result);
-            }
-          }, goal_handle}.join();
-      });
+  if (action_node->get_status() == ActionNode::READY && action_node) {
+    if (goal->action_id >= 0) {
+      is_action_exist = action_node->is_action_exist(goal->action_id);
+    } else if (goal->action_name != "") {
+      is_action_exist = action_node->is_action_exist(goal->action_name);
+    }
   }
+
+  return is_action_exist ?
+         rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE :
+         rclcpp_action::GoalResponse::REJECT;
+}
+
+rclcpp_action::CancelResponse AkushonNode::handle_cancel(
+  const std::shared_ptr<GoalHandleRunAction> goal_handle)
+{
+  return rclcpp_action::CancelResponse::ACCEPT;
+}
+
+void AkushonNode::handle_accepted(const std::shared_ptr<GoalHandleRunAction> goal_handle)
+{
+  std::thread{[this](const std::shared_ptr<GoalHandleRunAction> goal_handle) {
+      rclcpp::Rate rcl_rate(8ms);
+
+      const auto goal = goal_handle->get_goal();
+
+      bool is_ready = false;
+      if (goal->action_id >= 0) {
+        is_ready = action_node->start(goal->action_id);
+      } else if (goal->action_name != "") {
+        is_ready = action_node->start(goal->action_name);
+      }
+
+      auto feedback = std::make_shared<RunAction::Feedback>();
+      auto result = std::make_shared<RunAction::Result>();
+
+      if (is_ready) {
+        while (rclcpp::ok()) {
+          rcl_rate.sleep();
+
+          if (goal_handle->is_canceling()) {
+            result->status = CANCELED;
+            goal_handle->canceled(result);
+            return;
+          }
+
+          if (action_node->get_status() == ActionNode::PLAYING) {
+            action_node->process(this->node->now().seconds() * 1000);
+          } else if (action_node->get_status() == ActionNode::READY) {
+            break;
+          }
+
+          goal_handle->publish_feedback(feedback);
+        }
+      }
+
+      if (rclcpp::ok()) {
+        result->status = is_ready ? SUCCEEDED : FAILED;
+        goal_handle->succeed(result);
+      }
+    }, goal_handle}.join();
 }
 
 void AkushonNode::set_action_manager(std::shared_ptr<ActionManager> action_manager)

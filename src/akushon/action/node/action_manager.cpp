@@ -31,9 +31,6 @@
 #include "nlohmann/json.hpp"
 #include "tachimawari/joint/joint.hpp"
 
-#include "stdlib.h"  // NOLINT
-#include "unistd.h"  // NOLINT
-
 namespace akushon
 {
 
@@ -53,7 +50,7 @@ void ActionManager::delete_action(int action_id)
   actions.erase(action_id);
 }
 
-const Action & ActionManager::get_action(int action_id) const
+Action ActionManager::get_action(int action_id) const
 {
   if (actions.find(action_id) != actions.end()) {
     return actions.at(action_id);
@@ -64,38 +61,43 @@ const Action & ActionManager::get_action(int action_id) const
 
 void ActionManager::load_data(const std::string & path)
 {
-  for (auto [name, id] : ActionName::map) {
+  for (const auto & [name, id] : ActionName::map) {
     std::string file_name = path + "/action/" + name + ".json";
     Action action = Action(name);
 
-    bool is_load_success = false;
     try {
       std::ifstream file(path);
       nlohmann::json action_data = nlohmann::json::parse(file);
 
       action.set_name(action_data["name"]);
 
-      for (auto [key, val] : action_data.items()) {
+      for (const auto & [key, val] : action_data.items()) {
         if (key.find("step_") != std::string::npos) {
-          Pose pose(key);
-          std::vector<tachimawari::joint::Joint> joints;
+          {
+            using tachimawari::joint::JointId;
+            using tachimawari::joint::Joint;
 
-          for (auto [steps_key, steps_val] : action_data[key].items()) {
-            if (!(steps_key.find("step_") != std::string::npos)) {
-              tachimawari::joint::Joint joint(
-                tachimawari::joint::JointId::by_name.at(steps_key),
-                static_cast<float>(steps_val));
+            Pose pose(key);
+            std::vector<Joint> joints;
 
-              joints.push_back(joint);
-            } else if (steps_key == "step_pause") {
-              pose.set_pause(static_cast<float>(steps_val));
-            } else if (steps_key == "step_speed") {
-              pose.set_speed(static_cast<float>(steps_val));
+            for (const auto & [steps_key, steps_val] : action_data[key].items()) {
+              bool add_joint = steps_key.find("step_") == std::string::npos;
+              add_joint &= JointId::by_name.find(steps_key) != JointId::by_name.end();
+
+              if (add_joint) {
+                Joint joint(JointId::by_name.at(steps_key), steps_val);
+
+                joints.push_back(joint);
+              } else if (steps_key == "step_pause") {
+                pose.set_pause(steps_val);
+              } else if (steps_key == "step_speed") {
+                pose.set_speed(steps_val);
+              }
             }
-          }
 
-          pose.set_joints(joints);
-          action.add_pose(pose);
+            pose.set_joints(joints);
+            action.add_pose(pose);
+          }
         } else if (key == "start_delay") {
           action.set_start_delay(val);
         } else if (key == "stop_delay") {
@@ -105,14 +107,10 @@ void ActionManager::load_data(const std::string & path)
         }
       }
 
-      is_load_success = true;
+      actions.insert({id, action});
     } catch (nlohmann::json::parse_error & ex) {
       // TODO(maroqijalil): will be used for logging
       // std::cerr << "parse error at byte " << ex.byte << std::endl;
-    }
-
-    if (is_load_success) {
-      actions.insert({id, action});
     }
   }
 }
@@ -122,10 +120,12 @@ void ActionManager::start(int action_id, const Pose & initial_pose)
   std::vector<Action> target_actions;
 
   while (true) {
-    target_actions.push_back(actions.at(action_id));
+    const auto & action = actions.at(action_id);
 
-    if (actions.at(action_id).get_next_action() != "") {
-      int next_action_id = ActionName::map.at(actions.at(action_id).get_next_action());
+    target_actions.push_back(action);
+
+    if (action.get_next_action() != "") {
+      int next_action_id = ActionName::map.at(action.get_next_action());
 
       if (actions.find(next_action_id) != actions.end()) {
         action_id = next_action_id;

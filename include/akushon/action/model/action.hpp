@@ -73,7 +73,7 @@ public:
   int get_stop_delay() const;
 
   void set_next_action(std::string next_action);
-  std::string get_next_action() const;
+  const std::string & get_next_action() const;
 
   void reset();
 

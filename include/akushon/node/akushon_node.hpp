@@ -33,6 +33,9 @@
 namespace akushon
 {
 
+using akushon_interfaces::action::RunAction;
+using GoalHandleRunAction = rclcpp_action::ServerGoalHandle<RunAction>;
+
 class AkushonNode
 {
 public:
@@ -48,11 +51,20 @@ public:
   void set_action_manager(std::shared_ptr<ActionManager> action_manager);
 
 private:
+  rclcpp_action::GoalResponse handle_goal(
+    const rclcpp_action::GoalUUID & uuid,
+    std::shared_ptr<const RunAction::Goal> goal);
+
+  rclcpp_action::CancelResponse handle_cancel(
+    const std::shared_ptr<GoalHandleRunAction> goal_handle);
+
+  void handle_accepted(const std::shared_ptr<GoalHandleRunAction> goal_handle);
+
   rclcpp::Node::SharedPtr node;
 
   std::shared_ptr<ActionNode> action_node;
 
-  rclcpp_action::Server<akushon_interfaces::action::RunAction>::SharedPtr run_action_server;
+  rclcpp_action::Server<RunAction>::SharedPtr run_action_server;
 };
 
 }  // namespace akushon

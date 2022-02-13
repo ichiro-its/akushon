@@ -36,9 +36,8 @@ Interpolator::Interpolator(const std::vector<Action> & actions, const Pose & ini
   current_action_index(0)
 {
   for (const auto & joint : initial_pose.get_joints()) {
-    joint_processes.insert(
-      {joint.get_id(),
-        JointProcess(joint.get_id(), joint.get_position())});
+    auto joint_process = JointProcess(joint.get_id(), joint.get_position());
+    joint_processes.insert({joint.get_id(), joint_process});
   }
 
   if (actions.size() != 0) {
@@ -58,7 +57,7 @@ void Interpolator::process(int time)
           start_stop_time = time;
         }
 
-        if ((time - start_stop_time) > (actions[current_action_index].get_start_delay() * 1000)) {
+        if ((time - start_stop_time) > (get_current_action().get_start_delay() * 1000)) {
           change_state(PLAYING);
         }
 
@@ -73,12 +72,11 @@ void Interpolator::process(int time)
             pause_time = time;
           }
 
-          if (current_pose_index == actions[current_action_index].get_pose_count()) {
+          const auto & current_action = get_current_action();
+          if (current_pose_index == current_action.get_pose_count()) {
             change_state(STOP_DELAY);
             init_pause = true;
-          } else if ((time - pause_time) >  // NOLINT
-            (actions[current_action_index].get_pose(current_pose_index).get_pause() * 1000))
-          {
+          } else if ((time - pause_time) > (get_current_pose().get_pause() * 1000)) {
             next_pose();
             init_pause = true;
           }
@@ -94,8 +92,8 @@ void Interpolator::process(int time)
           start_stop_time = time;
         }
 
-        if ((time - start_stop_time) > (actions[current_action_index].get_stop_delay() * 1000)) {
-          current_action_index++;
+        if ((time - start_stop_time) > (get_current_action().get_stop_delay() * 1000)) {
+          ++current_action_index;
 
           if (current_action_index == actions.size()) {
             change_state(END);
@@ -108,7 +106,7 @@ void Interpolator::process(int time)
       }
   }
 
-  for (auto [id, joint] : joint_processes) {
+  for (const auto & [id, joint] : joint_processes) {
     joint_processes.at(id).interpolate();
   }
 }
@@ -120,26 +118,34 @@ bool Interpolator::is_finished() const
 
 void Interpolator::next_pose()
 {
-  for (const auto & joint :
-    actions[current_action_index].get_pose(current_pose_index).get_joints())
-  {
+  for (const auto & joint : get_current_pose().get_joints()) {
     if (joint_processes.find(joint.get_id()) != joint_processes.end()) {
       joint_processes.at(joint.get_id()).set_target_position(joint.get_position());
     }
   }
-  current_pose_index++;
+  ++current_pose_index;
 }
 
 bool Interpolator::check_for_next()
 {
   int joint_number = joint_processes.size();
-  for (auto [id, joint] : joint_processes) {
+  for (const auto & [id, joint] : joint_processes) {
     if (joint.is_finished()) {
-      joint_number--;
+      --joint_number;
     }
   }
 
   return joint_number <= 0;
+}
+
+const Action & Interpolator::get_current_action() const
+{
+  return actions[current_action_index];
+}
+
+const Pose & Interpolator::get_current_pose() const
+{
+  return get_current_action().get_pose(current_pose_index);
 }
 
 void Interpolator::change_state(int state)
@@ -152,7 +158,7 @@ std::vector<tachimawari::joint::Joint> Interpolator::get_joints() const
 {
   std::vector<tachimawari::joint::Joint> joints;
 
-  for (auto [id, joint] : joint_processes) {
+  for (const auto & [id, joint] : joint_processes) {
     joints.push_back(joint);
   }
 

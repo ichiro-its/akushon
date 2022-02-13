@@ -51,6 +51,9 @@ public:
   std::vector<tachimawari::joint::Joint> get_joints() const;
 
 private:
+  const Action & get_current_action() const;
+  const Pose & get_current_pose() const;
+
   bool check_for_next();
   void next_pose();
 

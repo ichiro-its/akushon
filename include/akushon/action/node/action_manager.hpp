@@ -41,7 +41,7 @@ public:
 
   void insert_action(int action_id, const Action & action);
   void delete_action(int action_id);
-  const Action & get_action(int action_id) const;
+  Action get_action(int action_id) const;
 
   void load_data(const std::string & path);
 
