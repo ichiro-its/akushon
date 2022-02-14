@@ -18,48 +18,59 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__POSE_HPP_
-#define AKUSHON__POSE_HPP_
-
-#include <tachimawari/joint.hpp>
-
 #include <string>
 #include <vector>
+
+#include "akushon/action/model/pose.hpp"
+
+#include "tachimawari/joint/model/joint.hpp"
 
 namespace akushon
 {
 
-class Pose
+Pose::Pose(const std::string & pose_name)
+: name(pose_name), speed(0.0), pause(0.0), joints({})
 {
-public:
-  explicit Pose(const std::string & pose_name);
+}
 
-  void set_speed(const float & speed);
-  const float & get_speed() const;
+void Pose::set_speed(float speed)
+{
+  this->speed = speed;
+}
 
-  void set_pause(const float & pause);
-  const float & get_pause() const;
+float Pose::get_speed() const
+{
+  return speed;
+}
 
-  void set_name(const std::string & pose_name);
-  const std::string & get_name() const;
+void Pose::set_pause(float pause)
+{
+  this->pause = pause;
+}
 
-  void set_joints(const std::vector<tachimawari::Joint> & joints);
-  const std::vector<tachimawari::Joint> & get_joints() const;
+float Pose::get_pause() const
+{
+  return pause;
+}
 
-  void set_target_position(const Pose & target_pose);
+void Pose::set_name(const std::string & pose_name)
+{
+  name = pose_name;
+}
 
-  void interpolate();
-  bool operator==(const Pose & other);
+const std::string & Pose::get_name() const
+{
+  return name;
+}
 
-private:
-  float speed;
-  float pause;
+void Pose::set_joints(const std::vector<tachimawari::joint::Joint> & joints)
+{
+  this->joints = joints;
+}
 
-  std::string name;
-
-  std::vector<tachimawari::Joint> joints;
-};
+const std::vector<tachimawari::joint::Joint> & Pose::get_joints() const
+{
+  return joints;
+}
 
 }  // namespace akushon
-
-#endif  // AKUSHON__POSE_HPP_

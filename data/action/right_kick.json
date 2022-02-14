@@ -1,5 +1,6 @@
 {
   "name"      : "Right Kick",
+  "start_delay" : 0,
   "step_0"    : { 
     "step_pause" : 0,
     "step_speed"  : 1,
@@ -71,5 +72,7 @@
     "right_knee": 0,
     "right_ankle_roll": 0,
     "right_ankle_pitch": 1
-  }
+  },
+  "stop_delay" : 0,
+  "next_action" : "left_kick"
 }

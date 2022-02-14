@@ -15,15 +15,21 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
-find_package(robocup_client REQUIRED)
+find_package(akushon_interfaces REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(tachimawari REQUIRED)
 find_package(tachimawari_interfaces REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED
-  "src/${PROJECT_NAME}/pose.cpp"
-  "src/${PROJECT_NAME}/action.cpp"
-  "src/${PROJECT_NAME}/action_manager.cpp")
+  "src/${PROJECT_NAME}/action/model/action_name.cpp"
+  "src/${PROJECT_NAME}/action/model/action.cpp"
+  "src/${PROJECT_NAME}/action/model/pose.cpp"
+  "src/${PROJECT_NAME}/action/node/action_manager.cpp"
+  "src/${PROJECT_NAME}/action/node/action_node.cpp"
+  "src/${PROJECT_NAME}/action/process/interpolator.cpp"
+  "src/${PROJECT_NAME}/action/process/joint_process.cpp"
+  "src/${PROJECT_NAME}/node/akushon_node.cpp")
 
 target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -31,8 +37,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 ament_target_dependencies(${PROJECT_NAME}
   ament_index_cpp
-  robocup_client
+  akushon_interfaces
   rclcpp
+  rclcpp_action
   tachimawari
   tachimawari_interfaces)
 
@@ -44,15 +51,14 @@ install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION "lib"
   RUNTIME DESTINATION "bin")
 
-add_executable(action_manager "src/action_manager_main.cpp")
-target_include_directories(action_manager PUBLIC
+add_executable(akushon_main "src/akushon_main.cpp")
+target_include_directories(akushon_main PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-
-target_link_libraries(action_manager ${PROJECT_NAME})
+target_link_libraries(akushon_main ${PROJECT_NAME})
 
 install(TARGETS
-  action_manager
+  akushon_main
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
@@ -62,8 +68,9 @@ endif()
 
 ament_export_dependencies(
   ament_index_cpp
-  robocup_client
+  akushon_interfaces
   rclcpp
+  rclcpp_action
   tachimawari
   tachimawari_interfaces)
 ament_export_include_directories("include")

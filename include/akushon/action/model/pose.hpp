@@ -18,59 +18,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__ACTION_HPP_
-#define AKUSHON__ACTION_HPP_
+#ifndef AKUSHON__ACTION__MODEL__POSE_HPP_
+#define AKUSHON__ACTION__MODEL__POSE_HPP_
 
-#include <akushon/pose.hpp>
-#include <nlohmann/json.hpp>
-
-#include <memory>
 #include <string>
 #include <vector>
+
+#include "tachimawari/joint/model/joint.hpp"
 
 namespace akushon
 {
 
-class Action
+class Pose
 {
 public:
-  explicit Action(const std::string & action_name);
+  explicit Pose(const std::string & pose_name);
 
-  void insert_pose(const Pose & pose);
-  void insert_pose(const uint8_t & id, const Pose & pose);
-  void delete_pose(const uint8_t & id);
+  void set_speed(float speed);
+  float get_speed() const;
 
-  void load_data(const std::string & path);
-  void set_name(const std::string & action_name);
+  void set_pause(float pause);
+  float get_pause() const;
 
+  void set_name(const std::string & pose_name);
   const std::string & get_name() const;
-  const std::vector<Pose> & get_poses() const;
-  const Pose & get_current_pose() const;
-  const Pose & get_pose_by_index(const uint8_t & index) const;
 
-  void next_pose();
-  bool is_running() const;
+  void set_joints(const std::vector<tachimawari::joint::Joint> & joints);
+  const std::vector<tachimawari::joint::Joint> & get_joints() const;
 
-  Pose process(Pose robot_pose, const int & time);
-  void reset();
+  void set_target_position(const Pose & target_pose);
 
 private:
+  float speed;
+  float pause;
+
   std::string name;
 
-  int current_pose_index = 0;
-  int pose_count = 0;
-  uint8_t next_motion_id;
-
-  std::vector<Pose> poses;
-
-  int pause_start_time;
-  bool on_pause;
-  bool on_process;
-
-  int start_stop_time;
-  bool is_start;
+  std::vector<tachimawari::joint::Joint> joints;
 };
 
 }  // namespace akushon
 
-#endif  // AKUSHON__ACTION_HPP_
+#endif  // AKUSHON__ACTION__MODEL__POSE_HPP_

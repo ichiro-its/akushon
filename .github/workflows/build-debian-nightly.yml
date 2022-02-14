@@ -41,6 +41,6 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASS }}
           script: |
-            cd ~/repository/debian
+            cd ${{ secrets.SERVER_REPO_DIR }}/debian
             reprepro includedeb nightly ~/temp/nightly/akushon/package/*.deb
             rm -rf ~/temp/nightly/akushon/

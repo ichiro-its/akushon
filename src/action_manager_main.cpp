@@ -138,7 +138,7 @@ int main(int argc, char ** argv)
       if (action_manager->is_running()) {
         auto robot_pose = action_manager->process(time);
 
-        for (auto & joint : robot_pose->get_joints()) {
+        for (const auto & joint : robot_pose->get_joints()) {
           std::string joint_name = joint.get_joint_name();
 
           if (joint_name.find("shoulder_pitch") != std::string::npos) {
