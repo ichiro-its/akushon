@@ -36,9 +36,6 @@ using namespace std::placeholders;
 namespace akushon
 {
 
-using akushon_interfaces::action::RunAction;
-using GoalHandleRunAction = rclcpp_action::ServerGoalHandle<RunAction>;
-
 AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
 : node(node), action_node(nullptr)
 {

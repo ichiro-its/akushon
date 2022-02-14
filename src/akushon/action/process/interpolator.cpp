@@ -72,8 +72,7 @@ void Interpolator::process(int time)
             pause_time = time;
           }
 
-          const auto & current_action = get_current_action();
-          if (current_pose_index == current_action.get_pose_count()) {
+          if (current_pose_index == get_current_action().get_pose_count()) {
             change_state(STOP_DELAY);
             init_pause = true;
           } else if ((time - pause_time) > (get_current_pose().get_pause() * 1000)) {

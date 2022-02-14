@@ -95,7 +95,7 @@ int Action::get_stop_delay() const
   return stop_delay;
 }
 
-void Action::set_next_action(std::string next_action)
+void Action::set_next_action(const std::string & next_action)
 {
   this->next_action = next_action;
 }
