@@ -138,4 +138,9 @@ void ActionNode::publish_joints()
   set_joints_publisher->publish(joints_msg);
 }
 
+std::string ActionNode::get_all_actions() const
+{
+  return action_manager->get_actions_list();
+}
+
 }  // namespace akushon

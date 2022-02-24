@@ -61,14 +61,16 @@ Action ActionManager::get_action(int action_id) const
 
 void ActionManager::load_data(const std::string & path)
 {
+  nlohmann::json actions_list;
   for (const auto & [name, id] : ActionName::map) {
     std::string file_name = path + "/action/" + name + ".json";
     Action action = Action(name);
 
     try {
-      std::ifstream file(path);
+      std::ifstream file(file_name);
       nlohmann::json action_data = nlohmann::json::parse(file);
 
+      actions_list["action_" + name] = action_data;
       action.set_name(action_data["name"]);
 
       for (const auto & [key, val] : action_data.items()) {
@@ -112,7 +114,9 @@ void ActionManager::load_data(const std::string & path)
       // TODO(maroqijalil): will be used for logging
       // std::cerr << "parse error at byte " << ex.byte << std::endl;
     }
+
   }
+  this->actions_list = actions_list.dump();
 }
 
 void ActionManager::start(int action_id, const Pose & initial_pose)
@@ -162,6 +166,11 @@ std::vector<tachimawari::joint::Joint> ActionManager::get_joints() const
   }
 
   return {};
+}
+
+std::string ActionManager::get_actions_list() const
+{
+  return actions_list;
 }
 
 }  // namespace akushon

@@ -27,6 +27,7 @@
 #include "akushon/action/node/action_manager.hpp"
 #include "akushon/action/node/action_node.hpp"
 #include "akushon_interfaces/action/run_action.hpp"
+#include "akushon_interfaces/srv/action.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 
@@ -39,6 +40,19 @@ namespace akushon
 AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
 : node(node), action_node(nullptr)
 {
+  {
+    using akushon_interfaces::srv::Action;
+    action_service = node->create_service<Action>(
+      "/get_actions",
+      [this](std::shared_ptr<Action::Request> request,
+      std::shared_ptr<Action::Response> response) {
+        response->json = this->action_node->get_all_actions();
+        
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Sending back response: " + response->json);
+      }
+    );
+  }
+
   run_action_server = rclcpp_action::create_server<RunAction>(
     node->get_node_base_interface(),
     node->get_node_clock_interface(),

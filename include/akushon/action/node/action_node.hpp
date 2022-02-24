@@ -54,6 +54,8 @@ public:
 
   int get_status() const;
 
+  std::string get_all_actions() const;
+
 private:
   std::string get_node_prefix() const;
 

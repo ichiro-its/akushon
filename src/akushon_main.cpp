@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 #include <memory>
+#include <iostream>
 
 #include "akushon/action/node/action_manager.hpp"
 #include "akushon/node/akushon_node.hpp"
@@ -28,11 +29,19 @@ int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
 
+  if (argc < 2) {
+    std::cerr << "Please specify the path!" << std::endl;
+    return 0;
+  }
+
   auto node = std::make_shared<rclcpp::Node>("akushon_node");
   auto akushon_node = std::make_shared<akushon::AkushonNode>(node);
 
   auto action_manager = std::make_shared<akushon::ActionManager>();
-  action_manager->load_data("");
+  
+  std::string path = argv[1];
+
+  action_manager->load_data(path);
 
   akushon_node->set_action_manager(action_manager);
 

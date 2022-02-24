@@ -51,9 +51,12 @@ public:
   bool is_playing() const;
 
   std::vector<tachimawari::joint::Joint> get_joints() const;
+  
+  std::string get_actions_list() const;
 
 private:
   std::map<int, Action> actions;
+  std::string actions_list;
 
   std::shared_ptr<Interpolator> interpolator;
   bool is_running;
