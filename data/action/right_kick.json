@@ -3,9 +3,9 @@
   "start_delay" : 0,
   "poses"     : [
     { 
-      "step_name" : "walkready",
-      "step_pause" : 0,
-      "step_speed"  : 1,
+      "pose_name" : "walkready",
+      "pose_pause" : 0,
+      "pose_speed"  : 1,
       "neck_yaw": 1,
       "neck_pitch": 2,
       "left_shoulder_pitch": 0,
@@ -28,9 +28,9 @@
       "right_ankle_pitch": 1
     },
     {
-      "step_name" : "feet",
-      "step_pause" : 1,
-      "step_speed"  : 0.01,
+      "pose_name" : "feet",
+      "pose_pause" : 1,
+      "pose_speed"  : 0.01,
       "neck_yaw": 51,
       "neck_pitch": 52,
       "left_shoulder_pitch": 53,
@@ -53,9 +53,9 @@
       "right_ankle_pitch": 51
     },
     {
-      "step_name" : "kick",
-      "step_pause" : 0,
-      "step_speed"  : 0.3,
+      "pose_name" : "kick",
+      "pose_pause" : 0,
+      "pose_speed"  : 0.3,
       "neck_yaw": 1,
       "neck_pitch": 2,
       "left_shoulder_pitch": 0,
