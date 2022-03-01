@@ -42,7 +42,7 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
 {
   {
     using akushon_interfaces::srv::Action;
-    action_service = node->create_service<Action>(
+    get_actions_service = node->create_service<Action>(
       "/get_actions",
       [this](std::shared_ptr<Action::Request> request,
       std::shared_ptr<Action::Response> response) {

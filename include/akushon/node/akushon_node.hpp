@@ -65,7 +65,7 @@ private:
 
   std::shared_ptr<ActionNode> action_node;
 
-  rclcpp::Service<akushon_interfaces::srv::Action>::SharedPtr action_service;
+  rclcpp::Service<akushon_interfaces::srv::Action>::SharedPtr get_actions_service;
 
   rclcpp_action::Server<RunAction>::SharedPtr run_action_server;
 };

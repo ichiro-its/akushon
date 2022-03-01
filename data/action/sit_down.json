@@ -1,5 +1,5 @@
 {
-  "name"      : "Leftss Kick",
+  "name"      : "Sit Down",
   "start_delay" : 0,
   "poses"     : [
     { 
@@ -79,5 +79,5 @@
     }
   ],
   "stop_delay" : 0,
-  "next_action" : "leftt_kick"
+  "next_action" : "right_kick"
 }
