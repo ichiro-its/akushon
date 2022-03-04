@@ -3,10 +3,10 @@
   "start_delay" : 0,
   "poses"     : [
     { 
-      "pose_name" : "down",
-      "pose_pause" : 0,
-      "pose_speed"  : 1,
-      "pose_joints" : {
+      "name" : "down",
+       "pause" : 0,
+       "speed"  : 1,
+       "joints" : {
         "neck_yaw": 1,
         "neck_pitch": 2,
         "left_shoulder_pitch": 0,
@@ -30,10 +30,10 @@
       }
     },
     {
-      "pose_name" : "sit_feet",
-      "pose_pause" : 1,
-      "pose_speed"  : 0.01,
-      "pose_joints" : {
+      "name" : "sit_feet",
+       "pause" : 1,
+       "speed"  : 0.01,
+       "joints" : {
         "neck_yaw": 51,
         "neck_pitch": 52,
         "left_shoulder_pitch": 53,
@@ -57,10 +57,10 @@
       }
     },
     {
-      "pose_name" : "sit_up",
-      "pose_pause" : 0,
-      "pose_speed"  : 0.3,
-      "pose_joints" : {
+      "name" : "sit_up",
+       "pause" : 0,
+       "speed"  : 0.3,
+       "joints" : {
         "neck_yaw": 1,
         "neck_pitch": 2,
         "left_shoulder_pitch": 0,
