@@ -27,7 +27,8 @@
 #include "akushon/action/node/action_manager.hpp"
 #include "akushon/action/node/action_node.hpp"
 #include "akushon_interfaces/action/run_action.hpp"
-#include "akushon_interfaces/srv/action.hpp"
+#include "akushon_interfaces/msg/save_actions.hpp"
+#include "akushon_interfaces/srv/get_actions.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 
@@ -41,14 +42,26 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
 : node(node), action_node(nullptr)
 {
   {
-    using akushon_interfaces::srv::Action;
-    get_actions_service = node->create_service<Action>(
+    using akushon_interfaces::msg::SaveActions;
+    save_actions_subscriber = node->create_subscription<SaveActions>(
+      "/save_actions", 10,
+      [this](const SaveActions::SharedPtr message) {
+        {
+          RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Get message: " + message->json);
+        }
+      }
+    );
+  }
+
+  {
+    using akushon_interfaces::srv::GetActions;
+    get_actions_service = node->create_service<GetActions>(
       "/get_actions",
-      [this](std::shared_ptr<Action::Request> request,
-      std::shared_ptr<Action::Response> response) {
+      [this](std::shared_ptr<GetActions::Request> request,
+      std::shared_ptr<GetActions::Response> response) {
         response->json = this->action_node->get_all_actions();
         
-        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Sending back response: " + response->json);
+        // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Sending back response: " + response->json);
       }
     );
   }
