@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 #include <fstream>
+#include <iostream>
 #include <map>
 #include <memory>
 #include <string>
@@ -62,8 +63,9 @@ Action ActionManager::get_action(int action_id) const
 void ActionManager::load_data(const std::string & path)
 {
   nlohmann::json actions_list;
+  path_data = path;
   for (const auto & [name, id] : ActionName::map) {
-    std::string file_name = path + "/action/" + name + ".json";
+    std::string file_name = path_data + "/action/" + name + ".json";
     Action action = Action(name);
 
     try {
@@ -117,6 +119,21 @@ void ActionManager::load_data(const std::string & path)
 
   }
   this->actions_list = actions_list.dump();
+}
+
+void ActionManager::save_data(const nlohmann::json & actions_data)
+{
+  for (const auto & [key, val] : actions_data.items()) {
+    std::cout << key << std::endl;
+    std::locale loc;
+    std::string action_name = key;
+    std::replace(action_name.begin(), action_name.end(), ' ', '_');
+    std::string file_name = path_data + "/action/" + action_name + ".json";
+    std::ofstream file;
+    file.open (file_name);
+    file << val.dump(2);
+    file.close();
+  }
 }
 
 void ActionManager::start(int action_id, const Pose & initial_pose)

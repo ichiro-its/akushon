@@ -19,6 +19,7 @@
 // SOFTWARE.
 
 #include <chrono>
+#include <iomanip>
 #include <memory>
 #include <string>
 #include <thread>
@@ -29,6 +30,7 @@
 #include "akushon/action/node/action_manager.hpp"
 #include "akushon/action/model/action_name.hpp"
 #include "akushon/action/model/pose.hpp"
+#include "nlohmann/json.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "tachimawari/joint/model/joint.hpp"
 #include "tachimawari_interfaces/msg/set_joints.hpp"
@@ -141,6 +143,11 @@ void ActionNode::publish_joints()
 std::string ActionNode::get_all_actions() const
 {
   return action_manager->get_actions_list();
+}
+
+void ActionNode::save_all_actions(std::string json_actions) {
+  nlohmann::json actions_data = nlohmann::json::parse(json_actions);
+  action_manager->save_data(actions_data);
 }
 
 }  // namespace akushon

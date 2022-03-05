@@ -46,9 +46,8 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
     save_actions_subscriber = node->create_subscription<SaveActions>(
       "/save_actions", 10,
       [this](const SaveActions::SharedPtr message) {
-        {
-          RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Get message: " + message->json);
-        }
+        this->action_node->save_all_actions(message->json);
+        // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Get message: " + message->json);
       }
     );
   }
@@ -60,7 +59,6 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
       [this](std::shared_ptr<GetActions::Request> request,
       std::shared_ptr<GetActions::Response> response) {
         response->json = this->action_node->get_all_actions();
-        
         // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Sending back response: " + response->json);
       }
     );

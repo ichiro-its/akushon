@@ -55,6 +55,7 @@ public:
   int get_status() const;
 
   std::string get_all_actions() const;
+  void save_all_actions(std::string json_actions);
 
 private:
   std::string get_node_prefix() const;
