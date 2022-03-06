@@ -27,7 +27,7 @@
 #include "akushon/action/node/action_manager.hpp"
 #include "akushon/action/node/action_node.hpp"
 #include "akushon_interfaces/action/run_action.hpp"
-#include "akushon_interfaces/msg/save_actions.hpp"
+#include "akushon_interfaces/msg/actions.hpp"
 #include "akushon_interfaces/srv/get_actions.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
@@ -42,10 +42,10 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
 : node(node), action_node(nullptr)
 {
   {
-    using akushon_interfaces::msg::SaveActions;
-    save_actions_subscriber = node->create_subscription<SaveActions>(
+    using akushon_interfaces::msg::Actions;
+    save_actions_subscriber = node->create_subscription<Actions>(
       "/save_actions", 10,
-      [this](const SaveActions::SharedPtr message) {
+      [this](const Actions::SharedPtr message) {
         this->action_node->save_all_actions(message->json);
         // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Get message: " + message->json);
       }
