@@ -27,7 +27,7 @@
 #include "akushon/action/node/action_manager.hpp"
 #include "akushon/action/node/action_node.hpp"
 #include "akushon_interfaces/action/run_action.hpp"
-#include "akushon_interfaces/msg/actions.hpp"
+#include "akushon_interfaces/srv/save_actions.hpp"
 #include "akushon_interfaces/srv/get_actions.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
@@ -66,7 +66,7 @@ private:
 
   std::shared_ptr<ActionNode> action_node;
 
-  rclcpp::Subscription<akushon_interfaces::msg::Actions>::SharedPtr save_actions_subscriber;
+  rclcpp::Service<akushon_interfaces::srv::SaveActions>::SharedPtr save_actions_service;
 
   rclcpp::Service<akushon_interfaces::srv::GetActions>::SharedPtr get_actions_service;
 

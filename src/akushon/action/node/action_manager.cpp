@@ -124,12 +124,13 @@ void ActionManager::load_data(const std::string & path)
 void ActionManager::save_data(const nlohmann::json & actions_data)
 {
   for (const auto & [key, val] : actions_data.items()) {
-    std::cout << key << std::endl;
     std::locale loc;
     std::string action_name = key;
     std::replace(action_name.begin(), action_name.end(), ' ', '_');
+    
     std::string file_name = path_data + "/action/" + action_name + ".json";
     std::ofstream file;
+
     file.open (file_name);
     file << val.dump(2);
     file.close();

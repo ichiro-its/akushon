@@ -4,7 +4,7 @@
   "poses": [
     {
       "joints": {
-        "left_ankle_pitch": 0,
+        "left_ankle_pitch": -100,
         "left_ankle_roll": 0,
         "left_elbow": 0,
         "left_hip_pitch": 0,
