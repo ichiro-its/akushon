@@ -29,6 +29,8 @@
 #include "akushon_interfaces/action/run_action.hpp"
 #include "akushon_interfaces/srv/save_actions.hpp"
 #include "akushon_interfaces/srv/get_actions.hpp"
+#include "akushon_interfaces/srv/run_pose.hpp"
+#include "tachimawari/joint/model/joint.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 
@@ -48,8 +50,7 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
       [this](std::shared_ptr<SaveActions::Request> request,
       std::shared_ptr<SaveActions::Response> response) {
         this->action_node->save_all_actions(request->json);
-        response->status = "saved";
-        // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Get message: " + message->json);
+        response->status = "SAVED";
       }
     );
   }
@@ -61,10 +62,31 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
       [this](std::shared_ptr<GetActions::Request> request,
       std::shared_ptr<GetActions::Response> response) {
         response->json = this->action_node->get_all_actions();
-        // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Sending back response: " + response->json);
       }
     );
   }
+
+  {
+    using akushon_interfaces::srv::RunPose;
+    run_pose_service = node->create_service<RunPose>(
+      "/run_pose",
+      [this](std::shared_ptr<RunPose::Request> request,
+      std::shared_ptr<RunPose::Response> response) {
+        {
+          using tachimawari::joint::Joint;
+
+          std::vector<Joint> joints;
+          for (const auto & joint : request->joints) {
+            joints.push_back(Joint(joint.id, joint.position));
+          }
+
+          this->action_node->publish_joints(joints);
+          response->status = "PUBLISHED";
+        }
+      }
+    );
+  }
+
 
   run_action_server = rclcpp_action::create_server<RunAction>(
     node->get_node_base_interface(),

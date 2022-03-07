@@ -29,6 +29,7 @@
 #include "akushon_interfaces/action/run_action.hpp"
 #include "akushon_interfaces/srv/save_actions.hpp"
 #include "akushon_interfaces/srv/get_actions.hpp"
+#include "akushon_interfaces/srv/run_pose.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 
@@ -69,6 +70,8 @@ private:
   rclcpp::Service<akushon_interfaces::srv::SaveActions>::SharedPtr save_actions_service;
 
   rclcpp::Service<akushon_interfaces::srv::GetActions>::SharedPtr get_actions_service;
+
+  rclcpp::Service<akushon_interfaces::srv::RunPose>::SharedPtr run_pose_service;
 
   rclcpp_action::Server<RunAction>::SharedPtr run_action_server;
 };

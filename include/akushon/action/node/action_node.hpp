@@ -57,6 +57,8 @@ public:
   std::string get_all_actions() const;
   void save_all_actions(std::string json_actions);
 
+  void publish_joints(const std::vector<tachimawari::joint::Joint> & request_joints);
+
 private:
   std::string get_node_prefix() const;
 
