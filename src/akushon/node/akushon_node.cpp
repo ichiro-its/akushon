@@ -30,6 +30,7 @@
 #include "akushon_interfaces/srv/save_actions.hpp"
 #include "akushon_interfaces/srv/get_actions.hpp"
 #include "akushon_interfaces/srv/run_pose.hpp"
+#include "akushon_interfaces/srv/run_action.hpp"
 #include "tachimawari/joint/model/joint.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
@@ -43,6 +44,17 @@ namespace akushon
 AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
 : node(node), action_node(nullptr)
 {
+  {
+    using akushon_interfaces::srv::RunAction;
+    run_action_service = node->create_service<RunAction>(
+      "/run_action",
+      [this](std::shared_ptr<RunAction::Request> request,
+      std::shared_ptr<RunAction::Response> response) {
+        response->status = AkushonNode::handle_run_action(request);
+      }
+    );
+  }
+
   {
     using akushon_interfaces::srv::SaveActions;
     save_actions_service = node->create_service<SaveActions>(
@@ -97,6 +109,26 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
     std::bind(&AkushonNode::handle_goal, this, _1, _2),
     std::bind(&AkushonNode::handle_cancel, this, _1),
     std::bind(&AkushonNode::handle_accepted, this, _1));
+}
+
+std::string AkushonNode::handle_run_action(std::shared_ptr<akushon_interfaces::srv::RunAction::Request> request) 
+{
+  bool is_action_exist = false;
+
+  if (action_node->get_status() == ActionNode::READY && action_node) {
+    if (request->action_id >= 0) {
+      is_action_exist = action_node->is_action_exist(request->action_id);
+    } else if (request->action_name != "") {
+      is_action_exist = action_node->is_action_exist(request->action_name);
+    }
+  }
+
+  if (is_action_exist) {
+    // run to play actions
+    return "ACCEPTED";
+  } else {
+    return "REJECTED";
+  }
 }
 
 rclcpp_action::GoalResponse AkushonNode::handle_goal(
