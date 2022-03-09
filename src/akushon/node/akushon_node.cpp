@@ -24,6 +24,7 @@
 
 #include "akushon/node/akushon_node.hpp"
 
+#include "akushon/action/model/action.hpp"
 #include "akushon/action/node/action_manager.hpp"
 #include "akushon/action/node/action_node.hpp"
 #include "akushon_interfaces/action/run_action.hpp"
@@ -32,7 +33,6 @@
 #include "akushon_interfaces/srv/run_pose.hpp"
 #include "akushon_interfaces/srv/run_action.hpp"
 #include "tachimawari/joint/model/joint.hpp"
-#include "akushon/action/model/action.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 
@@ -51,7 +51,9 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
       "/run_action",
       [this](std::shared_ptr<RunAction::Request> request,
       std::shared_ptr<RunAction::Response> response) {
-        response->status = AkushonNode::handle_run_action(request);
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Get message: " + request->json);
+        // response->status = AkushonNode::handle_run_action(request);
+        response->status = "ACCEPTED"; // temporary
       }
     );
   }
@@ -117,8 +119,8 @@ std::string AkushonNode::handle_run_action(std::shared_ptr<akushon_interfaces::s
   rclcpp::Rate rcl_rate(8ms);
 
   bool is_ready = false;
-  Action action = Action("temp_action");
-  is_ready = action_node->start(action); // action yang akan di play
+  Action action = action_node->load_json_action(request->json);
+  is_ready = action_node->start(action); 
 
   if (is_ready) {
     while (rclcpp::ok()) {

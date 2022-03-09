@@ -24,6 +24,7 @@
 #include <memory>
 #include <string>
 
+#include "akushon/action/model/action.hpp"
 #include "akushon/action/node/action_manager.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "tachimawari_interfaces/msg/set_joints.hpp"
@@ -57,6 +58,7 @@ public:
 
   std::string get_all_actions() const;
   void save_all_actions(std::string json_actions);
+  Action load_json_action(std::string json_action) const;
 
   void publish_joints(const std::vector<tachimawari::joint::Joint> & request_joints);
 

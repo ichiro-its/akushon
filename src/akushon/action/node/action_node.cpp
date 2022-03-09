@@ -197,9 +197,17 @@ std::string ActionNode::get_all_actions() const
   return action_manager->get_actions_list();
 }
 
-void ActionNode::save_all_actions(std::string json_actions) {
+void ActionNode::save_all_actions(std::string json_actions) 
+{
   nlohmann::json actions_data = nlohmann::json::parse(json_actions);
   action_manager->save_data(actions_data);
+}
+
+Action ActionNode::load_json_action(std::string json_action) const
+{
+  nlohmann::json action_data = nlohmann::json::parse(json_action);
+  Action action = action_manager->load_action(action_data, "temp_action");
+  return action;
 }
 
 }  // namespace akushon

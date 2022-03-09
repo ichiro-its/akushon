@@ -47,6 +47,8 @@ public:
   void load_data(const std::string & path);
   void save_data(const nlohmann::json & actions_data);
 
+  Action load_action(const nlohmann::json & action_data, const std::string & action_name) const;
+
   void start(int action_id, const Pose & initial_pose);
   void start(const Action & action, const Pose & initial_pose);
   void process(int time);
