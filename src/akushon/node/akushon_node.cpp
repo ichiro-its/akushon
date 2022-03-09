@@ -32,6 +32,7 @@
 #include "akushon_interfaces/srv/run_pose.hpp"
 #include "akushon_interfaces/srv/run_action.hpp"
 #include "tachimawari/joint/model/joint.hpp"
+#include "akushon/action/model/action.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 
@@ -113,21 +114,26 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
 
 std::string AkushonNode::handle_run_action(std::shared_ptr<akushon_interfaces::srv::RunAction::Request> request) 
 {
-  bool is_action_exist = false;
+  rclcpp::Rate rcl_rate(8ms);
 
-  if (action_node->get_status() == ActionNode::READY && action_node) {
-    if (request->action_id >= 0) {
-      is_action_exist = action_node->is_action_exist(request->action_id);
-    } else if (request->action_name != "") {
-      is_action_exist = action_node->is_action_exist(request->action_name);
+  bool is_ready = false;
+  Action action = Action("temp_action");
+  is_ready = action_node->start(action); // action yang akan di play
+
+  if (is_ready) {
+    while (rclcpp::ok()) {
+      rcl_rate.sleep();
+
+      if (action_node->get_status() == ActionNode::PLAYING) {
+        action_node->process(this->node->now().seconds() * 1000);
+      } else if (action_node->get_status() == ActionNode::READY) {
+        break;
+      }
     }
   }
 
-  if (is_action_exist) {
-    // run to play actions
-    return "ACCEPTED";
-  } else {
-    return "REJECTED";
+  if (rclcpp::ok()) {
+    return is_ready? "SUCCEEDED" : "FAILED";
   }
 }
 

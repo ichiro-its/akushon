@@ -163,6 +163,16 @@ void ActionManager::start(int action_id, const Pose & initial_pose)
   is_running = true;
 }
 
+void ActionManager::start(const Action & action, const Pose & initial_pose)
+{
+  bool temporary = true;
+  std::vector<Action> target_actions;
+  target_actions.push_back(action);
+
+  interpolator = std::make_shared<Interpolator>(target_actions, initial_pose);
+  is_running = true;
+}
+
 void ActionManager::process(int time)
 {
   interpolator->process(time);

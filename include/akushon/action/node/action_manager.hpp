@@ -48,6 +48,7 @@ public:
   void save_data(const nlohmann::json & actions_data);
 
   void start(int action_id, const Pose & initial_pose);
+  void start(const Action & action, const Pose & initial_pose);
   void process(int time);
 
   bool is_playing() const;

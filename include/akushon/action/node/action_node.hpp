@@ -49,6 +49,7 @@ public:
 
   bool start(const std::string & action_name);
   bool start(int action_id);
+  bool start(const Action & action);
 
   void process(int time);
 
