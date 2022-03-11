@@ -51,9 +51,12 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
       "/run_action",
       [this](std::shared_ptr<RunAction::Request> request,
       std::shared_ptr<RunAction::Response> response) {
-        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Get message: " + request->json);
+        // TODO(finesaaa): need real test
         // response->status = AkushonNode::handle_run_action(request);
-        response->status = "ACCEPTED"; // temporary
+
+        // TODO(finesaaa): temporary for checking
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "[RUN ACTION] Get request: " + request->json);
+        response->status = "ACCEPTED";
       }
     );
   }
