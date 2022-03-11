@@ -83,13 +83,14 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
   }
 }
 
-std::string AkushonNode::handle_run_action(std::shared_ptr<akushon_interfaces::srv::RunAction::Request> request) 
+std::string AkushonNode::handle_run_action(
+  std::shared_ptr<akushon_interfaces::srv::RunAction::Request> request)
 {
   rclcpp::Rate rcl_rate(8ms);
 
   bool is_ready = false;
   Action action = action_node->load_json_action(request->json);
-  is_ready = action_node->start(action); 
+  is_ready = action_node->start(action);
 
   if (is_ready) {
     while (rclcpp::ok()) {
@@ -104,7 +105,7 @@ std::string AkushonNode::handle_run_action(std::shared_ptr<akushon_interfaces::s
   }
 
   if (rclcpp::ok()) {
-    return is_ready? "SUCCEEDED" : "FAILED";
+    return is_ready ? "SUCCEEDED" : "FAILED";
   }
 }
 

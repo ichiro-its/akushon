@@ -56,7 +56,7 @@ public:
   bool is_playing() const;
 
   std::vector<tachimawari::joint::Joint> get_joints() const;
-  
+
   std::string get_actions_list() const;
 
 private:

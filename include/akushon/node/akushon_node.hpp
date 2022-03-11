@@ -50,7 +50,8 @@ public:
   void set_action_manager(std::shared_ptr<ActionManager> action_manager);
 
 private:
-  std::string handle_run_action(std::shared_ptr<akushon_interfaces::srv::RunAction::Request> request);
+  std::string handle_run_action(
+    std::shared_ptr<akushon_interfaces::srv::RunAction::Request> request);
 
   rclcpp::Node::SharedPtr node;
 

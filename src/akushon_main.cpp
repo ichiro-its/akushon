@@ -20,6 +20,7 @@
 
 #include <memory>
 #include <iostream>
+#include <string>
 
 #include "akushon/action/node/action_manager.hpp"
 #include "akushon/node/akushon_node.hpp"
@@ -38,7 +39,7 @@ int main(int argc, char * argv[])
   auto akushon_node = std::make_shared<akushon::AkushonNode>(node);
 
   auto action_manager = std::make_shared<akushon::ActionManager>();
-  
+
   std::string path = argv[1];
 
   action_manager->load_data(path);

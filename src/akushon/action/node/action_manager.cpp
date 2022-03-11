@@ -79,13 +79,14 @@ void ActionManager::load_data(const std::string & path)
       // TODO(maroqijalil): will be used for logging
       // std::cerr << "parse error at byte " << ex.byte << std::endl;
     }
-
   }
   std::cout << actions_list.dump() << std::endl;
   this->actions_list = actions_list.dump();
 }
 
-Action ActionManager::load_action(const nlohmann::json & action_data, const std::string & action_name) const 
+Action ActionManager::load_action(
+  const nlohmann::json & action_data,
+  const std::string & action_name) const
 {
   Action action = Action(action_name);
 
@@ -94,8 +95,7 @@ Action ActionManager::load_action(const nlohmann::json & action_data, const std:
 
     for (const auto & [key, val] : action_data.items()) {
       if (key.find("poses") != std::string::npos) {
-        for (const auto & raw_pose : action_data["poses"])
-        {
+        for (const auto & raw_pose : action_data["poses"]) {
           {
             using tachimawari::joint::JointId;
             using tachimawari::joint::Joint;
@@ -112,7 +112,7 @@ Action ActionManager::load_action(const nlohmann::json & action_data, const std:
             pose.set_speed(raw_pose["speed"]);
             pose.set_joints(joints);
             action.add_pose(pose);
-        }
+          }
         }
       } else if (key == "start_delay") {
         action.set_start_delay(val);
@@ -136,11 +136,11 @@ void ActionManager::save_data(const nlohmann::json & actions_data)
     std::locale loc;
     std::string action_name = key;
     std::replace(action_name.begin(), action_name.end(), ' ', '_');
-    
+
     std::string file_name = path_data + "/action/" + action_name + ".json";
     std::ofstream file;
 
-    file.open (file_name);
+    file.open(file_name);
     file << val.dump(2);
     file.close();
   }

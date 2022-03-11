@@ -122,7 +122,7 @@ bool ActionNode::start(const Action & action)
   auto result = get_joints_client->async_send_request(
     std::make_shared<tachimawari_interfaces::srv::GetJoints::Request>());
 
-  if (rclcpp::spin_until_future_complete(node, result) == 
+  if (rclcpp::spin_until_future_complete(node, result) ==
     rclcpp::FutureReturnCode::SUCCESS)
   {
     Pose pose("initial_pose");
@@ -181,7 +181,7 @@ std::string ActionNode::get_all_actions() const
   return action_manager->get_actions_list();
 }
 
-void ActionNode::save_all_actions(std::string json_actions) 
+void ActionNode::save_all_actions(std::string json_actions)
 {
   nlohmann::json actions_data = nlohmann::json::parse(json_actions);
   action_manager->save_data(actions_data);
