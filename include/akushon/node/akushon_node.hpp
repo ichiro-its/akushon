@@ -26,7 +26,6 @@
 
 #include "akushon/action/node/action_manager.hpp"
 #include "akushon/action/node/action_node.hpp"
-#include "akushon_interfaces/action/run_action.hpp"
 #include "akushon_interfaces/srv/save_actions.hpp"
 #include "akushon_interfaces/srv/get_actions.hpp"
 #include "akushon_interfaces/srv/run_action.hpp"
@@ -35,9 +34,6 @@
 
 namespace akushon
 {
-
-using akushon_interfaces::action::RunAction;
-using GoalHandleRunAction = rclcpp_action::ServerGoalHandle<RunAction>;
 
 class AkushonNode
 {
@@ -54,15 +50,6 @@ public:
   void set_action_manager(std::shared_ptr<ActionManager> action_manager);
 
 private:
-  rclcpp_action::GoalResponse handle_goal(
-    const rclcpp_action::GoalUUID & uuid,
-    std::shared_ptr<const RunAction::Goal> goal);
-
-  rclcpp_action::CancelResponse handle_cancel(
-    const std::shared_ptr<GoalHandleRunAction> goal_handle);
-
-  void handle_accepted(const std::shared_ptr<GoalHandleRunAction> goal_handle);
-
   std::string handle_run_action(std::shared_ptr<akushon_interfaces::srv::RunAction::Request> request);
 
   rclcpp::Node::SharedPtr node;
@@ -74,8 +61,6 @@ private:
   rclcpp::Service<akushon_interfaces::srv::GetActions>::SharedPtr get_actions_service;
 
   rclcpp::Service<akushon_interfaces::srv::RunAction>::SharedPtr run_action_service;
-
-  rclcpp_action::Server<RunAction>::SharedPtr run_action_server;
 };
 
 }  // namespace akushon

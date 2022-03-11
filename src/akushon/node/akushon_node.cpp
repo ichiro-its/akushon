@@ -27,7 +27,6 @@
 #include "akushon/action/model/action.hpp"
 #include "akushon/action/node/action_manager.hpp"
 #include "akushon/action/node/action_node.hpp"
-#include "akushon_interfaces/action/run_action.hpp"
 #include "akushon_interfaces/srv/save_actions.hpp"
 #include "akushon_interfaces/srv/get_actions.hpp"
 #include "akushon_interfaces/srv/run_action.hpp"
@@ -82,16 +81,6 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
       }
     );
   }
-
-  run_action_server = rclcpp_action::create_server<RunAction>(
-    node->get_node_base_interface(),
-    node->get_node_clock_interface(),
-    node->get_node_logging_interface(),
-    node->get_node_waitables_interface(),
-    "run_action",
-    std::bind(&AkushonNode::handle_goal, this, _1, _2),
-    std::bind(&AkushonNode::handle_cancel, this, _1),
-    std::bind(&AkushonNode::handle_accepted, this, _1));
 }
 
 std::string AkushonNode::handle_run_action(std::shared_ptr<akushon_interfaces::srv::RunAction::Request> request) 
@@ -117,75 +106,6 @@ std::string AkushonNode::handle_run_action(std::shared_ptr<akushon_interfaces::s
   if (rclcpp::ok()) {
     return is_ready? "SUCCEEDED" : "FAILED";
   }
-}
-
-rclcpp_action::GoalResponse AkushonNode::handle_goal(
-  const rclcpp_action::GoalUUID & uuid,
-  std::shared_ptr<const RunAction::Goal> goal)
-{
-  bool is_action_exist = false;
-
-  if (action_node->get_status() == ActionNode::READY && action_node) {
-    if (goal->action_id >= 0) {
-      is_action_exist = action_node->is_action_exist(goal->action_id);
-    } else if (goal->action_name != "") {
-      is_action_exist = action_node->is_action_exist(goal->action_name);
-    }
-  }
-
-  return is_action_exist ?
-         rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE :
-         rclcpp_action::GoalResponse::REJECT;
-}
-
-rclcpp_action::CancelResponse AkushonNode::handle_cancel(
-  const std::shared_ptr<GoalHandleRunAction> goal_handle)
-{
-  return rclcpp_action::CancelResponse::ACCEPT;
-}
-
-void AkushonNode::handle_accepted(const std::shared_ptr<GoalHandleRunAction> goal_handle)
-{
-  std::thread{[this](const std::shared_ptr<GoalHandleRunAction> goal_handle) {
-      rclcpp::Rate rcl_rate(8ms);
-
-      const auto goal = goal_handle->get_goal();
-
-      bool is_ready = false;
-      if (goal->action_id >= 0) {
-        is_ready = action_node->start(goal->action_id);
-      } else if (goal->action_name != "") {
-        is_ready = action_node->start(goal->action_name);
-      }
-
-      auto feedback = std::make_shared<RunAction::Feedback>();
-      auto result = std::make_shared<RunAction::Result>();
-
-      if (is_ready) {
-        while (rclcpp::ok()) {
-          rcl_rate.sleep();
-
-          if (goal_handle->is_canceling()) {
-            result->status = CANCELED;
-            goal_handle->canceled(result);
-            return;
-          }
-
-          if (action_node->get_status() == ActionNode::PLAYING) {
-            action_node->process(this->node->now().seconds() * 1000);
-          } else if (action_node->get_status() == ActionNode::READY) {
-            break;
-          }
-
-          goal_handle->publish_feedback(feedback);
-        }
-      }
-
-      if (rclcpp::ok()) {
-        result->status = is_ready ? SUCCEEDED : FAILED;
-        goal_handle->succeed(result);
-      }
-    }, goal_handle}.join();
 }
 
 void AkushonNode::set_action_manager(std::shared_ptr<ActionManager> action_manager)
