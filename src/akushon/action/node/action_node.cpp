@@ -176,22 +176,6 @@ void ActionNode::publish_joints()
   set_joints_publisher->publish(joints_msg);
 }
 
-void ActionNode::publish_joints(const std::vector<tachimawari::joint::Joint> & request_joints) 
-{
-  auto joints_msg = tachimawari_interfaces::msg::SetJoints();
-
-  const auto & joints = request_joints;
-  auto & joint_msgs = joints_msg.joints;
-
-  joint_msgs.resize(joints.size());
-  for (size_t i = 0; i < joints.size() && i < joint_msgs.size(); ++i) {
-    joint_msgs[i].id = joints[i].get_id();
-    joint_msgs[i].position = joints[i].get_position();
-  }
-
-  set_joints_publisher->publish(joints_msg);
-}
-
 std::string ActionNode::get_all_actions() const
 {
   return action_manager->get_actions_list();
