@@ -30,6 +30,7 @@
 #include "akushon/action/node/action_manager.hpp"
 #include "akushon/action/model/action_name.hpp"
 #include "akushon/action/model/pose.hpp"
+#include "akushon_interfaces/srv/run_action.hpp"
 #include "nlohmann/json.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "tachimawari/joint/model/joint.hpp"
@@ -50,6 +51,49 @@ ActionNode::ActionNode(
 
   get_joints_client = node->create_client<tachimawari_interfaces::srv::GetJoints>(
     "/joint/get_joints");
+  
+  {
+    using akushon_interfaces::srv::RunAction;
+    run_action_service = node->create_service<RunAction>(
+      "/run_action",
+      [this](std::shared_ptr<RunAction::Request> request,
+      std::shared_ptr<RunAction::Response> response) {
+        // TODO(finesaaa): need real test
+        // response->status = ActionNode::handle_run_action(request);
+
+        // TODO(finesaaa): temporary for checking
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "[RUN ACTION] Get request: " + request->json);
+        response->status = "ACCEPTED";
+      }
+    );
+  }
+}
+
+std::string ActionNode::handle_run_action(
+  std::shared_ptr<akushon_interfaces::srv::RunAction::Request> request)
+{
+  rclcpp::Rate rcl_rate(8ms);
+
+  bool is_ready = false;
+  nlohmann::json action_data = nlohmann::json::parse(request->json);
+  Action action = action_manager->load_action(action_data, "temp_action");
+  is_ready = start(action);
+
+  if (is_ready) {
+    while (rclcpp::ok()) {
+      rcl_rate.sleep();
+
+      if (get_status() == ActionNode::PLAYING) {
+        process(this->node->now().seconds() * 1000);
+      } else if (get_status() == ActionNode::READY) {
+        break;
+      }
+    }
+  }
+
+  if (rclcpp::ok()) {
+    return is_ready ? "SUCCEEDED" : "FAILED";
+  }
 }
 
 bool ActionNode::is_action_exist(int action_id) const
@@ -185,13 +229,6 @@ void ActionNode::save_all_actions(std::string json_actions)
 {
   nlohmann::json actions_data = nlohmann::json::parse(json_actions);
   action_manager->save_data(actions_data);
-}
-
-Action ActionNode::load_json_action(std::string json_action) const
-{
-  nlohmann::json action_data = nlohmann::json::parse(json_action);
-  Action action = action_manager->load_action(action_data, "temp_action");
-  return action;
 }
 
 }  // namespace akushon

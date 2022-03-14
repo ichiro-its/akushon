@@ -29,7 +29,6 @@
 #include "akushon/action/node/action_node.hpp"
 #include "akushon_interfaces/srv/save_actions.hpp"
 #include "akushon_interfaces/srv/get_actions.hpp"
-#include "akushon_interfaces/srv/run_action.hpp"
 #include "tachimawari/joint/model/joint.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
@@ -43,22 +42,6 @@ namespace akushon
 AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
 : node(node), action_node(nullptr)
 {
-  {
-    using akushon_interfaces::srv::RunAction;
-    run_action_service = node->create_service<RunAction>(
-      "/run_action",
-      [this](std::shared_ptr<RunAction::Request> request,
-      std::shared_ptr<RunAction::Response> response) {
-        // TODO(finesaaa): need real test
-        // response->status = AkushonNode::handle_run_action(request);
-
-        // TODO(finesaaa): temporary for checking
-        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "[RUN ACTION] Get request: " + request->json);
-        response->status = "ACCEPTED";
-      }
-    );
-  }
-
   {
     using akushon_interfaces::srv::SaveActions;
     save_actions_service = node->create_service<SaveActions>(
@@ -80,32 +63,6 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
         response->json = this->action_node->get_all_actions();
       }
     );
-  }
-}
-
-std::string AkushonNode::handle_run_action(
-  std::shared_ptr<akushon_interfaces::srv::RunAction::Request> request)
-{
-  rclcpp::Rate rcl_rate(8ms);
-
-  bool is_ready = false;
-  Action action = action_node->load_json_action(request->json);
-  is_ready = action_node->start(action);
-
-  if (is_ready) {
-    while (rclcpp::ok()) {
-      rcl_rate.sleep();
-
-      if (action_node->get_status() == ActionNode::PLAYING) {
-        action_node->process(this->node->now().seconds() * 1000);
-      } else if (action_node->get_status() == ActionNode::READY) {
-        break;
-      }
-    }
-  }
-
-  if (rclcpp::ok()) {
-    return is_ready ? "SUCCEEDED" : "FAILED";
   }
 }
 
