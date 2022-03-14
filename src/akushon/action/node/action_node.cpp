@@ -58,41 +58,36 @@ ActionNode::ActionNode(
       "/run_action",
       [this](std::shared_ptr<RunAction::Request> request,
       std::shared_ptr<RunAction::Response> response) {
+        
         // TODO(finesaaa): need real test
-        // response->status = ActionNode::handle_run_action(request);
+        rclcpp::Rate rcl_rate(8ms);
+
+        bool is_ready = false;
+        nlohmann::json action_data = nlohmann::json::parse(request->json);
+        Action action = this->action_manager->load_action(action_data, "temp_action");
+        is_ready = start(action);
+
+        if (is_ready) {
+          while (rclcpp::ok()) {
+            rcl_rate.sleep();
+
+            if (get_status() == ActionNode::PLAYING) {
+              process(this->node->now().seconds() * 1000);
+            } else if (get_status() == ActionNode::READY) {
+              break;
+            }
+          }
+        }
+
+        if (rclcpp::ok()) {
+          response->status = is_ready ? "SUCCEEDED" : "FAILED";
+        }
 
         // TODO(finesaaa): temporary for checking
-        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "[RUN ACTION] Get request: " + request->json);
-        response->status = "ACCEPTED";
+        // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "[RUN ACTION] Get request: " + request->json);
+        // response->status = "ACCEPTED";
       }
     );
-  }
-}
-
-std::string ActionNode::handle_run_action(
-  std::shared_ptr<akushon_interfaces::srv::RunAction::Request> request)
-{
-  rclcpp::Rate rcl_rate(8ms);
-
-  bool is_ready = false;
-  nlohmann::json action_data = nlohmann::json::parse(request->json);
-  Action action = action_manager->load_action(action_data, "temp_action");
-  is_ready = start(action);
-
-  if (is_ready) {
-    while (rclcpp::ok()) {
-      rcl_rate.sleep();
-
-      if (get_status() == ActionNode::PLAYING) {
-        process(this->node->now().seconds() * 1000);
-      } else if (get_status() == ActionNode::READY) {
-        break;
-      }
-    }
-  }
-
-  if (rclcpp::ok()) {
-    return is_ready ? "SUCCEEDED" : "FAILED";
   }
 }
 
@@ -218,17 +213,6 @@ void ActionNode::publish_joints()
   }
 
   set_joints_publisher->publish(joints_msg);
-}
-
-std::string ActionNode::get_all_actions() const
-{
-  return action_manager->get_actions_list();
-}
-
-void ActionNode::save_all_actions(std::string json_actions)
-{
-  nlohmann::json actions_data = nlohmann::json::parse(json_actions);
-  action_manager->save_data(actions_data);
 }
 
 }  // namespace akushon

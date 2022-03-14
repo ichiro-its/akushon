@@ -24,12 +24,8 @@
 
 #include "akushon/node/akushon_node.hpp"
 
-#include "akushon/action/model/action.hpp"
 #include "akushon/action/node/action_manager.hpp"
 #include "akushon/action/node/action_node.hpp"
-#include "akushon_interfaces/srv/save_actions.hpp"
-#include "akushon_interfaces/srv/get_actions.hpp"
-#include "tachimawari/joint/model/joint.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 
@@ -42,33 +38,16 @@ namespace akushon
 AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
 : node(node), action_node(nullptr)
 {
-  {
-    using akushon_interfaces::srv::SaveActions;
-    save_actions_service = node->create_service<SaveActions>(
-      "/save_actions",
-      [this](std::shared_ptr<SaveActions::Request> request,
-      std::shared_ptr<SaveActions::Response> response) {
-        this->action_node->save_all_actions(request->json);
-        response->status = "SAVED";
-      }
-    );
-  }
-
-  {
-    using akushon_interfaces::srv::GetActions;
-    get_actions_service = node->create_service<GetActions>(
-      "/get_actions",
-      [this](std::shared_ptr<GetActions::Request> request,
-      std::shared_ptr<GetActions::Response> response) {
-        response->json = this->action_node->get_all_actions();
-      }
-    );
-  }
 }
 
 void AkushonNode::set_action_manager(std::shared_ptr<ActionManager> action_manager)
 {
   action_node = std::make_shared<ActionNode>(node, action_manager);
+}
+
+void AkushonNode::run_config_service(const std::string & path)
+{
+  config_node = std::make_shared<ConfigNode>(node, path);
 }
 
 }  // namespace akushon

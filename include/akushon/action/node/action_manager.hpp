@@ -45,7 +45,6 @@ public:
   Action get_action(int action_id) const;
 
   void load_data(const std::string & path);
-  void save_data(const nlohmann::json & actions_data);
 
   Action load_action(const nlohmann::json & action_data, const std::string & action_name) const;
 
@@ -57,12 +56,8 @@ public:
 
   std::vector<tachimawari::joint::Joint> get_joints() const;
 
-  std::string get_actions_list() const;
-
 private:
   std::map<int, Action> actions;
-  std::string actions_list;
-  std::string path_data;
 
   std::shared_ptr<Interpolator> interpolator;
   bool is_running;

@@ -57,9 +57,6 @@ public:
 
   int get_status() const;
 
-  std::string get_all_actions() const;
-  void save_all_actions(std::string json_actions);
-
 private:
   std::string handle_run_action(
     std::shared_ptr<akushon_interfaces::srv::RunAction::Request> request);

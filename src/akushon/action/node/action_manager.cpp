@@ -62,16 +62,13 @@ Action ActionManager::get_action(int action_id) const
 
 void ActionManager::load_data(const std::string & path)
 {
-  nlohmann::json actions_list;
-  path_data = path;
   for (const auto & [name, id] : ActionName::map) {
-    std::string file_name = path_data + "/action/" + name + ".json";
+    std::string file_name = path + "/action/" + name + ".json";
 
     try {
       std::ifstream file(file_name);
       nlohmann::json action_data = nlohmann::json::parse(file);
 
-      actions_list["action_" + name] = action_data;
       Action action = load_action(action_data, name);
 
       actions.insert({id, action});
@@ -80,8 +77,6 @@ void ActionManager::load_data(const std::string & path)
       // std::cerr << "parse error at byte " << ex.byte << std::endl;
     }
   }
-  std::cout << actions_list.dump() << std::endl;
-  this->actions_list = actions_list.dump();
 }
 
 Action ActionManager::load_action(
@@ -128,22 +123,6 @@ Action ActionManager::load_action(
   }
 
   return action;
-}
-
-void ActionManager::save_data(const nlohmann::json & actions_data)
-{
-  for (const auto & [key, val] : actions_data.items()) {
-    std::locale loc;
-    std::string action_name = key;
-    std::replace(action_name.begin(), action_name.end(), ' ', '_');
-
-    std::string file_name = path_data + "/action/" + action_name + ".json";
-    std::ofstream file;
-
-    file.open(file_name);
-    file << val.dump(2);
-    file.close();
-  }
 }
 
 void ActionManager::start(int action_id, const Pose & initial_pose)
@@ -203,11 +182,6 @@ std::vector<tachimawari::joint::Joint> ActionManager::get_joints() const
   }
 
   return {};
-}
-
-std::string ActionManager::get_actions_list() const
-{
-  return actions_list;
 }
 
 }  // namespace akushon
