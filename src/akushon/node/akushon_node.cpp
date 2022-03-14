@@ -36,7 +36,7 @@ namespace akushon
 {
 
 AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
-: node(node), action_node(nullptr)
+: node(node), action_node(nullptr), config_node(nullptr)
 {
 }
 
