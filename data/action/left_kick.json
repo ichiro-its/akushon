@@ -27,7 +27,7 @@
       },
       "name": "walkready",
       "pause": 0,
-      "speed": "0.1"
+      "speed": 0.1
     },
     {
       "joints": {
