@@ -31,9 +31,9 @@ namespace akushon
 ConfigUtil::ConfigUtil(const std::string & path)
 : path(path)
 {
-};
+}
 
-std::string ConfigUtil::get_config() const 
+std::string ConfigUtil::get_config() const
 {
   nlohmann::json actions_list;
   for (const auto & [name, id] : ActionName::map) {
@@ -53,7 +53,7 @@ std::string ConfigUtil::get_config() const
   return actions_list.dump();
 }
 
-void ConfigUtil::set_config(const std::string & actions_data) 
+void ConfigUtil::set_config(const std::string & actions_data)
 {
   nlohmann::json actions_list = nlohmann::json::parse(actions_data);
   for (const auto & [key, val] : actions_list.items()) {
@@ -68,6 +68,6 @@ void ConfigUtil::set_config(const std::string & actions_data)
     file << val.dump(2);
     file.close();
   }
-}  
+}
 
 }  // namespace akushon

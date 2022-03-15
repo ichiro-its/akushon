@@ -24,7 +24,7 @@
 #include <fstream>
 #include <string>
 
-namespace akushon 
+namespace akushon
 {
 
 class ConfigUtil

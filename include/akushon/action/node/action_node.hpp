@@ -60,7 +60,7 @@ public:
 private:
   std::string handle_run_action(
     std::shared_ptr<akushon_interfaces::srv::RunAction::Request> request);
-  
+
   std::string get_node_prefix() const;
 
   void publish_joints();

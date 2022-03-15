@@ -29,7 +29,7 @@
 #include "akushon_interfaces/srv/get_actions.hpp"
 #include "rclcpp/rclcpp.hpp"
 
-namespace akushon 
+namespace akushon
 {
 
 class ConfigNode
