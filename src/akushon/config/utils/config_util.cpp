@@ -44,7 +44,6 @@ std::string ConfigUtil::get_config() const
       nlohmann::json action_data = nlohmann::json::parse(file);
 
       actions_list["action_" + name] = action_data;
-
     } catch (nlohmann::json::parse_error & ex) {
       // TODO(maroqijalil): will be used for logging
       // std::cerr << "parse error at byte " << ex.byte << std::endl;
@@ -60,7 +59,6 @@ void ConfigUtil::set_config(const std::string & actions_data)
     std::locale loc;
     std::string action_name = key;
     std::replace(action_name.begin(), action_name.end(), ' ', '_');
-
     std::string file_name = path + "/action/" + action_name + ".json";
     std::ofstream file;
 

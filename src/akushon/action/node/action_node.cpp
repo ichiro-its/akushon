@@ -58,7 +58,6 @@ ActionNode::ActionNode(
       "/run_action",
       [this](std::shared_ptr<RunAction::Request> request,
       std::shared_ptr<RunAction::Response> response) {
-
         // TODO(finesaaa): need real test
         rclcpp::Rate rcl_rate(8ms);
 
