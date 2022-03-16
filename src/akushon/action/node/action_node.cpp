@@ -19,6 +19,7 @@
 // SOFTWARE.
 
 #include <chrono>
+#include <iostream>
 #include <iomanip>
 #include <memory>
 #include <string>
@@ -44,7 +45,7 @@ namespace akushon
 
 ActionNode::ActionNode(
   rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> action_manager)
-: node(node), action_manager(action_manager), status(READY)
+: node(node), action_manager(action_manager), status(READY), now(node->now().seconds())
 {
   set_joints_publisher = node->create_publisher<tachimawari_interfaces::msg::SetJoints>(
     "/joint/set_joints", 10);
@@ -61,17 +62,17 @@ ActionNode::ActionNode(
         // TODO(finesaaa): need real test
         rclcpp::Rate rcl_rate(8ms);
 
-        bool is_ready = false;
         nlohmann::json action_data = nlohmann::json::parse(request->json);
         Action action = this->action_manager->load_action(action_data, "temp_action");
-        is_ready = start(action);
+        bool is_ready = start(action);
 
         if (is_ready) {
           while (rclcpp::ok()) {
             rcl_rate.sleep();
 
             if (get_status() == ActionNode::PLAYING) {
-              process(this->node->now().seconds() * 1000);
+              double time = this->node->now().seconds() - this->now;
+              process(time * 1000);
             } else if (get_status() == ActionNode::READY) {
               break;
             }

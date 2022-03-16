@@ -78,6 +78,7 @@ private:
   rclcpp::Service<akushon_interfaces::srv::RunAction>::SharedPtr run_action_service;
 
   int status;
+  double now;
 };
 
 }  // namespace akushon

@@ -153,7 +153,6 @@ void ActionManager::start(int action_id, const Pose & initial_pose)
 
 void ActionManager::start(const Action & action, const Pose & initial_pose)
 {
-  bool temporary = true;
   std::vector<Action> target_actions;
   target_actions.push_back(action);
 
