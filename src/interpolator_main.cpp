@@ -56,7 +56,7 @@ int main(int argc, char * argv[])
     using tachimawari::joint::Joint;
     std::vector<Joint> joints;
 
-    for (int id = 1; id < 21; id++) {
+    for (int id = 1; id < JointId::list.size(); id++) {
       Joint joint(id, 0);
       joints.push_back(joint);
     }
@@ -76,9 +76,10 @@ int main(int argc, char * argv[])
     auto joints = action_manager->get_joints();
 
     for (const auto & joint : joints) {
-      for (auto &i : tachimawari::joint::JointId::by_name) {
-        if (i.second == int(joint.get_id()))
+      for (auto & i : tachimawari::joint::JointId::by_name) {
+        if (i.second == int(joint.get_id())) {
           std::cout << i.first << " : ";
+        }
       }
       std::cout << joint.get_position() << std::endl;
     }
