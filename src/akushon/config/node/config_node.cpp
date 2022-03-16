@@ -23,7 +23,7 @@
 
 #include "akushon/config/node/config_node.hpp"
 
-#include "akushon/config/utils/config_util.hpp"
+#include "akushon/config/utils/config.hpp"
 #include "akushon_interfaces/srv/save_actions.hpp"
 #include "akushon_interfaces/srv/get_actions.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -51,7 +51,7 @@ ConfigNode::ConfigNode(rclcpp::Node::SharedPtr node, const std::string & path)
       get_node_prefix() + "/save_actions",
       [this](std::shared_ptr<SaveActions::Request> request,
       std::shared_ptr<SaveActions::Response> response) {
-        this->config_util.set_config(request->json);
+        this->config_util.save_config(request->json);
         response->status = "SAVED";
       }
     );

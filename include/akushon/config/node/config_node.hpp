@@ -24,7 +24,7 @@
 #include <memory>
 #include <string>
 
-#include "akushon/config/utils/config_util.hpp"
+#include "akushon/config/utils/config.hpp"
 #include "akushon_interfaces/srv/save_actions.hpp"
 #include "akushon_interfaces/srv/get_actions.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -40,7 +40,7 @@ public:
 private:
   std::string get_node_prefix() const;
 
-  ConfigUtil config_util;
+  Config config_util;
 
   rclcpp::Service<akushon_interfaces::srv::SaveActions>::SharedPtr save_actions_service;
   rclcpp::Service<akushon_interfaces::srv::GetActions>::SharedPtr get_actions_service;

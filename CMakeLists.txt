@@ -30,7 +30,7 @@ add_library(${PROJECT_NAME} SHARED
   "src/${PROJECT_NAME}/action/process/interpolator.cpp"
   "src/${PROJECT_NAME}/action/process/joint_process.cpp"
   "src/${PROJECT_NAME}/config/node/config_node.cpp"
-  "src/${PROJECT_NAME}/config/utils/config_util.cpp"
+  "src/${PROJECT_NAME}/config/utils/config.cpp"
   "src/${PROJECT_NAME}/node/akushon_node.cpp")
 
 target_include_directories(${PROJECT_NAME} PUBLIC
