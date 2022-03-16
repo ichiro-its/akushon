@@ -59,8 +59,15 @@ target_include_directories(akushon_main PUBLIC
   $<INSTALL_INTERFACE:include>)
 target_link_libraries(akushon_main ${PROJECT_NAME})
 
+add_executable(interpolator_main "src/interpolator_main.cpp")
+target_include_directories(interpolator_main PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+target_link_libraries(interpolator_main ${PROJECT_NAME})
+
 install(TARGETS
   akushon_main
+  interpolator_main
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
