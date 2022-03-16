@@ -105,21 +105,18 @@ int ActionNode::get_status() const
   return status;
 }
 
-bool ActionNode::start(const std::string & action_name)
-{
-  return start(ActionName::map.at(action_name));
-}
-
-bool ActionNode::start(int action_id)
+Pose ActionNode::get_initial_pose() const
 {
   while (!get_joints_client->wait_for_service(1s)) {
     if (rclcpp::ok()) {
       // service not available, waiting again...
     } else {
       // Interrupted while waiting for the service. Exiting.
-      return false;
+      break;
     }
   }
+
+  Pose pose("initial_pose");
 
   auto result = get_joints_client->async_send_request(
     std::make_shared<tachimawari_interfaces::srv::GetJoints::Request>());
@@ -127,7 +124,6 @@ bool ActionNode::start(int action_id)
   if (rclcpp::spin_until_future_complete(node, result) ==
     rclcpp::FutureReturnCode::SUCCESS)
   {
-    Pose pose("initial_pose");
     std::vector<tachimawari::joint::Joint> joints;
 
     for (const auto & joint : result.get()->joints) {
@@ -135,7 +131,21 @@ bool ActionNode::start(int action_id)
         tachimawari::joint::Joint(joint.id, joint.position));
     }
     pose.set_joints(joints);
+  }
 
+  return pose;
+}
+
+bool ActionNode::start(const std::string & action_name)
+{
+  return start(ActionName::map.at(action_name));
+}
+
+bool ActionNode::start(int action_id)
+{
+  Pose pose = this->get_initial_pose();
+
+  if (!pose.get_joints().empty()) {
     action_manager->start(action_id, pose);
     status = PLAYING;
   } else {
@@ -148,34 +158,13 @@ bool ActionNode::start(int action_id)
 
 bool ActionNode::start(const Action & action)
 {
-  while (!get_joints_client->wait_for_service(1s)) {
-    if (rclcpp::ok()) {
-      // service not available, waiting again ...
-    } else {
-      // interupted while waiting for the service, exiting ...
-      return false;
-    }
-  }
+  Pose pose = this->get_initial_pose();
 
-  auto result = get_joints_client->async_send_request(
-    std::make_shared<tachimawari_interfaces::srv::GetJoints::Request>());
-
-  if (rclcpp::spin_until_future_complete(node, result) ==
-    rclcpp::FutureReturnCode::SUCCESS)
-  {
-    Pose pose("initial_pose");
-    std::vector<tachimawari::joint::Joint> joints;
-
-    for (const auto & joint : result.get()->joints) {
-      joints.push_back(
-        tachimawari::joint::Joint(joint.id, joint.position));
-    }
-    pose.set_joints(joints);
-
+  if (!pose.get_joints().empty()) {
     action_manager->start(action, pose);
     status = PLAYING;
   } else {
-    // failed to call service
+    // Failed to call service
     return false;
   }
 

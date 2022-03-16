@@ -25,6 +25,7 @@
 #include <string>
 
 #include "akushon/action/model/action.hpp"
+#include "akushon/action/model/pose.hpp"
 #include "akushon/action/node/action_manager.hpp"
 #include "akushon_interfaces/srv/run_action.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -60,6 +61,8 @@ public:
 private:
   std::string handle_run_action(
     std::shared_ptr<akushon_interfaces::srv::RunAction::Request> request);
+
+  Pose get_initial_pose() const;
 
   std::string get_node_prefix() const;
 
