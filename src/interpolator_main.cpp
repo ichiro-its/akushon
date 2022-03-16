@@ -21,6 +21,7 @@
 #include <memory>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "akushon/action/node/action_manager.hpp"
 #include "akushon/action/model/action.hpp"
@@ -77,7 +78,7 @@ int main(int argc, char * argv[])
 
     for (const auto & joint : joints) {
       for (auto & i : tachimawari::joint::JointId::by_name) {
-        if (i.second == int(joint.get_id())) {
+        if (i.second == static_cast<int>(joint.get_id())) {
           std::cout << i.first << " : ";
         }
       }
@@ -87,7 +88,6 @@ int main(int argc, char * argv[])
     std::cout << std::endl;
 
     time += 8;
-
   }
 
   return 0;
