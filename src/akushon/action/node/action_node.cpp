@@ -55,7 +55,7 @@ ActionNode::ActionNode(
   {
     using akushon_interfaces::srv::RunAction;
     run_action_service = node->create_service<RunAction>(
-      "/run_action",
+      get_node_prefix() + "/run_action",
       [this](std::shared_ptr<RunAction::Request> request,
       std::shared_ptr<RunAction::Response> response) {
         // TODO(finesaaa): need real test
