@@ -66,7 +66,10 @@ if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
 
   ament_add_gtest(${PROJECT_NAME}_tests
-    "test/action/action_test.cpp")
+    "test/action/action_test.cpp" 
+    "test/action/interpolator_test.cpp" 
+    "test/node/akushon_node_test.cpp"
+    )
 
   target_include_directories(${PROJECT_NAME}_tests PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
