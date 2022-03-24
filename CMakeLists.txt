@@ -29,6 +29,8 @@ add_library(${PROJECT_NAME} SHARED
   "src/${PROJECT_NAME}/action/node/action_node.cpp"
   "src/${PROJECT_NAME}/action/process/interpolator.cpp"
   "src/${PROJECT_NAME}/action/process/joint_process.cpp"
+  "src/${PROJECT_NAME}/config/node/config_node.cpp"
+  "src/${PROJECT_NAME}/config/utils/config.cpp"
   "src/${PROJECT_NAME}/node/akushon_node.cpp")
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -57,8 +59,22 @@ target_include_directories(akushon_main PUBLIC
   $<INSTALL_INTERFACE:include>)
 target_link_libraries(akushon_main ${PROJECT_NAME})
 
+add_executable(interpolator_main "src/interpolator_main.cpp")
+target_include_directories(interpolator_main PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+target_link_libraries(interpolator_main ${PROJECT_NAME})
+
+add_executable(action_main "src/action_main.cpp")
+target_include_directories(action_main PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+target_link_libraries(action_main ${PROJECT_NAME})
+
 install(TARGETS
   akushon_main
+  interpolator_main
+  action_main
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)

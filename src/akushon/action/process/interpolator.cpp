@@ -22,7 +22,6 @@
 #include <vector>
 
 #include "akushon/action/process/interpolator.hpp"
-
 #include "akushon/action/model/action.hpp"
 #include "akushon/action/process/joint_process.hpp"
 #include "tachimawari/joint/model/joint.hpp"
@@ -117,9 +116,11 @@ bool Interpolator::is_finished() const
 
 void Interpolator::next_pose()
 {
-  for (const auto & joint : get_current_pose().get_joints()) {
+  auto current_pose = get_current_pose();
+  for (const auto & joint : current_pose.get_joints()) {
     if (joint_processes.find(joint.get_id()) != joint_processes.end()) {
-      joint_processes.at(joint.get_id()).set_target_position(joint.get_position());
+      joint_processes.at(joint.get_id()).set_target_position(
+        joint.get_position(), current_pose.get_speed());
     }
   }
   ++current_pose_index;
