@@ -41,6 +41,7 @@ void JointProcess::set_target_position(float target_position, float speed)
 
   this->target_position = target_position;
   additional_position = (this->target_position - initial_position) * filtered_speed;
+  additional_position = (fabs(additional_position) < 0.1) ? 0.0 : additional_position;
 }
 
 void JointProcess::set_initial_position(float initial_position)
@@ -67,7 +68,7 @@ void JointProcess::interpolate()
 
 bool JointProcess::is_finished() const
 {
-  return initial_position == target_position;
+  return (initial_position == target_position) || (additional_position == 0.0);
 }
 
 JointProcess::operator tachimawari::joint::Joint() const

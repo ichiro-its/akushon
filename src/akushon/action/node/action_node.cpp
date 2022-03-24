@@ -194,7 +194,7 @@ void ActionNode::publish_joints()
 
   const auto & joints = action_manager->get_joints();
   auto & joint_msgs = joints_msg.joints;
-
+  
   joint_msgs.resize(joints.size());
   for (size_t i = 0; i < joints.size() && i < joint_msgs.size(); ++i) {
     joint_msgs[i].id = joints[i].get_id();
