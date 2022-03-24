@@ -153,8 +153,7 @@ void ActionManager::start(int action_id, const Pose & initial_pose)
 
 void ActionManager::start(const Action & action, const Pose & initial_pose)
 {
-  std::vector<Action> target_actions;
-  target_actions.push_back(action);
+  std::vector<Action> target_actions {action};
 
   interpolator = std::make_shared<Interpolator>(target_actions, initial_pose);
   is_running = true;
