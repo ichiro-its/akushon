@@ -34,11 +34,11 @@
 #include "nlohmann/json.hpp"
 #include "tachimawari/joint/joint.hpp"
 
-TEST(InterpolatorTest, StateTest) {
+TEST(InterpolatorTest, JointTest) {
   akushon::ActionManager action_manager;
-  int joint_tolerance = 5;
+  int joint_tolerance = 4;
 
-  action_manager.load_data("/home/faza/ws_ros/src/akushon/data/test");
+  action_manager.load_data("../../src/akushon/data/test");
 
   std::vector<akushon::Pose> poses = action_manager.get_action(akushon::Action::RIGHT_KICK).get_poses();
 
@@ -52,8 +52,7 @@ TEST(InterpolatorTest, StateTest) {
        && expected_joints[i].get_position() - joint_tolerance  < action_manager_joints[i].get_position());
   }
 
-  for (int i = 0; i < 2000; i+=1){
-    std::cerr << i << " " << action_manager.get_joints()[0].get_position() << std::endl;
+  for (int i = 0; i < 1100; i+=1){
     action_manager.process(i);
   }
 
@@ -62,11 +61,11 @@ TEST(InterpolatorTest, StateTest) {
 
   for (int i = 0; i < 20; i++)
   {
-    std::cerr << expected_joints[i].get_position() << " " << action_manager_joints[i].get_position() << std::endl;
-    ASSERT_TRUE(expected_joints[i].get_position() + joint_tolerance > action_manager_joints[i].get_position() && expected_joints[i].get_position() - joint_tolerance < action_manager_joints[i].get_position());
+    ASSERT_TRUE(expected_joints[i].get_position() + joint_tolerance > action_manager_joints[i].get_position() 
+      && expected_joints[i].get_position() - joint_tolerance < action_manager_joints[i].get_position());
   }
 
-  for (int i = 2500; i < 2800; i++){
+  for (int i = 1100; i < 2000; i++){
     action_manager.process(i);
   }
 
