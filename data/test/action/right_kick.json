@@ -38,7 +38,7 @@
         "left_hip_roll": 50,
         "left_hip_yaw": 50,
         "left_knee": 50,
-        "left_shoulder_pitch": 53,
+        "left_shoulder_pitch": 23,
         "left_shoulder_roll": 51,
         "neck_pitch": 52,
         "neck_yaw": 51,
@@ -54,7 +54,7 @@
       },
       "name": "r_feet",
       "pause": 1,
-      "speed": 0.5
+      "speed": 0.1
     },
     {
       "joints": {
