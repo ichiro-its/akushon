@@ -1,6 +1,6 @@
 {
   "name": "Right Kick",
-  "start_delay": 1,
+  "start_delay": 0,
   "step_0": {
     "step_pause": 0,
     "step_speed": 1,
@@ -27,7 +27,7 @@
   },
   "step_1": {
     "step_pause": 1,
-    "step_speed": 0.01,
+    "step_speed": 0.5,
     "neck_yaw": 51,
     "neck_pitch": 52,
     "left_shoulder_pitch": 53,
@@ -50,7 +50,7 @@
     "right_ankle_pitch": 51
   },
   "step_2": {
-    "step_pause": 0,
+    "step_pause": 2,
     "step_speed": 0.3,
     "neck_yaw": 1,
     "neck_pitch": 2,
@@ -74,5 +74,5 @@
     "right_ankle_pitch": 1
   },
   "stop_delay": 0,
-  "next_action": "left_kick"
+  "next_action": ""
 }
