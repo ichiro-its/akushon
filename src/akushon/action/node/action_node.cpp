@@ -19,6 +19,8 @@
 // SOFTWARE.
 
 #include <chrono>
+#include <iostream>
+#include <iomanip>
 #include <memory>
 #include <string>
 #include <thread>
@@ -29,6 +31,8 @@
 #include "akushon/action/node/action_manager.hpp"
 #include "akushon/action/model/action_name.hpp"
 #include "akushon/action/model/pose.hpp"
+#include "akushon_interfaces/srv/run_action.hpp"
+#include "nlohmann/json.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "tachimawari/joint/model/joint.hpp"
 #include "tachimawari_interfaces/msg/set_joints.hpp"
@@ -41,13 +45,50 @@ namespace akushon
 
 ActionNode::ActionNode(
   rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> action_manager)
-: node(node), action_manager(action_manager), status(READY)
+: node(node), action_manager(action_manager), status(READY), now(node->now().seconds())
 {
   set_joints_publisher = node->create_publisher<tachimawari_interfaces::msg::SetJoints>(
     "/joint/set_joints", 10);
 
   get_joints_client = node->create_client<tachimawari_interfaces::srv::GetJoints>(
     "/joint/get_joints");
+
+  {
+    using akushon_interfaces::srv::RunAction;
+    run_action_service = node->create_service<RunAction>(
+      get_node_prefix() + "/run_action",
+      [this](std::shared_ptr<RunAction::Request> request,
+      std::shared_ptr<RunAction::Response> response) {
+        // TODO(finesaaa): need real test
+        rclcpp::Rate rcl_rate(8ms);
+
+        nlohmann::json action_data = nlohmann::json::parse(request->json);
+        Action action = this->action_manager->load_action(action_data, "temp_action");
+        bool is_ready = start(action);
+
+        if (is_ready) {
+          while (rclcpp::ok()) {
+            rcl_rate.sleep();
+
+            if (get_status() == ActionNode::PLAYING) {
+              double time = this->node->now().seconds() - this->now;
+              process(time * 1000);
+            } else if (get_status() == ActionNode::READY) {
+              break;
+            }
+          }
+        }
+
+        if (rclcpp::ok()) {
+          response->status = is_ready ? "SUCCEEDED" : "FAILED";
+        }
+
+        // TODO(finesaaa): temporary for checking
+        // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "[RUN ACTION] Get request: " + request->json);
+        // response->status = "ACCEPTED";
+      }
+    );
+  }
 }
 
 bool ActionNode::is_action_exist(int action_id) const
@@ -65,21 +106,18 @@ int ActionNode::get_status() const
   return status;
 }
 
-bool ActionNode::start(const std::string & action_name)
-{
-  return start(ActionName::map.at(action_name));
-}
-
-bool ActionNode::start(int action_id)
+Pose ActionNode::get_initial_pose() const
 {
   while (!get_joints_client->wait_for_service(1s)) {
     if (rclcpp::ok()) {
       // service not available, waiting again...
     } else {
       // Interrupted while waiting for the service. Exiting.
-      return false;
+      break;
     }
   }
+
+  Pose pose("initial_pose");
 
   auto result = get_joints_client->async_send_request(
     std::make_shared<tachimawari_interfaces::srv::GetJoints::Request>());
@@ -87,7 +125,6 @@ bool ActionNode::start(int action_id)
   if (rclcpp::spin_until_future_complete(node, result) ==
     rclcpp::FutureReturnCode::SUCCESS)
   {
-    Pose pose("initial_pose");
     std::vector<tachimawari::joint::Joint> joints;
 
     for (const auto & joint : result.get()->joints) {
@@ -95,8 +132,37 @@ bool ActionNode::start(int action_id)
         tachimawari::joint::Joint(joint.id, joint.position));
     }
     pose.set_joints(joints);
+  }
 
+  return pose;
+}
+
+bool ActionNode::start(const std::string & action_name)
+{
+  return start(ActionName::map.at(action_name));
+}
+
+bool ActionNode::start(int action_id)
+{
+  Pose pose = this->get_initial_pose();
+
+  if (!pose.get_joints().empty()) {
     action_manager->start(action_id, pose);
+    status = PLAYING;
+  } else {
+    // Failed to call service
+    return false;
+  }
+
+  return true;
+}
+
+bool ActionNode::start(const Action & action)
+{
+  Pose pose = this->get_initial_pose();
+
+  if (!pose.get_joints().empty()) {
+    action_manager->start(action, pose);
     status = PLAYING;
   } else {
     // Failed to call service

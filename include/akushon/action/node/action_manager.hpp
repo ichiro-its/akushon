@@ -29,6 +29,7 @@
 #include "akushon/action/model/action.hpp"
 #include "akushon/action/model/pose.hpp"
 #include "akushon/action/process/interpolator.hpp"
+#include "nlohmann/json.hpp"
 #include "tachimawari/joint/model/joint.hpp"
 
 namespace akushon
@@ -45,7 +46,10 @@ public:
 
   void load_data(const std::string & path);
 
+  Action load_action(const nlohmann::json & action_data, const std::string & action_name) const;
+
   void start(int action_id, const Pose & initial_pose);
+  void start(const Action & action, const Pose & initial_pose);
   void process(int time);
 
   bool is_playing() const;

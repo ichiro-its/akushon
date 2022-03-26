@@ -21,10 +21,17 @@
 #include <memory>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "akushon/action/node/action_manager.hpp"
+#include "akushon/action/model/action.hpp"
+#include "akushon/action/model/pose.hpp"
 #include "akushon/node/akushon_node.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include "tachimawari/joint/joint.hpp"
+#include "tachimawari/joint/model/joint_id.hpp"
+
+using namespace std::chrono_literals;
 
 int main(int argc, char * argv[])
 {
@@ -35,20 +42,53 @@ int main(int argc, char * argv[])
     return 0;
   }
 
-  auto node = std::make_shared<rclcpp::Node>("akushon_node");
-  auto akushon_node = std::make_shared<akushon::AkushonNode>(node);
-
   auto action_manager = std::make_shared<akushon::ActionManager>();
 
   std::string path = argv[1];
 
+  rclcpp::Rate rcl_rate(8ms);
+  int time = 0;
+
   action_manager->load_data(path);
+  akushon::Pose pose("init");
 
-  akushon_node->set_action_manager(action_manager);
-  akushon_node->run_config_service(path);
+  {
+    using tachimawari::joint::JointId;
+    using tachimawari::joint::Joint;
+    std::vector<Joint> joints;
 
-  rclcpp::spin(node);
-  rclcpp::shutdown();
+    for (int id = 1; id < JointId::list.size(); id++) {
+      Joint joint(id, 0);
+      joints.push_back(joint);
+    }
+    pose.set_pause(0.0);
+    pose.set_speed(0.0);
+    pose.set_joints(joints);
+  }
+
+  action_manager->start(akushon::Action::WALKREADY, pose);
+  while (rclcpp::ok()) {
+    if (!action_manager->is_playing()) {
+      break;
+    }
+
+    rcl_rate.sleep();
+    action_manager->process(time);
+    auto joints = action_manager->get_joints();
+
+    for (const auto & joint : joints) {
+      for (auto & i : tachimawari::joint::JointId::by_name) {
+        if (i.second == static_cast<int>(joint.get_id())) {
+          std::cout << i.first << " : ";
+        }
+      }
+      std::cout << joint.get_position() << std::endl;
+    }
+
+    std::cout << std::endl;
+
+    time += 8;
+  }
 
   return 0;
 }

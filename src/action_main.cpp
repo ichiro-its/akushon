@@ -18,47 +18,53 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__NODE__AKUSHON_NODE_HPP_
-#define AKUSHON__NODE__AKUSHON_NODE_HPP_
-
 #include <memory>
+#include <iostream>
 #include <string>
+#include <vector>
 
 #include "akushon/action/node/action_manager.hpp"
+#include "akushon/action/model/action.hpp"
+#include "akushon/action/model/pose.hpp"
 #include "akushon/action/node/action_node.hpp"
-#include "akushon/config/node/config_node.hpp"
-#include "akushon_interfaces/srv/save_actions.hpp"
-#include "akushon_interfaces/srv/get_actions.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "rclcpp_action/rclcpp_action.hpp"
 
-namespace akushon
+using namespace std::chrono_literals;
+
+int main(int argc, char * argv[])
 {
+  rclcpp::init(argc, argv);
 
-class AkushonNode
-{
-public:
-  enum
-  {
-    SUCCEEDED,
-    CANCELED,
-    FAILED
-  };
+  if (argc < 2) {
+    std::cerr << "Please specify the path!" << std::endl;
+    return 0;
+  }
 
-  explicit AkushonNode(rclcpp::Node::SharedPtr node);
+  auto action_manager = std::make_shared<akushon::ActionManager>();
+  std::string path = argv[1];
+  action_manager->load_data(path);
 
-  void set_action_manager(std::shared_ptr<ActionManager> action_manager);
+  auto node = std::make_shared<rclcpp::Node>("akushon_node");
+  auto action_node = std::make_shared<akushon::ActionNode>(node, action_manager);
 
-  void run_config_service(const std::string & path);
+  rclcpp::Rate rcl_rate(8ms);
+  int time = 0;
 
-private:
-  rclcpp::Node::SharedPtr node;
+  if (action_node->start(akushon::Action::WALKREADY)) {
+    while (rclcpp::ok()) {
+      rcl_rate.sleep();
 
-  std::shared_ptr<ActionNode> action_node;
+      if (action_node->get_status() == akushon::ActionNode::PLAYING) {
+        action_node->process(time);
+      } else if (action_node->get_status() == akushon::ActionNode::READY) {
+        break;
+      }
 
-  std::shared_ptr<ConfigNode> config_node;
-};
+      time += 8;
+    }
+  } else {
+    std::cout << "the action not found\n";
+  }
 
-}  // namespace akushon
-
-#endif  // AKUSHON__NODE__AKUSHON_NODE_HPP_
+  return 0;
+}

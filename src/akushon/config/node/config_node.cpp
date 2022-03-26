@@ -18,47 +18,49 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__NODE__AKUSHON_NODE_HPP_
-#define AKUSHON__NODE__AKUSHON_NODE_HPP_
-
 #include <memory>
 #include <string>
 
-#include "akushon/action/node/action_manager.hpp"
-#include "akushon/action/node/action_node.hpp"
 #include "akushon/config/node/config_node.hpp"
+
+#include "akushon/config/utils/config.hpp"
 #include "akushon_interfaces/srv/save_actions.hpp"
 #include "akushon_interfaces/srv/get_actions.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "rclcpp_action/rclcpp_action.hpp"
 
 namespace akushon
 {
 
-class AkushonNode
+ConfigNode::ConfigNode(rclcpp::Node::SharedPtr node, const std::string & path)
+: config_util(path)
 {
-public:
-  enum
   {
-    SUCCEEDED,
-    CANCELED,
-    FAILED
-  };
+    using akushon_interfaces::srv::GetActions;
+    get_actions_service = node->create_service<GetActions>(
+      get_node_prefix() + "/get_actions",
+      [this](std::shared_ptr<GetActions::Request> request,
+      std::shared_ptr<GetActions::Response> response) {
+        response->json = this->config_util.get_config();
+      }
+    );
+  }
 
-  explicit AkushonNode(rclcpp::Node::SharedPtr node);
+  {
+    using akushon_interfaces::srv::SaveActions;
+    save_actions_service = node->create_service<SaveActions>(
+      get_node_prefix() + "/save_actions",
+      [this](std::shared_ptr<SaveActions::Request> request,
+      std::shared_ptr<SaveActions::Response> response) {
+        this->config_util.save_config(request->json);
+        response->status = "SAVED";
+      }
+    );
+  }
+}
 
-  void set_action_manager(std::shared_ptr<ActionManager> action_manager);
-
-  void run_config_service(const std::string & path);
-
-private:
-  rclcpp::Node::SharedPtr node;
-
-  std::shared_ptr<ActionNode> action_node;
-
-  std::shared_ptr<ConfigNode> config_node;
-};
+std::string ConfigNode::get_node_prefix() const
+{
+  return "akushon/config";
+}
 
 }  // namespace akushon
-
-#endif  // AKUSHON__NODE__AKUSHON_NODE_HPP_
