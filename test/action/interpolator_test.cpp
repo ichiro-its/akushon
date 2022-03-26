@@ -36,7 +36,7 @@
 
 TEST(InterpolatorTest, JointTest) {
   akushon::ActionManager action_manager;
-  int joint_tolerance = 4;
+  int max_error = 4;
 
   action_manager.load_data("../../src/akushon/data/test");
 
@@ -48,8 +48,8 @@ TEST(InterpolatorTest, JointTest) {
   std::vector<tachimawari::joint::Joint> action_manager_joints = action_manager.get_joints();
 
   for (int i = 0; i < 20; i++){
-    ASSERT_TRUE(expected_joints[i].get_position() + joint_tolerance > action_manager_joints[i].get_position()
-       && expected_joints[i].get_position() - joint_tolerance  < action_manager_joints[i].get_position());
+    ASSERT_TRUE(expected_joints[i].get_position() + max_error > action_manager_joints[i].get_position()
+       && expected_joints[i].get_position() - max_error  < action_manager_joints[i].get_position());
   }
 
   for (int i = 0; i < 1100; i+=1){
@@ -61,8 +61,8 @@ TEST(InterpolatorTest, JointTest) {
 
   for (int i = 0; i < 20; i++)
   {
-    ASSERT_TRUE(expected_joints[i].get_position() + joint_tolerance > action_manager_joints[i].get_position() 
-      && expected_joints[i].get_position() - joint_tolerance < action_manager_joints[i].get_position());
+    ASSERT_TRUE(expected_joints[i].get_position() + max_error > action_manager_joints[i].get_position() 
+      && expected_joints[i].get_position() - max_error < action_manager_joints[i].get_position());
   }
 
   for (int i = 1100; i < 2000; i++){
@@ -74,7 +74,7 @@ TEST(InterpolatorTest, JointTest) {
 
   for (int i = 0; i < 20; i++)
   {
-    ASSERT_TRUE(expected_joints[i].get_position() + joint_tolerance > action_manager_joints[i].get_position()
-       && expected_joints[i].get_position() - joint_tolerance  < action_manager_joints[i].get_position());
+    ASSERT_TRUE(expected_joints[i].get_position() + max_error > action_manager_joints[i].get_position()
+       && expected_joints[i].get_position() - max_error  < action_manager_joints[i].get_position());
   }
 }
