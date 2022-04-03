@@ -69,8 +69,7 @@ TEST(InterpolatorTest, JointTest) {
   std::vector<tachimawari::joint::Joint> action_manager_joints = action_manager.get_joints();
 
   for (int i = 0; i < 20; i++){
-    ASSERT_TRUE(expected_positions[0][i] + max_error > action_manager_joints[i].get_position()
-       && expected_positions[0][i] - max_error  < action_manager_joints[i].get_position());
+    ASSERT_NEAR(expected_positions[0][i], action_manager_joints[i].get_position(), max_error);
   }
 
   for (int i = 0; i < 1100; i++)
@@ -82,8 +81,7 @@ TEST(InterpolatorTest, JointTest) {
 
   for (int i = 0; i < 20; i++)
   {
-    ASSERT_TRUE(expected_positions[1][i] + max_error > action_manager_joints[i].get_position() 
-      && expected_positions[1][i] - max_error < action_manager_joints[i].get_position());
+    ASSERT_NEAR(expected_positions[1][i], action_manager_joints[i].get_position(), max_error);
   }
 
   for (int i = 1100; i < 2000; i++){
@@ -94,7 +92,6 @@ TEST(InterpolatorTest, JointTest) {
 
   for (int i = 0; i < 20; i++)
   {
-    ASSERT_TRUE(expected_positions[2][i] + max_error > action_manager_joints[i].get_position()
-       && expected_positions[2][i] - max_error  < action_manager_joints[i].get_position());
+    ASSERT_NEAR(expected_positions[2][i], action_manager_joints[i].get_position(), max_error);
   }
 }
