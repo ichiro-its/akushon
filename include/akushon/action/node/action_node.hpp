@@ -29,6 +29,7 @@
 #include "akushon/action/node/action_manager.hpp"
 #include "akushon_interfaces/srv/run_action.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include "tachimawari_interfaces/msg/current_joints.hpp"
 #include "tachimawari_interfaces/msg/set_joints.hpp"
 #include "tachimawari_interfaces/srv/get_joints.hpp"
 
@@ -72,6 +73,8 @@ private:
 
   std::shared_ptr<ActionManager> action_manager;
 
+  rclcpp::Subscription<tachimawari_interfaces::msg::CurrentJoints>::SharedPtr
+    current_joints_subscriber;
   rclcpp::Publisher<tachimawari_interfaces::msg::SetJoints>::SharedPtr set_joints_publisher;
   rclcpp::Client<tachimawari_interfaces::srv::GetJoints>::SharedPtr get_joints_client;
 
@@ -79,6 +82,7 @@ private:
 
   int status;
   double now;
+  Pose initial_pose;
 };
 
 }  // namespace akushon

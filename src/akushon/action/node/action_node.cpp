@@ -45,8 +45,25 @@ namespace akushon
 
 ActionNode::ActionNode(
   rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> action_manager)
-: node(node), action_manager(action_manager), status(READY), now(node->now().seconds())
+: node(node), action_manager(action_manager), status(READY), now(node->now().seconds()),
+  initial_pose(Pose("initial_pose"))
 {
+  current_joints_subscriber = node->create_subscription<tachimawari_interfaces::msg::CurrentJoints>(
+    "/joint/current_joints", 10,
+    [this](const tachimawari_interfaces::msg::CurrentJoints::SharedPtr message) {
+      {
+        using tachimawari::joint::Joint;
+        std::vector<Joint> current_joints;
+
+        for (const auto & joint : message->joints) {
+          current_joints.push_back(Joint(joint.id, joint.position));
+        }
+
+        this->initial_pose.set_joints(current_joints);
+      }
+    }
+  );
+
   set_joints_publisher = node->create_publisher<tachimawari_interfaces::msg::SetJoints>(
     "/joint/set_joints", 10);
 
@@ -144,7 +161,7 @@ bool ActionNode::start(const std::string & action_name)
 
 bool ActionNode::start(int action_id)
 {
-  Pose pose = this->get_initial_pose();
+  Pose pose = this->initial_pose;
 
   if (!pose.get_joints().empty()) {
     action_manager->start(action_id, pose);
@@ -159,7 +176,7 @@ bool ActionNode::start(int action_id)
 
 bool ActionNode::start(const Action & action)
 {
-  Pose pose = this->get_initial_pose();
+  Pose pose = this->initial_pose;
 
   if (!pose.get_joints().empty()) {
     action_manager->start(action, pose);
