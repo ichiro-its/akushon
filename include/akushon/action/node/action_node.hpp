@@ -63,8 +63,6 @@ private:
   std::string handle_run_action(
     std::shared_ptr<akushon_interfaces::srv::RunAction::Request> request);
 
-  Pose get_initial_pose() const;
-
   std::string get_node_prefix() const;
 
   void publish_joints();
@@ -76,7 +74,6 @@ private:
   rclcpp::Subscription<tachimawari_interfaces::msg::CurrentJoints>::SharedPtr
     current_joints_subscriber;
   rclcpp::Publisher<tachimawari_interfaces::msg::SetJoints>::SharedPtr set_joints_publisher;
-  rclcpp::Client<tachimawari_interfaces::srv::GetJoints>::SharedPtr get_joints_client;
 
   rclcpp::Service<akushon_interfaces::srv::RunAction>::SharedPtr run_action_service;
 
