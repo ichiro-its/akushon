@@ -73,7 +73,6 @@ ActionNode::ActionNode(
       get_node_prefix() + "/run_action",
       [this](std::shared_ptr<RunAction::Request> request,
       std::shared_ptr<RunAction::Response> response) {
-        // TODO(finesaaa): need real test
         rclcpp::Rate rcl_rate(8ms);
 
         nlohmann::json action_data = nlohmann::json::parse(request->json);
@@ -96,10 +95,6 @@ ActionNode::ActionNode(
         if (rclcpp::ok()) {
           response->status = is_ready ? "SUCCEEDED" : "FAILED";
         }
-
-        // TODO(finesaaa): temporary for checking
-        // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "[RUN ACTION] Get request: " + request->json);
-        // response->status = "ACCEPTED";
       }
     );
   }
