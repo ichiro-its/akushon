@@ -36,7 +36,6 @@
 #include "rclcpp/rclcpp.hpp"
 #include "tachimawari/joint/model/joint.hpp"
 #include "tachimawari_interfaces/msg/set_joints.hpp"
-#include "tachimawari_interfaces/srv/get_joints.hpp"
 
 using namespace std::chrono_literals;
 

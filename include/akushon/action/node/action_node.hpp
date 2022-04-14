@@ -31,7 +31,6 @@
 #include "rclcpp/rclcpp.hpp"
 #include "tachimawari_interfaces/msg/current_joints.hpp"
 #include "tachimawari_interfaces/msg/set_joints.hpp"
-#include "tachimawari_interfaces/srv/get_joints.hpp"
 
 namespace akushon
 {
