@@ -26,8 +26,10 @@
 #include "akushon/action/node/action_manager.hpp"
 #include "akushon/action/model/action.hpp"
 #include "akushon/action/model/pose.hpp"
-#include "akushon/action/node/action_node.hpp"
+#include "akushon/node/akushon_node.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include "tachimawari/joint/joint.hpp"
+#include "tachimawari/joint/model/joint_id.hpp"
 
 using namespace std::chrono_literals;
 
@@ -41,29 +43,51 @@ int main(int argc, char * argv[])
   }
 
   auto action_manager = std::make_shared<akushon::ActionManager>();
-  std::string path = argv[1];
-  action_manager->load_data(path);
 
-  auto node = std::make_shared<rclcpp::Node>("akushon_node");
-  auto action_node = std::make_shared<akushon::ActionNode>(node, action_manager);
+  std::string path = argv[1];
 
   rclcpp::Rate rcl_rate(8ms);
   int time = 0;
 
-  if (action_node->start(akushon::Action::WALKREADY)) {
-    while (rclcpp::ok()) {
-      rcl_rate.sleep();
+  action_manager->load_config(path);
+  akushon::Pose pose("init");
 
-      if (action_node->get_status() == akushon::ActionNode::PLAYING) {
-        action_node->process(time);
-      } else if (action_node->get_status() == akushon::ActionNode::READY) {
-        break;
-      }
+  {
+    using tachimawari::joint::JointId;
+    using tachimawari::joint::Joint;
+    std::vector<Joint> joints;
 
-      time += 8;
+    for (int id = 1; id < JointId::list.size(); id++) {
+      Joint joint(id, 0);
+      joints.push_back(joint);
     }
-  } else {
-    std::cout << "the action not found\n";
+    pose.set_pause(0.0);
+    pose.set_speed(0.0);
+    pose.set_joints(joints);
+  }
+
+  action_manager->start(akushon::Action::WALKREADY, pose);
+  while (rclcpp::ok()) {
+    if (!action_manager->is_playing()) {
+      break;
+    }
+
+    rcl_rate.sleep();
+    action_manager->process(time);
+    auto joints = action_manager->get_joints();
+
+    for (const auto & joint : joints) {
+      for (auto & i : tachimawari::joint::JointId::by_name) {
+        if (i.second == static_cast<int>(joint.get_id())) {
+          std::cout << i.first << " : ";
+        }
+      }
+      std::cout << joint.get_position() << std::endl;
+    }
+
+    std::cout << std::endl;
+
+    time += 8;
   }
 
   return 0;

@@ -47,7 +47,7 @@ public:
 
   explicit AkushonNode(rclcpp::Node::SharedPtr node);
 
-  void set_action_manager(std::shared_ptr<ActionManager> action_manager);
+  void run_action_manager(std::shared_ptr<ActionManager> action_manager);
 
   void run_config_service(const std::string & path);
 

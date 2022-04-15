@@ -60,7 +60,7 @@ Action ActionManager::get_action(int action_id) const
   return Action("");
 }
 
-void ActionManager::load_data(const std::string & path)
+void ActionManager::load_config(const std::string & path)
 {
   for (const auto & [name, id] : ActionName::map) {
     std::string file_name = path + "/action/" + name + ".json";

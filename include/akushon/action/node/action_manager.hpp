@@ -44,7 +44,7 @@ public:
   void delete_action(int action_id);
   Action get_action(int action_id) const;
 
-  void load_data(const std::string & path);
+  void load_config(const std::string & path);
 
   Action load_action(const nlohmann::json & action_data, const std::string & action_name) const;
 

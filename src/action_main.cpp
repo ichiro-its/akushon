@@ -21,10 +21,15 @@
 #include <memory>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "akushon/action/node/action_manager.hpp"
-#include "akushon/node/akushon_node.hpp"
+#include "akushon/action/model/action.hpp"
+#include "akushon/action/model/pose.hpp"
+#include "akushon/action/node/action_node.hpp"
 #include "rclcpp/rclcpp.hpp"
+
+using namespace std::chrono_literals;
 
 int main(int argc, char * argv[])
 {
@@ -35,20 +40,31 @@ int main(int argc, char * argv[])
     return 0;
   }
 
-  auto node = std::make_shared<rclcpp::Node>("akushon_node");
-  auto akushon_node = std::make_shared<akushon::AkushonNode>(node);
-
   auto action_manager = std::make_shared<akushon::ActionManager>();
-
   std::string path = argv[1];
+  action_manager->load_config(path);
 
-  action_manager->load_data(path);
+  auto node = std::make_shared<rclcpp::Node>("akushon_node");
+  auto action_node = std::make_shared<akushon::ActionNode>(node, action_manager);
 
-  akushon_node->set_action_manager(action_manager);
-  akushon_node->run_config_service(path);
+  rclcpp::Rate rcl_rate(8ms);
+  int time = 0;
 
-  rclcpp::spin(node);
-  rclcpp::shutdown();
+  if (action_node->start(akushon::Action::WALKREADY)) {
+    while (rclcpp::ok()) {
+      rcl_rate.sleep();
+
+      if (action_node->get_status() == akushon::ActionNode::PLAYING) {
+        action_node->process(time);
+      } else if (action_node->get_status() == akushon::ActionNode::READY) {
+        break;
+      }
+
+      time += 8;
+    }
+  } else {
+    std::cout << "the action not found\n";
+  }
 
   return 0;
 }
