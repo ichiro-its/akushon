@@ -36,7 +36,6 @@
 #include "rclcpp/rclcpp.hpp"
 #include "tachimawari/joint/model/joint.hpp"
 #include "tachimawari_interfaces/msg/set_joints.hpp"
-#include "tachimawari_interfaces/srv/get_joints.hpp"
 
 using namespace std::chrono_literals;
 
@@ -45,13 +44,27 @@ namespace akushon
 
 ActionNode::ActionNode(
   rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> action_manager)
-: node(node), action_manager(action_manager), status(READY), now(node->now().seconds())
+: node(node), action_manager(action_manager), status(READY), now(node->now().seconds()),
+  initial_pose(Pose("initial_pose"))
 {
+  current_joints_subscriber = node->create_subscription<tachimawari_interfaces::msg::CurrentJoints>(
+    "/joint/current_joints", 10,
+    [this](const tachimawari_interfaces::msg::CurrentJoints::SharedPtr message) {
+      {
+        using tachimawari::joint::Joint;
+        std::vector<Joint> current_joints;
+
+        for (const auto & joint : message->joints) {
+          current_joints.push_back(Joint(joint.id, joint.position));
+        }
+
+        this->initial_pose.set_joints(current_joints);
+      }
+    }
+  );
+
   set_joints_publisher = node->create_publisher<tachimawari_interfaces::msg::SetJoints>(
     "/joint/set_joints", 10);
-
-  get_joints_client = node->create_client<tachimawari_interfaces::srv::GetJoints>(
-    "/joint/get_joints");
 
   {
     using akushon_interfaces::srv::RunAction;
@@ -59,7 +72,6 @@ ActionNode::ActionNode(
       get_node_prefix() + "/run_action",
       [this](std::shared_ptr<RunAction::Request> request,
       std::shared_ptr<RunAction::Response> response) {
-        // TODO(finesaaa): need real test
         rclcpp::Rate rcl_rate(8ms);
 
         nlohmann::json action_data = nlohmann::json::parse(request->json);
@@ -82,10 +94,6 @@ ActionNode::ActionNode(
         if (rclcpp::ok()) {
           response->status = is_ready ? "SUCCEEDED" : "FAILED";
         }
-
-        // TODO(finesaaa): temporary for checking
-        // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "[RUN ACTION] Get request: " + request->json);
-        // response->status = "ACCEPTED";
       }
     );
   }
@@ -106,37 +114,6 @@ int ActionNode::get_status() const
   return status;
 }
 
-Pose ActionNode::get_initial_pose() const
-{
-  while (!get_joints_client->wait_for_service(1s)) {
-    if (rclcpp::ok()) {
-      // service not available, waiting again...
-    } else {
-      // Interrupted while waiting for the service. Exiting.
-      break;
-    }
-  }
-
-  Pose pose("initial_pose");
-
-  auto result = get_joints_client->async_send_request(
-    std::make_shared<tachimawari_interfaces::srv::GetJoints::Request>());
-
-  if (rclcpp::spin_until_future_complete(node, result) ==
-    rclcpp::FutureReturnCode::SUCCESS)
-  {
-    std::vector<tachimawari::joint::Joint> joints;
-
-    for (const auto & joint : result.get()->joints) {
-      joints.push_back(
-        tachimawari::joint::Joint(joint.id, joint.position));
-    }
-    pose.set_joints(joints);
-  }
-
-  return pose;
-}
-
 bool ActionNode::start(const std::string & action_name)
 {
   return start(ActionName::map.at(action_name));
@@ -144,7 +121,7 @@ bool ActionNode::start(const std::string & action_name)
 
 bool ActionNode::start(int action_id)
 {
-  Pose pose = this->get_initial_pose();
+  Pose pose = this->initial_pose;
 
   if (!pose.get_joints().empty()) {
     action_manager->start(action_id, pose);
@@ -159,7 +136,7 @@ bool ActionNode::start(int action_id)
 
 bool ActionNode::start(const Action & action)
 {
-  Pose pose = this->get_initial_pose();
+  Pose pose = this->initial_pose;
 
   if (!pose.get_joints().empty()) {
     action_manager->start(action, pose);
