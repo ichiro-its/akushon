@@ -20,6 +20,7 @@
 
 #include <string>
 #include <vector>
+#include <cmath>
 
 #include "akushon/action/process/joint_process.hpp"
 

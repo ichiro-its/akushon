@@ -49,7 +49,7 @@ int main(int argc, char * argv[])
   rclcpp::Rate rcl_rate(8ms);
   int time = 0;
 
-  action_manager->load_data(path);
+  action_manager->load_config(path);
   akushon::Pose pose("init");
 
   {

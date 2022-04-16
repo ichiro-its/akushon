@@ -53,28 +53,28 @@ install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION "lib"
   RUNTIME DESTINATION "bin")
 
-add_executable(akushon_main "src/akushon_main.cpp")
-target_include_directories(akushon_main PUBLIC
+add_executable(action "src/action_main.cpp")
+target_include_directories(action PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-target_link_libraries(akushon_main ${PROJECT_NAME})
+target_link_libraries(action ${PROJECT_NAME})
 
-add_executable(interpolator_main "src/interpolator_main.cpp")
-target_include_directories(interpolator_main PUBLIC
+add_executable(interpolator "src/interpolator_main.cpp")
+target_include_directories(interpolator PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-target_link_libraries(interpolator_main ${PROJECT_NAME})
+target_link_libraries(interpolator ${PROJECT_NAME})
 
-add_executable(action_main "src/action_main.cpp")
-target_include_directories(action_main PUBLIC
+add_executable(main "src/akushon_main.cpp")
+target_include_directories(main PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-target_link_libraries(action_main ${PROJECT_NAME})
+target_link_libraries(main ${PROJECT_NAME})
 
 install(TARGETS
-  akushon_main
-  interpolator_main
-  action_main
+  action
+  interpolator
+  main
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)

@@ -42,7 +42,7 @@ int main(int argc, char * argv[])
 
   auto action_manager = std::make_shared<akushon::ActionManager>();
   std::string path = argv[1];
-  action_manager->load_data(path);
+  action_manager->load_config(path);
 
   auto node = std::make_shared<rclcpp::Node>("akushon_node");
   auto action_node = std::make_shared<akushon::ActionNode>(node, action_manager);
