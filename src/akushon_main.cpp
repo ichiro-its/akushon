@@ -42,9 +42,9 @@ int main(int argc, char * argv[])
 
   std::string path = argv[1];
 
-  action_manager->load_data(path);
+  action_manager->load_config(path);
 
-  akushon_node->set_action_manager(action_manager);
+  akushon_node->run_action_manager(action_manager);
   akushon_node->run_config_service(path);
 
   rclcpp::spin(node);

@@ -40,7 +40,7 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
 {
 }
 
-void AkushonNode::set_action_manager(std::shared_ptr<ActionManager> action_manager)
+void AkushonNode::run_action_manager(std::shared_ptr<ActionManager> action_manager)
 {
   action_node = std::make_shared<ActionNode>(node, action_manager);
 }
