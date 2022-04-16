@@ -33,9 +33,9 @@ TEST(AkushonNodeTest, CompileProcess) {
     akushon::AkushonNode akushon_node(node);
 
     auto action_manager = std::make_shared<akushon::ActionManager>();
-    action_manager->load_data("");
+    action_manager->load_config("");
 
-    akushon_node.set_action_manager(action_manager);
+    akushon_node.run_action_manager(action_manager);
   } catch (...) {
   }
 }

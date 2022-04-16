@@ -38,60 +38,58 @@ TEST(InterpolatorTest, JointTest) {
   akushon::ActionManager action_manager;
   float max_error = 0.5;
 
-  action_manager.load_data("../../src/akushon/data/test");
+  action_manager.load_config("../../src/akushon/data/test");
 
-  std::vector<akushon::Pose> poses = action_manager.get_action(akushon::Action::RIGHT_KICK).get_poses();
+  std::vector<akushon::Pose> poses =
+    action_manager.get_action(akushon::Action::RIGHT_KICK).get_poses();
 
   action_manager.start(akushon::Action::RIGHT_KICK, poses[0]);
 
   float expected_positions[3][20] =
+  {
     {
-      {
-        0, 0, 1, 1, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 1, 0, 1, 2
-      },
-      {
-        53, 23, 51, 51, 50,
-        50, 50, 50, 50, 50,
-        50, 50, 50, 50, 50,
-        50, 51, 50, 51, 52
-      },
-      {
-        0, 0, 1, 1, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 1, 0, 1, 2
-      }
-    };
+      0, 0, 1, 1, 0,
+      0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0,
+      0, 1, 0, 1, 2
+    },
+    {
+      53, 23, 51, 51, 50,
+      50, 50, 50, 50, 50,
+      50, 50, 50, 50, 50,
+      50, 51, 50, 51, 52
+    },
+    {
+      0, 0, 1, 1, 0,
+      0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0,
+      0, 1, 0, 1, 2
+    }
+  };
 
   std::vector<tachimawari::joint::Joint> action_manager_joints = action_manager.get_joints();
 
-  for (int i = 0; i < 20; i++){
+  for (int i = 0; i < 20; i++) {
     EXPECT_NEAR(expected_positions[0][i], action_manager_joints[i].get_position(), max_error);
   }
 
-  for (int i = 0; i < 1100; i++)
-  {
+  for (int i = 0; i < 1100; i++) {
     action_manager.process(i);
   }
 
   action_manager_joints = action_manager.get_joints();
 
-  for (int i = 0; i < 20; i++)
-  {
+  for (int i = 0; i < 20; i++) {
     EXPECT_NEAR(expected_positions[1][i], action_manager_joints[i].get_position(), max_error);
   }
 
-  for (int i = 1100; i < 2000; i++){
+  for (int i = 1100; i < 2000; i++) {
     action_manager.process(i);
   }
 
   action_manager_joints = action_manager.get_joints();
 
-  for (int i = 0; i < 20; i++)
-  {
+  for (int i = 0; i < 20; i++) {
     EXPECT_NEAR(expected_positions[2][i], action_manager_joints[i].get_position(), max_error);
   }
 }
