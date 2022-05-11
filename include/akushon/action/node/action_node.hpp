@@ -72,6 +72,7 @@ private:
     current_joints_subscriber;
   rclcpp::Publisher<tachimawari_interfaces::msg::SetJoints>::SharedPtr set_joints_publisher;
 
+  rclcpp::Service<akushon_interfaces::srv::RunAction>::SharedPtr run_action_pkg_service;
   rclcpp::Service<akushon_interfaces::srv::RunAction>::SharedPtr run_action_service;
 
   int status;

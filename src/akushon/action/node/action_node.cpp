@@ -97,6 +97,37 @@ ActionNode::ActionNode(
       }
     );
   }
+
+  {
+    using akushon_interfaces::srv::RunAction;
+    run_action_pkg_service = node->create_service<RunAction>(
+      get_node_prefix() + "/run_action_pkg",
+      [this](std::shared_ptr<RunAction::Request> request,
+      std::shared_ptr<RunAction::Response> response) {
+        rclcpp::Rate rcl_rate(8ms);
+
+        nlohmann::json action_name = nlohmann::json::parse(request->json);
+        bool is_ready = start(action_name.dump());
+
+        if (is_ready) {
+          while (rclcpp::ok()) {
+            rcl_rate.sleep();
+
+            if (get_status() == ActionNode::PLAYING) {
+              double time = this->node->now().seconds() - this->now;
+              process(time * 1000);
+            } else if (get_status() == ActionNode::READY) {
+              break;
+            }
+          }
+        }
+
+        if (rclcpp::ok()) {
+          response->status = is_ready ? "SUCCEEDED" : "FAILED";
+        }
+      }
+    );
+  }
 }
 
 bool ActionNode::is_action_exist(const std::string & action_name) const
