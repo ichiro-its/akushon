@@ -99,14 +99,9 @@ ActionNode::ActionNode(
   }
 }
 
-bool ActionNode::is_action_exist(int action_id) const
-{
-  return action_manager->get_action(action_id).get_name().empty();
-}
-
 bool ActionNode::is_action_exist(const std::string & action_name) const
 {
-  return is_action_exist(ActionName::map.at(action_name));
+  return action_manager->get_action(action_name).get_name().empty();
 }
 
 int ActionNode::get_status() const
@@ -116,15 +111,10 @@ int ActionNode::get_status() const
 
 bool ActionNode::start(const std::string & action_name)
 {
-  return start(ActionName::map.at(action_name));
-}
-
-bool ActionNode::start(int action_id)
-{
   Pose pose = this->initial_pose;
 
   if (!pose.get_joints().empty()) {
-    action_manager->start(action_id, pose);
+    action_manager->start(action_name, pose);
     status = PLAYING;
   } else {
     // Failed to call service

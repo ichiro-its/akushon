@@ -40,15 +40,15 @@ class ActionManager
 public:
   ActionManager();
 
-  void insert_action(int action_id, const Action & action);
-  void delete_action(int action_id);
-  Action get_action(int action_id) const;
+  void insert_action(std::string action_name, const Action & action);
+  void delete_action(std::string action_name);
+  Action get_action(std::string action_name) const;
 
   void load_config(const std::string & path);
 
   Action load_action(const nlohmann::json & action_data, const std::string & action_name) const;
 
-  void start(int action_id, const Pose & initial_pose);
+  void start(std::string action_name, const Pose & initial_pose);
   void start(const Action & action, const Pose & initial_pose);
   void process(int time);
 
@@ -57,7 +57,7 @@ public:
   std::vector<tachimawari::joint::Joint> get_joints() const;
 
 private:
-  std::map<int, Action> actions;
+  std::map<std::string, Action> actions;
 
   std::shared_ptr<Interpolator> interpolator;
   bool is_running;

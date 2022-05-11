@@ -25,6 +25,7 @@
 
 #include "akushon/action/node/action_manager.hpp"
 #include "akushon/action/model/action.hpp"
+#include "akushon/action/model/action_name.hpp"
 #include "akushon/action/model/pose.hpp"
 #include "akushon/action/node/action_node.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -50,7 +51,7 @@ int main(int argc, char * argv[])
   rclcpp::Rate rcl_rate(8ms);
   int time = 0;
 
-  if (action_node->start(akushon::Action::WALKREADY)) {
+  if (action_node->start(akushon::ActionName::WALKREADY)) {
     while (rclcpp::ok()) {
       rcl_rate.sleep();
 

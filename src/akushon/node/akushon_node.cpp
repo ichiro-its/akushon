@@ -29,9 +29,6 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 
-using namespace std::chrono_literals;
-using namespace std::placeholders;
-
 namespace akushon
 {
 
