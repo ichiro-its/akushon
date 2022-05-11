@@ -36,20 +36,20 @@ const std::map<std::string, int> ActionName::map = {
   {"leftward_up", 5}
 };
 
-const std::string ActionName::INIT = "init";
-const std::string ActionName::WALKREADY = "walk_ready";
-const std::string ActionName::SIT_DOWN = "sit_down";
-const std::string ActionName::FORWARD_UP = "forward_up";
-const std::string ActionName::BACKWARD_UP = "backward_up";
-const std::string ActionName::LEFTWARD_UP = "leftward_up";
-const std::string ActionName::RIGHTWARD_UP = "rightward_up";
-const std::string ActionName::RIGHT_KICK = "right_kick";
-const std::string ActionName::LEFT_KICK = "left_kick";
-const std::string ActionName::RIGHT_KICK_SHORT = "right_kick_short";
-const std::string ActionName::LEGT_KICK_SHORT = "left_kick_short";
-const std::string ActionName::LEFT_SIDEKICK = "left_sidekick";
-const std::string ActionName::RIGHT_SIDEKICK = "right_sidekick";
-const std::string ActionName::KEEPER_SIT = "keeper_sit";
-const std::string ActionName::KEEPER_UP = "keeper_up";
+const char ActionName::INIT[] = "init";
+const char ActionName::WALKREADY[] = "walk_ready";
+const char ActionName::SIT_DOWN[] = "sit_down";
+const char ActionName::FORWARD_UP[] = "forward_up";
+const char ActionName::BACKWARD_UP[] = "backward_up";
+const char ActionName::LEFTWARD_UP[] = "leftward_up";
+const char ActionName::RIGHTWARD_UP[] = "rightward_up";
+const char ActionName::RIGHT_KICK[] = "right_kick";
+const char ActionName::LEFT_KICK[] = "left_kick";
+const char ActionName::RIGHT_KICK_SHORT[] = "right_kick_short";
+const char ActionName::LEGT_KICK_SHORT[] = "left_kick_short";
+const char ActionName::LEFT_SIDEKICK[] = "left_sidekick";
+const char ActionName::RIGHT_SIDEKICK[] = "right_sidekick";
+const char ActionName::KEEPER_SIT[] = "keeper_sit";
+const char ActionName::KEEPER_UP[] = "keeper_up";
 
-} // namespace akushon
+}  // namespace akushon

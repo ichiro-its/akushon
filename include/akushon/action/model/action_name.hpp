@@ -30,21 +30,21 @@ namespace akushon
 class ActionName
 {
 public:
-  static const std::string INIT;
-  static const std::string WALKREADY;
-  static const std::string SIT_DOWN;
-  static const std::string FORWARD_UP;
-  static const std::string BACKWARD_UP;
-  static const std::string LEFTWARD_UP;
-  static const std::string RIGHTWARD_UP;
-  static const std::string RIGHT_KICK;
-  static const std::string LEFT_KICK;
-  static const std::string RIGHT_KICK_SHORT;
-  static const std::string LEGT_KICK_SHORT;
-  static const std::string LEFT_SIDEKICK;
-  static const std::string RIGHT_SIDEKICK;
-  static const std::string KEEPER_SIT;
-  static const std::string KEEPER_UP;
+  static const char INIT[];
+  static const char WALKREADY[];
+  static const char SIT_DOWN[];
+  static const char FORWARD_UP[];
+  static const char BACKWARD_UP[];
+  static const char LEFTWARD_UP[];
+  static const char RIGHTWARD_UP[];
+  static const char RIGHT_KICK[];
+  static const char LEFT_KICK[];
+  static const char RIGHT_KICK_SHORT[];
+  static const char LEGT_KICK_SHORT[];
+  static const char LEFT_SIDEKICK[];
+  static const char RIGHT_SIDEKICK[];
+  static const char KEEPER_SIT[];
+  static const char KEEPER_UP[];
 
   static const std::map<std::string, int> map;
 };

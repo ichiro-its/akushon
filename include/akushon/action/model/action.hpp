@@ -33,7 +33,6 @@ namespace akushon
 class Action
 {
 public:
-
   explicit Action(const std::string & action_name);
 
   void add_pose(const Pose & pose);
