@@ -76,7 +76,7 @@ ActionNode::ActionNode(
 
         bool is_ready = false;
         nlohmann::json action_name = nlohmann::json::parse(request->action_name);
-        if (request->json == "") {
+        if (request->control_type == ActionNode::control_type::RUN_ACTION_BY_NAME) {
           is_ready = start(action_name.dump());
         } else {
           nlohmann::json action_data = nlohmann::json::parse(request->json);
