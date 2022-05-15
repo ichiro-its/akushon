@@ -30,21 +30,21 @@ namespace akushon
 class ActionName
 {
 public:
-  static const std::string INIT = "init";
-  static const std::string WALKREADY = "walk_ready";
-  static const std::string SIT_DOWN = "sit_down";
-  static const std::string FORWARD_UP = "forward_up";
-  static const std::string BACKWARD_UP = "backward_up";
-  static const std::string LEFTWARD_UP = "leftward_ups";
-  static const std::string RIGHTWARD_UP = "rightward_up";
-  static const std::string RIGHT_KICK = "right_kick";
-  static const std::string LEFT_KICK = "left_kick";
-  static const std::string RIGHT_KICK_SHORT = "right_kick_short";
-  static const std::string LEGT_KICK_SHORT = "left_kick_short";
-  static const std::string LEFT_SIDEKICK = "left_sidekick";
-  static const std::string RIGHT_SIDEKICK = "right_sidekick";
-  static const std::string KEEPER_SIT = "keeper_sit";
-  static const std::string KEEPER_UP = "keeper_up";
+  static const char * INIT;
+  static const char * WALKREADY;
+  static const char * SIT_DOWN;
+  static const char * FORWARD_UP;
+  static const char * BACKWARD_UP;
+  static const char * LEFTWARD_UP;
+  static const char * RIGHTWARD_UP;
+  static const char * RIGHT_KICK;
+  static const char * LEFT_KICK;
+  static const char * RIGHT_KICK_SHORT;
+  static const char * LEGT_KICK_SHORT;
+  static const char * LEFT_SIDEKICK;
+  static const char * RIGHT_SIDEKICK;
+  static const char * KEEPER_SIT;
+  static const char * KEEPER_UP;
 
   static const std::map<std::string, int> map;
 };

@@ -74,40 +74,15 @@ ActionNode::ActionNode(
       std::shared_ptr<RunAction::Response> response) {
         rclcpp::Rate rcl_rate(8ms);
 
-        nlohmann::json action_data = nlohmann::json::parse(request->json);
-        Action action = this->action_manager->load_action(action_data, "temp_action");
-        bool is_ready = start(action);
-
-        if (is_ready) {
-          while (rclcpp::ok()) {
-            rcl_rate.sleep();
-
-            if (get_status() == ActionNode::PLAYING) {
-              double time = this->node->now().seconds() - this->now;
-              process(time * 1000);
-            } else if (get_status() == ActionNode::READY) {
-              break;
-            }
-          }
+        bool is_ready = false;
+        nlohmann::json action_name = nlohmann::json::parse(request->action_name);
+        if (request->json == "") {
+          is_ready = start(action_name.dump());
+        } else {
+          nlohmann::json action_data = nlohmann::json::parse(request->json);
+          Action action = this->action_manager->load_action(action_data, action_name.dump());
+          is_ready = start(action);
         }
-
-        if (rclcpp::ok()) {
-          response->status = is_ready ? "SUCCEEDED" : "FAILED";
-        }
-      }
-    );
-  }
-
-  {
-    using akushon_interfaces::srv::RunAction;
-    run_action_pkg_service = node->create_service<RunAction>(
-      get_node_prefix() + "/run_action_pkg",
-      [this](std::shared_ptr<RunAction::Request> request,
-      std::shared_ptr<RunAction::Response> response) {
-        rclcpp::Rate rcl_rate(8ms);
-
-        nlohmann::json action_name = nlohmann::json::parse(request->json);
-        bool is_ready = start(action_name.dump());
 
         if (is_ready) {
           while (rclcpp::ok()) {

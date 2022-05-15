@@ -44,6 +44,12 @@ public:
     PLAYING
   };
 
+  typedef enum
+  {
+    RUN_ACTION_BY_NAME,
+    RUN_ACTION_BY_JSON
+  } control_type;
+
   explicit ActionNode(
     rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> action_manager);
 
@@ -72,7 +78,6 @@ private:
     current_joints_subscriber;
   rclcpp::Publisher<tachimawari_interfaces::msg::SetJoints>::SharedPtr set_joints_publisher;
 
-  rclcpp::Service<akushon_interfaces::srv::RunAction>::SharedPtr run_action_pkg_service;
   rclcpp::Service<akushon_interfaces::srv::RunAction>::SharedPtr run_action_service;
 
   int status;
