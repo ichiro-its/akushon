@@ -42,6 +42,16 @@ using namespace std::chrono_literals;
 namespace akushon
 {
 
+std::string ActionNode::get_node_prefix()
+{
+  return "action";
+}
+
+std::string ActionNode::run_action_service()
+{
+  return get_node_prefix() + "/run_action";
+}
+
 ActionNode::ActionNode(
   rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> action_manager)
 : node(node), action_manager(action_manager), now(node->now().seconds()),
@@ -68,19 +78,20 @@ ActionNode::ActionNode(
 
   {
     using akushon_interfaces::srv::RunAction;
-    run_action_service = node->create_service<RunAction>(
-      get_node_prefix() + "/run_action",
+    run_action_server = node->create_service<RunAction>(
+      run_action_service(),
       [this](std::shared_ptr<RunAction::Request> request,
       std::shared_ptr<RunAction::Response> response) {
         rclcpp::Rate rcl_rate(8ms);
 
         bool is_ready = false;
-        nlohmann::json action_name = nlohmann::json::parse(request->action_name);
-        if (request->control_type == ActionNode::control_type::RUN_ACTION_BY_NAME) {
-          is_ready = start(action_name.dump());
+
+        if (request->control_type == RUN_ACTION_BY_NAME) {
+          is_ready = start(request->action_name);
         } else {
           nlohmann::json action_data = nlohmann::json::parse(request->json);
-          Action action = this->action_manager->load_action(action_data, action_name.dump());
+          Action action = this->action_manager->load_action(action_data, request->action_name);
+
           is_ready = start(action);
         }
 
@@ -140,11 +151,6 @@ bool ActionNode::update(int time)
   }
 
   return false;
-}
-
-std::string ActionNode::get_node_prefix() const
-{
-  return "action";
 }
 
 void ActionNode::publish_joints()

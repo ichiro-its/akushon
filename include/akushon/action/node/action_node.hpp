@@ -44,11 +44,14 @@ public:
     PLAYING
   };
 
-  typedef enum
+  enum
   {
     RUN_ACTION_BY_NAME,
     RUN_ACTION_BY_JSON
-  } control_type;
+  };
+
+  static std::string get_node_prefix();
+  static std::string run_action_service();
 
   explicit ActionNode(
     rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> action_manager);
@@ -62,8 +65,6 @@ private:
   std::string handle_run_action(
     std::shared_ptr<akushon_interfaces::srv::RunAction::Request> request);
 
-  std::string get_node_prefix() const;
-
   void publish_joints();
 
   rclcpp::Node::SharedPtr node;
@@ -74,7 +75,7 @@ private:
     current_joints_subscriber;
   rclcpp::Publisher<tachimawari_interfaces::msg::SetJoints>::SharedPtr set_joints_publisher;
 
-  rclcpp::Service<akushon_interfaces::srv::RunAction>::SharedPtr run_action_service;
+  rclcpp::Service<akushon_interfaces::srv::RunAction>::SharedPtr run_action_server;
 
   double now;
   Pose initial_pose;
