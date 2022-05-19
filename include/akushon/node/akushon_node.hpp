@@ -45,7 +45,7 @@ public:
   void run_config_service(const std::string & path);
 
 private:
-  double prev_time;
+  double start_time;
   rclcpp::Node::SharedPtr node;
   rclcpp::TimerBase::SharedPtr node_timer;
 

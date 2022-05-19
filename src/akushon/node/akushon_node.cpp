@@ -37,13 +37,13 @@ namespace akushon
 
 AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
 : node(node), action_node(nullptr), config_node(nullptr),
-  prev_time(node->now().seconds())
+  start_time(node->now().seconds())
 {
   node_timer = node->create_wall_timer(
     8ms,
     [this]() {
       if (this->action_node) {
-        double time = this->node->now().seconds() - this->prev_time;
+        double time = this->node->now().seconds() - this->start_time;
         this->action_node->update(time * 1000);
       }
     }
