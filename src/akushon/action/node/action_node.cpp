@@ -44,7 +44,7 @@ namespace akushon
 
 ActionNode::ActionNode(
   rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> action_manager)
-: node(node), action_manager(action_manager), status(READY), now(node->now().seconds()),
+: node(node), action_manager(action_manager), now(node->now().seconds()),
   initial_pose(Pose("initial_pose"))
 {
   current_joints_subscriber = node->create_subscription<tachimawari_interfaces::msg::CurrentJoints>(
@@ -88,10 +88,8 @@ ActionNode::ActionNode(
           while (rclcpp::ok()) {
             rcl_rate.sleep();
 
-            if (get_status() == ActionNode::PLAYING) {
-              double time = this->node->now().seconds() - this->now;
-              process(time * 1000);
-            } else if (get_status() == ActionNode::READY) {
+            double time = this->node->now().seconds() - this->now;
+            if (!update(time * 1000)) {
               break;
             }
           }
@@ -105,25 +103,13 @@ ActionNode::ActionNode(
   }
 }
 
-bool ActionNode::is_action_exist(const std::string & action_name) const
-{
-  return action_manager->get_action(action_name).get_name().empty();
-}
-
-int ActionNode::get_status() const
-{
-  return status;
-}
-
 bool ActionNode::start(const std::string & action_name)
 {
   Pose pose = this->initial_pose;
 
   if (!pose.get_joints().empty()) {
     action_manager->start(action_name, pose);
-    status = PLAYING;
   } else {
-    // Failed to call service
     return false;
   }
 
@@ -136,24 +122,24 @@ bool ActionNode::start(const Action & action)
 
   if (!pose.get_joints().empty()) {
     action_manager->start(action, pose);
-    status = PLAYING;
   } else {
-    // Failed to call service
     return false;
   }
 
   return true;
 }
 
-void ActionNode::process(int time)
+bool ActionNode::update(int time)
 {
   action_manager->process(time);
 
   if (action_manager->is_playing()) {
     publish_joints();
-  } else {
-    status = READY;
+
+    return true;
   }
+
+  return false;
 }
 
 std::string ActionNode::get_node_prefix() const

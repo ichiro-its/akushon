@@ -55,9 +55,7 @@ int main(int argc, char * argv[])
     while (rclcpp::ok()) {
       rcl_rate.sleep();
 
-      if (action_node->get_status() == akushon::ActionNode::PLAYING) {
-        action_node->process(time);
-      } else if (action_node->get_status() == akushon::ActionNode::READY) {
+      if (!action_node->update(time)) {
         break;
       }
 

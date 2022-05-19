@@ -53,14 +53,10 @@ public:
   explicit ActionNode(
     rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> action_manager);
 
-  bool is_action_exist(const std::string & action_name) const;
-
   bool start(const std::string & action_name);
   bool start(const Action & action);
 
-  void process(int time);
-
-  int get_status() const;
+  bool update(int time);
 
 private:
   std::string handle_run_action(
@@ -80,7 +76,6 @@ private:
 
   rclcpp::Service<akushon_interfaces::srv::RunAction>::SharedPtr run_action_service;
 
-  int status;
   double now;
   Pose initial_pose;
 };
