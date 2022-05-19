@@ -30,6 +30,7 @@
 #include "akushon_interfaces/msg/run_action.hpp"
 #include "akushon_interfaces/msg/status.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include "std_msgs/msg/empty.hpp"
 #include "tachimawari_interfaces/msg/current_joints.hpp"
 #include "tachimawari_interfaces/msg/set_joints.hpp"
 
@@ -40,6 +41,7 @@ class ActionNode
 {
 public:
   using CurrentJoints = tachimawari_interfaces::msg::CurrentJoints;
+  using Empty = std_msgs::msg::Empty;
   using RunAction = akushon_interfaces::msg::RunAction;
   using SetJoints = tachimawari_interfaces::msg::SetJoints;
   using Status = akushon_interfaces::msg::Status;
@@ -58,6 +60,7 @@ public:
 
   static std::string get_node_prefix();
   static std::string run_action_topic();
+  static std::string brake_action_topic();
   static std::string status_topic();
 
   explicit ActionNode(
@@ -80,6 +83,7 @@ private:
   rclcpp::Publisher<SetJoints>::SharedPtr set_joints_publisher;
 
   rclcpp::Subscription<RunAction>::SharedPtr run_action_subscriber;
+  rclcpp::Subscription<Empty>::SharedPtr brake_action_subscriber;
   rclcpp::Publisher<Status>::SharedPtr status_publisher;
 };
 

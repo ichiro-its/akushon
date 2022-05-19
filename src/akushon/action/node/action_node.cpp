@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <chrono>
 #include <iostream>
 #include <iomanip>
 #include <memory>
@@ -37,8 +36,6 @@
 #include "tachimawari/joint/model/joint.hpp"
 #include "tachimawari_interfaces/msg/set_joints.hpp"
 
-using namespace std::chrono_literals;
-
 namespace akushon
 {
 
@@ -50,6 +47,11 @@ std::string ActionNode::get_node_prefix()
 std::string ActionNode::run_action_topic()
 {
   return get_node_prefix() + "/run_action";
+}
+
+std::string ActionNode::brake_action_topic()
+{
+  return get_node_prefix() + "/brake_action";
 }
 
 std::string ActionNode::status_topic()
@@ -87,13 +89,20 @@ ActionNode::ActionNode(
     run_action_topic(), 10,
     [this](std::shared_ptr<RunAction> message) {
       if (message->control_type == RUN_ACTION_BY_NAME) {
-        start(message->action_name);
+        this->start(message->action_name);
       } else {
         nlohmann::json action_data = nlohmann::json::parse(message->json);
         Action action = this->action_manager->load_action(action_data, message->action_name);
 
-        start(action);
+        this->start(action);
       }
+    }
+  );
+
+  brake_action_subscriber = node->create_subscription<Empty>(
+    brake_action_topic(), 10,
+    [this](std::shared_ptr<Empty> message) {
+      this->action_manager->brake();
     }
   );
 }

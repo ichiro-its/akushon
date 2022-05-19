@@ -31,8 +31,9 @@
 #include <utility>
 #include <vector>
 
-#include "akushon/action/model/action_name.hpp"
 #include "akushon/action/node/action_manager.hpp"
+
+#include "akushon/action/model/action_name.hpp"
 #include "akushon/action/process/interpolator.hpp"
 #include "nlohmann/json.hpp"
 #include "tachimawari/joint/joint.hpp"
@@ -82,7 +83,7 @@ void ActionManager::load_config(const std::string & path)
 
       actions.insert({name, action});
     } catch (nlohmann::json::parse_error & ex) {
-      // TODO(maroqijalil): will be used for logging
+      // TODO(any): will be used for logging
       // std::cerr << "parse error at byte " << ex.byte << std::endl;
     }
   }
@@ -127,7 +128,7 @@ Action ActionManager::load_action(
       }
     }
   } catch (nlohmann::json::parse_error & ex) {
-    // TODO(maroqijalil): will be used for logging
+    // TODO(any): will be used for logging
     // std::cerr << "parse error at byte " << ex.byte << std::endl;
   }
 
@@ -170,11 +171,20 @@ void ActionManager::start(const Action & action, const Pose & initial_pose)
 
 void ActionManager::process(int time)
 {
-  interpolator->process(time);
+  if (interpolator) {
+    interpolator->process(time);
 
-  if (interpolator->is_finished()) {
+    if (interpolator->is_finished()) {
+      interpolator = nullptr;
+    }
+  } else {
     is_running = false;
   }
+}
+
+void ActionManager::brake()
+{
+  interpolator = nullptr;
 }
 
 bool ActionManager::is_playing() const
