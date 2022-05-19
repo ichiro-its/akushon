@@ -59,7 +59,7 @@ std::string ActionNode::status_topic()
 
 ActionNode::ActionNode(
   rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> action_manager)
-: node(node), action_manager(action_manager), now(node->now().seconds()),
+: node(node), action_manager(action_manager),
   initial_pose(Pose("initial_pose"))
 {
   current_joints_subscriber = node->create_subscription<CurrentJoints>(
@@ -94,13 +94,6 @@ ActionNode::ActionNode(
 
         start(action);
       }
-
-      while (rclcpp::ok()) {
-        double time = this->node->now().seconds() - this->now;
-        if (!update(time * 1000)) {
-          break;
-        }
-      }
     }
   );
 }
@@ -133,9 +126,8 @@ bool ActionNode::start(const Action & action)
 
 bool ActionNode::update(int time)
 {
-  action_manager->process(time);
-
   if (action_manager->is_playing()) {
+    action_manager->process(time);
     publish_joints();
 
     return true;

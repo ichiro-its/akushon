@@ -71,6 +71,7 @@ public:
 private:
   void publish_joints();
 
+  Pose initial_pose;
   rclcpp::Node::SharedPtr node;
 
   std::shared_ptr<ActionManager> action_manager;
@@ -80,9 +81,6 @@ private:
 
   rclcpp::Subscription<RunAction>::SharedPtr run_action_subscriber;
   rclcpp::Publisher<Status>::SharedPtr status_publisher;
-
-  double now;
-  Pose initial_pose;
 };
 
 }  // namespace akushon

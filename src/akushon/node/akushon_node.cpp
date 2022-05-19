@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#include <chrono>
 #include <memory>
 #include <string>
 #include <thread>
@@ -29,12 +30,24 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 
+using namespace std::chrono_literals;
+
 namespace akushon
 {
 
 AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
-: node(node), action_node(nullptr), config_node(nullptr)
+: node(node), action_node(nullptr), config_node(nullptr),
+  prev_time(node->now().seconds())
 {
+  node_timer = node->create_wall_timer(
+    8ms,
+    [this]() {
+      if (this->action_node) {
+        double time = this->node->now().seconds() - this->prev_time;
+        this->action_node->update(time * 1000);
+      }
+    }
+  );
 }
 
 void AkushonNode::run_action_manager(std::shared_ptr<ActionManager> action_manager)
