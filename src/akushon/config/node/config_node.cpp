@@ -34,28 +34,22 @@ namespace akushon
 ConfigNode::ConfigNode(rclcpp::Node::SharedPtr node, const std::string & path)
 : config_util(path)
 {
-  {
-    using akushon_interfaces::srv::GetActions;
-    get_actions_service = node->create_service<GetActions>(
-      get_node_prefix() + "/get_actions",
-      [this](std::shared_ptr<GetActions::Request> request,
-      std::shared_ptr<GetActions::Response> response) {
-        response->json = this->config_util.get_config();
-      }
-    );
-  }
+  get_actions_service = node->create_service<GetActions>(
+    get_node_prefix() + "/get_actions",
+    [this](std::shared_ptr<GetActions::Request> request,
+    std::shared_ptr<GetActions::Response> response) {
+      response->json = this->config_util.get_config();
+    }
+  );
 
-  {
-    using akushon_interfaces::srv::SaveActions;
-    save_actions_service = node->create_service<SaveActions>(
-      get_node_prefix() + "/save_actions",
-      [this](std::shared_ptr<SaveActions::Request> request,
-      std::shared_ptr<SaveActions::Response> response) {
-        this->config_util.save_config(request->json);
-        response->status = "SAVED";
-      }
-    );
-  }
+  save_actions_service = node->create_service<SaveActions>(
+    get_node_prefix() + "/save_actions",
+    [this](std::shared_ptr<SaveActions::Request> request,
+    std::shared_ptr<SaveActions::Response> response) {
+      this->config_util.save_config(request->json);
+      response->status = "SAVED";
+    }
+  );
 }
 
 std::string ConfigNode::get_node_prefix() const

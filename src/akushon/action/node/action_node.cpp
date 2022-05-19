@@ -47,9 +47,14 @@ std::string ActionNode::get_node_prefix()
   return "action";
 }
 
-std::string ActionNode::run_action_service()
+std::string ActionNode::run_action_topic()
 {
   return get_node_prefix() + "/run_action";
+}
+
+std::string ActionNode::status_topic()
+{
+  return get_node_prefix() + "/status";
 }
 
 ActionNode::ActionNode(
@@ -57,9 +62,9 @@ ActionNode::ActionNode(
 : node(node), action_manager(action_manager), now(node->now().seconds()),
   initial_pose(Pose("initial_pose"))
 {
-  current_joints_subscriber = node->create_subscription<tachimawari_interfaces::msg::CurrentJoints>(
+  current_joints_subscriber = node->create_subscription<CurrentJoints>(
     "/joint/current_joints", 10,
-    [this](const tachimawari_interfaces::msg::CurrentJoints::SharedPtr message) {
+    [this](const CurrentJoints::SharedPtr message) {
       {
         using tachimawari::joint::Joint;
         std::vector<Joint> current_joints;
@@ -73,45 +78,31 @@ ActionNode::ActionNode(
     }
   );
 
-  set_joints_publisher = node->create_publisher<tachimawari_interfaces::msg::SetJoints>(
+  set_joints_publisher = node->create_publisher<SetJoints>(
     "/joint/set_joints", 10);
 
-  {
-    using akushon_interfaces::srv::RunAction;
-    run_action_server = node->create_service<RunAction>(
-      run_action_service(),
-      [this](std::shared_ptr<RunAction::Request> request,
-      std::shared_ptr<RunAction::Response> response) {
-        rclcpp::Rate rcl_rate(8ms);
+  status_publisher = node->create_publisher<Status>(status_topic(), 10);
 
-        bool is_ready = false;
+  run_action_subscriber = node->create_subscription<RunAction>(
+    run_action_topic(), 10,
+    [this](std::shared_ptr<RunAction> message) {
+      if (message->control_type == RUN_ACTION_BY_NAME) {
+        start(message->action_name);
+      } else {
+        nlohmann::json action_data = nlohmann::json::parse(message->json);
+        Action action = this->action_manager->load_action(action_data, message->action_name);
 
-        if (request->control_type == RUN_ACTION_BY_NAME) {
-          is_ready = start(request->action_name);
-        } else {
-          nlohmann::json action_data = nlohmann::json::parse(request->json);
-          Action action = this->action_manager->load_action(action_data, request->action_name);
+        start(action);
+      }
 
-          is_ready = start(action);
-        }
-
-        if (is_ready) {
-          while (rclcpp::ok()) {
-            rcl_rate.sleep();
-
-            double time = this->node->now().seconds() - this->now;
-            if (!update(time * 1000)) {
-              break;
-            }
-          }
-        }
-
-        if (rclcpp::ok()) {
-          response->status = is_ready ? "SUCCEEDED" : "FAILED";
+      while (rclcpp::ok()) {
+        double time = this->node->now().seconds() - this->now;
+        if (!update(time * 1000)) {
+          break;
         }
       }
-    );
-  }
+    }
+  );
 }
 
 bool ActionNode::start(const std::string & action_name)

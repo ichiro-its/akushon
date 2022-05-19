@@ -27,7 +27,8 @@
 #include "akushon/action/model/action.hpp"
 #include "akushon/action/model/pose.hpp"
 #include "akushon/action/node/action_manager.hpp"
-#include "akushon_interfaces/srv/run_action.hpp"
+#include "akushon_interfaces/msg/run_action.hpp"
+#include "akushon_interfaces/msg/status.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "tachimawari_interfaces/msg/current_joints.hpp"
 #include "tachimawari_interfaces/msg/set_joints.hpp"
@@ -38,6 +39,11 @@ namespace akushon
 class ActionNode
 {
 public:
+  using CurrentJoints = tachimawari_interfaces::msg::CurrentJoints;
+  using RunAction = akushon_interfaces::msg::RunAction;
+  using SetJoints = tachimawari_interfaces::msg::SetJoints;
+  using Status = akushon_interfaces::msg::Status;
+
   enum
   {
     READY,
@@ -51,7 +57,8 @@ public:
   };
 
   static std::string get_node_prefix();
-  static std::string run_action_service();
+  static std::string run_action_topic();
+  static std::string status_topic();
 
   explicit ActionNode(
     rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> action_manager);
@@ -62,20 +69,17 @@ public:
   bool update(int time);
 
 private:
-  std::string handle_run_action(
-    std::shared_ptr<akushon_interfaces::srv::RunAction::Request> request);
-
   void publish_joints();
 
   rclcpp::Node::SharedPtr node;
 
   std::shared_ptr<ActionManager> action_manager;
 
-  rclcpp::Subscription<tachimawari_interfaces::msg::CurrentJoints>::SharedPtr
-    current_joints_subscriber;
-  rclcpp::Publisher<tachimawari_interfaces::msg::SetJoints>::SharedPtr set_joints_publisher;
+  rclcpp::Subscription<CurrentJoints>::SharedPtr current_joints_subscriber;
+  rclcpp::Publisher<SetJoints>::SharedPtr set_joints_publisher;
 
-  rclcpp::Service<akushon_interfaces::srv::RunAction>::SharedPtr run_action_server;
+  rclcpp::Subscription<RunAction>::SharedPtr run_action_subscriber;
+  rclcpp::Publisher<Status>::SharedPtr status_publisher;
 
   double now;
   Pose initial_pose;
