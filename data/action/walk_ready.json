@@ -1,5 +1,5 @@
 {
-  "name": "Walkready",
+  "name": "Walk Ready",
   "next": "",
   "poses": [
     {
@@ -12,7 +12,7 @@
         "left_hip_yaw": 0,
         "left_knee": -60,
         "left_shoulder_pitch": -5,
-        "left_shoulder_roll": 20,
+        "left_shoulder_roll": 18,
         "neck_pitch": -5,
         "neck_yaw": 1,
         "right_ankle_pitch": 25,

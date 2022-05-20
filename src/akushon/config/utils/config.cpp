@@ -22,7 +22,6 @@
 #include <string>
 #include <iostream>
 #include <filesystem>
-#include <c_string>
 
 #include "akushon/action/model/action_name.hpp"
 #include "akushon/config/utils/config.hpp"
@@ -39,17 +38,17 @@ Config::Config(const std::string & path)
 std::string Config::get_config() const
 {
   nlohmann::json actions_list;
+  std::cout << "[ ACTIONS LIST ] : " << std::endl;
   for (const auto & action_file : std::filesystem::directory_iterator(path)) {
 
     std::string file_name = action_file.path();
-    std::cout << action_file.path() << std::endl;
 
     try {
       std::string action_name = "";
-      for (const auto i = len(path); i < len(file_name) - 5; i++) {
+      for (auto i = path.size(); i < file_name.size() - 5; i++) {
         action_name += file_name[i];
       }
-      std::cout << action_name << std::endl;
+      std::cout << action_name << " | ";
 
       std::ifstream file(action_file.path());
       nlohmann::json action_data = nlohmann::json::parse(file);
@@ -59,6 +58,7 @@ std::string Config::get_config() const
       // std::cerr << "parse error at byte " << ex.byte << std::endl;
     }
   }
+  std::cout << std::endl;
   return actions_list.dump();
 }
 
@@ -69,7 +69,7 @@ void Config::save_config(const std::string & actions_data)
     std::locale loc;
     std::string action_name = key;
     std::replace(action_name.begin(), action_name.end(), ' ', '_');
-    std::string file_name = path + "/action/" + action_name + ".json";
+    std::string file_name = path + action_name + ".json";
     std::ofstream file;
 
     file.open(file_name);
