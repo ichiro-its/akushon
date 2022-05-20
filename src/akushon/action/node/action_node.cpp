@@ -88,6 +88,7 @@ ActionNode::ActionNode(
   run_action_subscriber = node->create_subscription<RunAction>(
     run_action_topic(), 10,
     [this](std::shared_ptr<RunAction> message) {
+      std::cout << message->action_name << std::endl;
       if (message->control_type == RUN_ACTION_BY_NAME) {
         this->start(message->action_name);
       } else {

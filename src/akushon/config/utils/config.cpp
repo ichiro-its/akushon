@@ -20,6 +20,9 @@
 
 #include <fstream>
 #include <string>
+#include <iostream>
+#include <filesystem>
+#include <c_string>
 
 #include "akushon/action/model/action_name.hpp"
 #include "akushon/config/utils/config.hpp"
@@ -36,14 +39,21 @@ Config::Config(const std::string & path)
 std::string Config::get_config() const
 {
   nlohmann::json actions_list;
-  for (const auto & [name, id] : ActionName::map) {
-    std::string file_name = path + "/action/" + name + ".json";
+  for (const auto & action_file : std::filesystem::directory_iterator(path)) {
+
+    std::string file_name = action_file.path();
+    std::cout << action_file.path() << std::endl;
 
     try {
-      std::ifstream file(file_name);
-      nlohmann::json action_data = nlohmann::json::parse(file);
+      std::string action_name = "";
+      for (const auto i = len(path); i < len(file_name) - 5; i++) {
+        action_name += file_name[i];
+      }
+      std::cout << action_name << std::endl;
 
-      actions_list["action_" + name] = action_data;
+      std::ifstream file(action_file.path());
+      nlohmann::json action_data = nlohmann::json::parse(file);
+      actions_list[action_name] = action_data;
     } catch (nlohmann::json::parse_error & ex) {
       // TODO(maroqijalil): will be used for logging
       // std::cerr << "parse error at byte " << ex.byte << std::endl;
