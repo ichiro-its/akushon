@@ -25,6 +25,7 @@
 
 #include "akushon/action/node/action_manager.hpp"
 #include "akushon/action/model/action.hpp"
+#include "akushon/action/model/action_name.hpp"
 #include "akushon/action/model/pose.hpp"
 #include "akushon/node/akushon_node.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -66,7 +67,7 @@ int main(int argc, char * argv[])
     pose.set_joints(joints);
   }
 
-  action_manager->start(akushon::Action::WALKREADY, pose);
+  action_manager->start(akushon::ActionName::WALKREADY, pose);
   while (rclcpp::ok()) {
     if (!action_manager->is_playing()) {
       break;

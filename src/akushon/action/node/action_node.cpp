@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <chrono>
 #include <iostream>
 #include <iomanip>
 #include <memory>
@@ -31,25 +30,42 @@
 #include "akushon/action/node/action_manager.hpp"
 #include "akushon/action/model/action_name.hpp"
 #include "akushon/action/model/pose.hpp"
-#include "akushon_interfaces/srv/run_action.hpp"
 #include "nlohmann/json.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "tachimawari/joint/model/joint.hpp"
 #include "tachimawari_interfaces/msg/set_joints.hpp"
 
-using namespace std::chrono_literals;
-
 namespace akushon
 {
 
+std::string ActionNode::get_node_prefix()
+{
+  return "action";
+}
+
+std::string ActionNode::run_action_topic()
+{
+  return get_node_prefix() + "/run_action";
+}
+
+std::string ActionNode::brake_action_topic()
+{
+  return get_node_prefix() + "/brake_action";
+}
+
+std::string ActionNode::status_topic()
+{
+  return get_node_prefix() + "/status";
+}
+
 ActionNode::ActionNode(
   rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> action_manager)
-: node(node), action_manager(action_manager), status(READY), now(node->now().seconds()),
+: node(node), action_manager(action_manager),
   initial_pose(Pose("initial_pose"))
 {
-  current_joints_subscriber = node->create_subscription<tachimawari_interfaces::msg::CurrentJoints>(
+  current_joints_subscriber = node->create_subscription<CurrentJoints>(
     "/joint/current_joints", 10,
-    [this](const tachimawari_interfaces::msg::CurrentJoints::SharedPtr message) {
+    [this](const CurrentJoints::SharedPtr message) {
       {
         using tachimawari::joint::Joint;
         std::vector<Joint> current_joints;
@@ -63,71 +79,41 @@ ActionNode::ActionNode(
     }
   );
 
-  set_joints_publisher = node->create_publisher<tachimawari_interfaces::msg::SetJoints>(
+  set_joints_publisher = node->create_publisher<SetJoints>(
     "/joint/set_joints", 10);
 
-  {
-    using akushon_interfaces::srv::RunAction;
-    run_action_service = node->create_service<RunAction>(
-      get_node_prefix() + "/run_action",
-      [this](std::shared_ptr<RunAction::Request> request,
-      std::shared_ptr<RunAction::Response> response) {
-        rclcpp::Rate rcl_rate(8ms);
+  status_publisher = node->create_publisher<Status>(status_topic(), 10);
 
-        nlohmann::json action_data = nlohmann::json::parse(request->json);
-        Action action = this->action_manager->load_action(action_data, "temp_action");
-        bool is_ready = start(action);
+  run_action_subscriber = node->create_subscription<RunAction>(
+    run_action_topic(), 10,
+    [this](std::shared_ptr<RunAction> message) {
+      std::cout << message->action_name << std::endl;
+      if (message->control_type == RUN_ACTION_BY_NAME) {
+        this->start(message->action_name);
+      } else {
+        nlohmann::json action_data = nlohmann::json::parse(message->json);
+        Action action = this->action_manager->load_action(action_data, message->action_name);
 
-        if (is_ready) {
-          while (rclcpp::ok()) {
-            rcl_rate.sleep();
-
-            if (get_status() == ActionNode::PLAYING) {
-              double time = this->node->now().seconds() - this->now;
-              process(time * 1000);
-            } else if (get_status() == ActionNode::READY) {
-              break;
-            }
-          }
-        }
-
-        if (rclcpp::ok()) {
-          response->status = is_ready ? "SUCCEEDED" : "FAILED";
-        }
+        this->start(action);
       }
-    );
-  }
-}
+    }
+  );
 
-bool ActionNode::is_action_exist(int action_id) const
-{
-  return action_manager->get_action(action_id).get_name().empty();
-}
-
-bool ActionNode::is_action_exist(const std::string & action_name) const
-{
-  return is_action_exist(ActionName::map.at(action_name));
-}
-
-int ActionNode::get_status() const
-{
-  return status;
+  brake_action_subscriber = node->create_subscription<Empty>(
+    brake_action_topic(), 10,
+    [this](std::shared_ptr<Empty> message) {
+      this->action_manager->brake();
+    }
+  );
 }
 
 bool ActionNode::start(const std::string & action_name)
 {
-  return start(ActionName::map.at(action_name));
-}
-
-bool ActionNode::start(int action_id)
-{
   Pose pose = this->initial_pose;
 
   if (!pose.get_joints().empty()) {
-    action_manager->start(action_id, pose);
-    status = PLAYING;
+    action_manager->start(action_name, pose);
   } else {
-    // Failed to call service
     return false;
   }
 
@@ -140,29 +126,23 @@ bool ActionNode::start(const Action & action)
 
   if (!pose.get_joints().empty()) {
     action_manager->start(action, pose);
-    status = PLAYING;
   } else {
-    // Failed to call service
     return false;
   }
 
   return true;
 }
 
-void ActionNode::process(int time)
+bool ActionNode::update(int time)
 {
-  action_manager->process(time);
-
   if (action_manager->is_playing()) {
+    action_manager->process(time);
     publish_joints();
-  } else {
-    status = READY;
-  }
-}
 
-std::string ActionNode::get_node_prefix() const
-{
-  return "action";
+    return true;
+  }
+
+  return false;
 }
 
 void ActionNode::publish_joints()

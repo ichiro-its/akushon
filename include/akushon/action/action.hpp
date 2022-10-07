@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Ichiro ITS
+// Copyright (c) 2021 ICHIRO ITS
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,52 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__ACTION__NODE__ACTION_MANAGER_HPP_
-#define AKUSHON__ACTION__NODE__ACTION_MANAGER_HPP_
+#ifndef AKUSHON__ACTION__ACTION_HPP_
+#define AKUSHON__ACTION__ACTION_HPP_
 
-#include <string>
-#include <map>
-#include <vector>
-#include <memory>
-
+#include "akushon/action/model/action_name.hpp"
 #include "akushon/action/model/action.hpp"
 #include "akushon/action/model/pose.hpp"
+#include "akushon/action/node/action_manager.hpp"
+#include "akushon/action/node/action_node.hpp"
 #include "akushon/action/process/interpolator.hpp"
-#include "nlohmann/json.hpp"
-#include "tachimawari/joint/model/joint.hpp"
+#include "akushon/action/process/joint_process.hpp"
 
-namespace akushon
-{
-
-class ActionManager
-{
-public:
-  ActionManager();
-
-  void insert_action(std::string action_name, const Action & action);
-  void delete_action(std::string action_name);
-  Action get_action(std::string action_name) const;
-
-  void load_config(const std::string & path);
-
-  Action load_action(const nlohmann::json & action_data, const std::string & action_name) const;
-
-  void start(std::string action_name, const Pose & initial_pose);
-  void start(const Action & action, const Pose & initial_pose);
-  void brake();
-  void process(int time);
-
-  bool is_playing() const;
-
-  std::vector<tachimawari::joint::Joint> get_joints() const;
-
-private:
-  std::map<std::string, Action> actions;
-
-  std::shared_ptr<Interpolator> interpolator;
-  bool is_running;
-};
-
-}  // namespace akushon
-
-#endif  // AKUSHON__ACTION__NODE__ACTION_MANAGER_HPP_
+#endif  // AKUSHON__ACTION__ACTION_HPP_

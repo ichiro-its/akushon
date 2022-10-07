@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Ichiro ITS
+// Copyright (c) 2021 ICHIRO ITS
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,42 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__NODE__AKUSHON_NODE_HPP_
-#define AKUSHON__NODE__AKUSHON_NODE_HPP_
+#ifndef AKUSHON__AKUSHON_HPP_
+#define AKUSHON__AKUSHON_HPP_
 
-#include <memory>
-#include <string>
+#include "akushon/action/action.hpp"
+#include "akushon/node/akushon_node.hpp"
 
-#include "akushon/action/node/action_manager.hpp"
-#include "akushon/action/node/action_node.hpp"
-#include "akushon/config/node/config_node.hpp"
-#include "akushon_interfaces/srv/save_actions.hpp"
-#include "akushon_interfaces/srv/get_actions.hpp"
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp_action/rclcpp_action.hpp"
-
-namespace akushon
-{
-
-class AkushonNode
-{
-public:
-  explicit AkushonNode(rclcpp::Node::SharedPtr node);
-
-  void run_action_manager(std::shared_ptr<ActionManager> action_manager);
-
-  void run_config_service(const std::string & path);
-
-private:
-  double start_time;
-  rclcpp::Node::SharedPtr node;
-  rclcpp::TimerBase::SharedPtr node_timer;
-
-  std::shared_ptr<ActionNode> action_node;
-
-  std::shared_ptr<ConfigNode> config_node;
-};
-
-}  // namespace akushon
-
-#endif  // AKUSHON__NODE__AKUSHON_NODE_HPP_
+#endif  // AKUSHON__AKUSHON_HPP_

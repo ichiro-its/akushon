@@ -35,6 +35,9 @@ namespace akushon
 class ConfigNode
 {
 public:
+  using SaveActions = akushon_interfaces::srv::SaveActions;
+  using GetActions = akushon_interfaces::srv::GetActions;
+
   explicit ConfigNode(rclcpp::Node::SharedPtr node, const std::string & path);
 
 private:
@@ -42,8 +45,8 @@ private:
 
   Config config_util;
 
-  rclcpp::Service<akushon_interfaces::srv::SaveActions>::SharedPtr save_actions_service;
-  rclcpp::Service<akushon_interfaces::srv::GetActions>::SharedPtr get_actions_service;
+  rclcpp::Service<SaveActions>::SharedPtr save_actions_service;
+  rclcpp::Service<GetActions>::SharedPtr get_actions_service;
 };
 
 }  // namespace akushon
