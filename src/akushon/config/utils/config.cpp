@@ -18,10 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include <fstream>
-#include <string>
-#include <iostream>
 #include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <string>
 
 #include "akushon/action/model/action_name.hpp"
 #include "akushon/config/utils/config.hpp"
@@ -40,7 +40,6 @@ std::string Config::get_config() const
   nlohmann::json actions_list;
   std::cout << "[ ACTIONS LIST ] : " << std::endl;
   for (const auto & action_file : std::filesystem::directory_iterator(path)) {
-
     std::string file_name = action_file.path();
 
     try {
