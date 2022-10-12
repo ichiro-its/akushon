@@ -33,26 +33,6 @@ namespace akushon
 class Action
 {
 public:
-  enum
-  {
-    INIT,
-    WALKREADY,
-    SIT_DOWN,
-    FORWARD_UP,
-    BACKWARD_UP,
-    LEFTWARD_UP,
-    RIGHTWARD_UP,
-    RIGHT_KICK,
-    LEFT_KICK,
-    RIGHT_KICK_SHORT,
-    LEGT_KICK_SHORT,
-    LEFT_SIDEKICK,
-    RIGHT_SIDEKICK,
-    KEEPER_SIT,
-    KEEPER_UP,
-    TOTAL
-  };
-
   explicit Action(const std::string & action_name);
 
   void add_pose(const Pose & pose);

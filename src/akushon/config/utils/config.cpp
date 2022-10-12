@@ -18,7 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <string>
 
 #include "akushon/action/model/action_name.hpp"
@@ -36,19 +38,26 @@ Config::Config(const std::string & path)
 std::string Config::get_config() const
 {
   nlohmann::json actions_list;
-  for (const auto & [name, id] : ActionName::map) {
-    std::string file_name = path + "/action/" + name + ".json";
+  std::cout << "[ ACTIONS LIST ] : " << std::endl;
+  for (const auto & action_file : std::filesystem::directory_iterator(path)) {
+    std::string file_name = action_file.path();
 
     try {
-      std::ifstream file(file_name);
-      nlohmann::json action_data = nlohmann::json::parse(file);
+      std::string action_name = "";
+      for (auto i = path.size(); i < file_name.size() - 5; i++) {
+        action_name += file_name[i];
+      }
+      std::cout << action_name << " | ";
 
-      actions_list["action_" + name] = action_data;
+      std::ifstream file(action_file.path());
+      nlohmann::json action_data = nlohmann::json::parse(file);
+      actions_list[action_name] = action_data;
     } catch (nlohmann::json::parse_error & ex) {
       // TODO(maroqijalil): will be used for logging
       // std::cerr << "parse error at byte " << ex.byte << std::endl;
     }
   }
+  std::cout << std::endl;
   return actions_list.dump();
 }
 
@@ -59,7 +68,7 @@ void Config::save_config(const std::string & actions_data)
     std::locale loc;
     std::string action_name = key;
     std::replace(action_name.begin(), action_name.end(), ' ', '_');
-    std::string file_name = path + "/action/" + action_name + ".json";
+    std::string file_name = path + action_name + ".json";
     std::ofstream file;
 
     file.open(file_name);

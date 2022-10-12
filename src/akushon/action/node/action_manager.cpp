@@ -18,6 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#include <unistd.h>
+#include <limits.h>
+
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -26,8 +30,9 @@
 #include <utility>
 #include <vector>
 
-#include "akushon/action/model/action_name.hpp"
 #include "akushon/action/node/action_manager.hpp"
+
+#include "akushon/action/model/action_name.hpp"
 #include "akushon/action/process/interpolator.hpp"
 #include "nlohmann/json.hpp"
 #include "tachimawari/joint/joint.hpp"
@@ -41,20 +46,20 @@ ActionManager::ActionManager()
   interpolator = std::make_shared<Interpolator>(std::vector<Action>(), Pose(""));
 }
 
-void ActionManager::insert_action(int action_id, const Action & action)
+void ActionManager::insert_action(std::string action_name, const Action & action)
 {
-  actions.insert({action_id, action});
+  actions.insert({action_name, action});
 }
 
-void ActionManager::delete_action(int action_id)
+void ActionManager::delete_action(std::string action_name)
 {
-  actions.erase(action_id);
+  actions.erase(action_name);
 }
 
-Action ActionManager::get_action(int action_id) const
+Action ActionManager::get_action(std::string action_name) const
 {
-  if (actions.find(action_id) != actions.end()) {
-    return actions.at(action_id);
+  if (actions.find(action_name) != actions.end()) {
+    return actions.at(action_name);
   }
 
   return Action("");
@@ -62,18 +67,22 @@ Action ActionManager::get_action(int action_id) const
 
 void ActionManager::load_config(const std::string & path)
 {
-  for (const auto & [name, id] : ActionName::map) {
-    std::string file_name = path + "/action/" + name + ".json";
-
+  for (const auto & entry : std::filesystem::directory_iterator(path)) {
+    std::string name = "";
+    std::string file_name = entry.path();
+    std::string extension_json = ".json";
+    for (int i = path.length(); i < file_name.length() - extension_json.length(); i++) {
+      name += file_name[i];
+    }
     try {
       std::ifstream file(file_name);
       nlohmann::json action_data = nlohmann::json::parse(file);
 
       Action action = load_action(action_data, name);
 
-      actions.insert({id, action});
+      actions.insert({name, action});
     } catch (nlohmann::json::parse_error & ex) {
-      // TODO(maroqijalil): will be used for logging
+      // TODO(any): will be used for logging
       // std::cerr << "parse error at byte " << ex.byte << std::endl;
     }
   }
@@ -118,27 +127,27 @@ Action ActionManager::load_action(
       }
     }
   } catch (nlohmann::json::parse_error & ex) {
-    // TODO(maroqijalil): will be used for logging
+    // TODO(any): will be used for logging
     // std::cerr << "parse error at byte " << ex.byte << std::endl;
   }
 
   return action;
 }
 
-void ActionManager::start(int action_id, const Pose & initial_pose)
+void ActionManager::start(std::string action_name, const Pose & initial_pose)
 {
   std::vector<Action> target_actions;
 
   while (true) {
-    const auto & action = actions.at(action_id);
+    const auto & action = actions.at(action_name);
 
     target_actions.push_back(action);
 
     if (action.get_next_action() != "") {
-      int next_action_id = ActionName::map.at(action.get_next_action());
+      std::string next_action_name = action.get_next_action();
 
-      if (actions.find(next_action_id) != actions.end()) {
-        action_id = next_action_id;
+      if (actions.find(next_action_name) != actions.end()) {
+        action_name = next_action_name;
       } else {
         break;
       }
@@ -161,11 +170,20 @@ void ActionManager::start(const Action & action, const Pose & initial_pose)
 
 void ActionManager::process(int time)
 {
-  interpolator->process(time);
+  if (interpolator) {
+    interpolator->process(time);
 
-  if (interpolator->is_finished()) {
+    if (interpolator->is_finished()) {
+      interpolator = nullptr;
+    }
+  } else {
     is_running = false;
   }
+}
+
+void ActionManager::brake()
+{
+  interpolator = nullptr;
 }
 
 bool ActionManager::is_playing() const

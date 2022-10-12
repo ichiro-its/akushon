@@ -18,6 +18,7 @@ find_package(ament_index_cpp REQUIRED)
 find_package(akushon_interfaces REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(tachimawari REQUIRED)
 find_package(tachimawari_interfaces REQUIRED)
 
@@ -42,6 +43,7 @@ ament_target_dependencies(${PROJECT_NAME}
   akushon_interfaces
   rclcpp
   rclcpp_action
+  std_msgs
   tachimawari
   tachimawari_interfaces)
 
@@ -101,6 +103,7 @@ ament_export_dependencies(
   akushon_interfaces
   rclcpp
   rclcpp_action
+  std_msgs
   tachimawari
   tachimawari_interfaces)
 ament_export_include_directories("include")
