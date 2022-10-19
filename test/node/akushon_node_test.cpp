@@ -22,7 +22,8 @@
 
 #include "gtest/gtest.h"
 
-#include "akushon/action/node/action_manager.hpp"
+#include "akushon/action/action.hpp"
+#include "akushon/config/config.hpp"
 #include "akushon/node/akushon_node.hpp"
 #include "rclcpp/rclcpp.hpp"
 
@@ -36,6 +37,7 @@ TEST(AkushonNodeTest, CompileProcess) {
     action_manager->load_config("");
 
     akushon_node.run_action_manager(action_manager);
+    akushon_node.run_config_service("");
   } catch (...) {
   }
 }

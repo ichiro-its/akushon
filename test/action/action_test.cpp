@@ -29,6 +29,10 @@ TEST(ActionTest, ClassInitialization) {
   akushon::Action action("test action");
   ASSERT_EQ(action.get_name(), "test action");
   ASSERT_TRUE(action.get_poses().empty());
+  ASSERT_EQ(action.get_start_delay(), 0.0);
+  ASSERT_EQ(action.get_stop_delay(), 0.0);
+  ASSERT_EQ(action.get_next_action(), "");
+
 }
 
 TEST(ActionTest, SetterTest) {
@@ -36,7 +40,9 @@ TEST(ActionTest, SetterTest) {
   action.set_name("new test action");
   action.set_start_delay(1.0);
   action.set_stop_delay(3.0);
+  action.set_next_action("next action");
   ASSERT_EQ(action.get_name(), "new test action");
   ASSERT_EQ(action.get_start_delay(), 1.0);
   ASSERT_EQ(action.get_stop_delay(), 3.0);
+  ASSERT_EQ(action.get_next_action(), "next action");
 }
