@@ -31,7 +31,7 @@ namespace akushon
 {
 
 Action::Action(const std::string & action_name)
-: name(action_name), poses({}), start_delay(0), stop_delay(0), next_action("")
+: name(action_name), poses({}), start_delay(0), stop_delay(0), next_action(""), use_spline(false)
 {
 }
 
@@ -108,6 +108,29 @@ const std::string & Action::get_next_action() const
 void Action::reset()
 {
   poses.clear();
+  for (auto & [id, spline] : joint_splines) {
+    delete spline;
+  }
+  joint_splines.clear();
+}
+
+void Action::enable_spline(bool enable)
+{
+  use_spline = enable;
+}
+
+void Action::generate_splines()
+{
+  for (auto pose : poses) {
+    for (auto & joint : pose.get_joints()) {
+      uint8_t joint_id = joint.get_id();
+
+      if ( joint_splines.find(joint_id) != joint_splines.end()) {
+        joint_splines[joint_id] = new keisan::SmoothSpline();
+      }
+      joint_splines[joint_id]->add_point(joint.get_position(), pose.get_time());
+    }
+  }
 }
 
 }  // namespace akushon

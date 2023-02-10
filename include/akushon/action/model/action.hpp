@@ -24,8 +24,10 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
 
 #include "akushon/action/model/pose.hpp"
+#include "keisan/spline/smooth_spline.hpp"
 
 namespace akushon
 {
@@ -57,10 +59,16 @@ public:
 
   void reset();
 
+  void enable_spline(bool enable);
+  void generate_splines();
+
 private:
   std::string name;
 
   std::vector<Pose> poses;
+  std::map<uint8_t, keisan::SmoothSpline*> joint_splines;
+
+  bool use_spline;
 
   int stop_delay;
   int start_delay;
