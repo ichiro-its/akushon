@@ -21,10 +21,10 @@
 #ifndef AKUSHON__ACTION__MODEL__ACTION_HPP_
 #define AKUSHON__ACTION__MODEL__ACTION_HPP_
 
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
-#include <map>
 
 #include "akushon/action/model/pose.hpp"
 #include "keisan/spline/smooth_spline.hpp"
@@ -60,13 +60,15 @@ public:
   void reset();
 
   void enable_spline(bool enable);
+  bool is_using_spline() const;
   void generate_splines();
+
+  std::map<uint8_t, keisan::SmoothSpline *> joint_splines;
 
 private:
   std::string name;
 
   std::vector<Pose> poses;
-  std::map<uint8_t, keisan::SmoothSpline*> joint_splines;
 
   bool use_spline;
 

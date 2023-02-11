@@ -119,6 +119,11 @@ void Action::enable_spline(bool enable)
   use_spline = enable;
 }
 
+bool Action::is_using_spline() const
+{
+  return use_spline; 
+}
+
 void Action::generate_splines()
 {
   for (auto pose : poses) {

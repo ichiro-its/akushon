@@ -49,69 +49,76 @@ Interpolator::Interpolator(const std::vector<Action> & actions, const Pose & ini
 void Interpolator::process(int time)
 {
   switch (state) {
-    case START_DELAY:
-      {
-        if (init_state) {
-          init_state = false;
-          start_stop_time = time;
-        }
-
-        if ((time - start_stop_time) > (get_current_action().get_start_delay() * 1000)) {
-          change_state(PLAYING);
-        }
-
-        break;
+    case START_DELAY: 
+    {
+      if (init_state) {
+        init_state = false;
+        start_stop_time = time;
       }
 
-    case PLAYING:
-      {
-        if (check_for_next()) {
-          if (init_pause) {
-            init_pause = false;
-            pause_time = time;
-          }
-
-          if (current_pose_index == get_current_action().get_pose_count()) {
-            change_state(STOP_DELAY);
-            init_pause = true;
-          } else if ((time - pause_time) > (get_current_pose().get_pause() * 1000)) {
-            next_pose();
-            init_pause = true;
-          }
-        }
-
-        break;
+      if ((time - start_stop_time) > (get_current_action().get_start_delay() * 1000)) {
+        change_state(PLAYING);
       }
 
-    case STOP_DELAY:
-      {
-        if (init_state) {
-          init_state = false;
-          start_stop_time = time;
+      break;
+    }
+
+    case PLAYING: 
+    {
+      if (check_for_next()) {
+        if (init_pause) {
+          init_pause = false;
+          pause_time = time;
         }
 
-        if ((time - start_stop_time) > (get_current_action().get_stop_delay() * 1000)) {
-          ++current_action_index;
-
-          if (current_action_index == actions.size()) {
-            change_state(END);
-          } else {
-            change_state(START_DELAY);
-          }
+        if (current_pose_index == get_current_action().get_pose_count()) {
+          change_state(STOP_DELAY);
+          init_pause = true;
+        } else if ((time - pause_time) > (get_current_pose().get_pause() * 1000)) {
+          next_pose();
+          init_pause = true;
+          prev_time = time;
         }
-
-        break;
       }
+
+      break;
+    }
+
+    case STOP_DELAY: 
+    {
+      if (init_state) {
+        init_state = false;
+        start_stop_time = time;
+      }
+
+      if ((time - start_stop_time) > (get_current_action().get_stop_delay() * 1000)) {
+        ++current_action_index;
+
+        if (current_action_index == actions.size()) {
+          change_state(END);
+        } else {
+          change_state(START_DELAY);
+        }
+      }
+
+      break;
+    }
   }
 
+  bool is_using_spline = get_current_action().is_using_spline();
+  int delta_time = time - prev_time;
+  prev_time = time;
   for (const auto & [id, joint] : joint_processes) {
+    if (is_using_spline) {
+      joint_processes.at(id).interpolate_spline(delta_time);
+    }
     joint_processes.at(id).interpolate();
   }
 }
 
-bool Interpolator::is_finished() const
-{
-  return state == END;
+bool Interpolator::is_finished() const 
+{ 
+  return state == END; 
 }
 
 void Interpolator::next_pose()
@@ -119,8 +126,14 @@ void Interpolator::next_pose()
   auto current_pose = get_current_pose();
   for (const auto & joint : current_pose.get_joints()) {
     if (joint_processes.find(joint.get_id()) != joint_processes.end()) {
-      joint_processes.at(joint.get_id()).set_target_position(
-        joint.get_position(), current_pose.get_speed());
+      joint_processes.at(joint.get_id())
+        .set_target_position(joint.get_position(), current_pose.get_speed());
+    }
+
+    Action current_action = get_current_action();
+    auto current_joint_spline = current_action.joint_splines.find(joint.get_id());
+    if (current_joint_spline != current_action.joint_splines.end()) {
+      joint_processes.at(joint.get_id()).set_spline(*current_joint_spline->second);
     }
   }
   ++current_pose_index;
@@ -138,9 +151,9 @@ bool Interpolator::check_for_next()
   return joint_number <= 0;
 }
 
-const Action & Interpolator::get_current_action() const
-{
-  return actions[current_action_index];
+const Action & Interpolator::get_current_action() const 
+{ 
+  return actions[current_action_index]; 
 }
 
 const Pose & Interpolator::get_current_pose() const

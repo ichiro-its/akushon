@@ -40,7 +40,7 @@ public:
   void set_pause(float pause);
   float get_pause() const;
 
-  void set_time(float time);
+  void set_time(float time_s);
   float get_time() const;
 
   void set_name(const std::string & pose_name);
@@ -54,7 +54,7 @@ public:
 private:
   float speed;
   float pause;
-  float time;
+  int time;
 
   std::string name;
 
