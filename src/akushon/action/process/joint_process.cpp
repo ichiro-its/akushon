@@ -82,6 +82,9 @@ bool JointProcess::is_finished() const
   return (initial_position == target_position) || (additional_position == 0.0);
 }
 
-JointProcess::operator tachimawari::joint::Joint() const { return joint; }
+JointProcess::operator tachimawari::joint::Joint() const 
+{
+ return joint; 
+}
 
 }  // namespace akushon
