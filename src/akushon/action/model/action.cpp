@@ -121,7 +121,7 @@ void Action::enable_spline(bool enable)
 
 bool Action::is_using_spline() const
 {
-  return use_spline; 
+  return use_spline;
 }
 
 void Action::generate_splines()
@@ -130,7 +130,7 @@ void Action::generate_splines()
     for (auto & joint : pose.get_joints()) {
       uint8_t joint_id = joint.get_id();
 
-      if ( joint_splines.find(joint_id) != joint_splines.end()) {
+      if (joint_splines.find(joint_id) != joint_splines.end()) {
         joint_splines[joint_id] = new keisan::SmoothSpline();
       }
       joint_splines[joint_id]->add_point(joint.get_position(), pose.get_time());

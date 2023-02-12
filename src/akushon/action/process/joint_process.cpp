@@ -44,9 +44,9 @@ void JointProcess::set_target_position(float target_position, float speed)
   additional_position = (fabs(additional_position) < 0.1) ? 0.0 : additional_position;
 }
 
-void JointProcess::set_spline(keisan::Spline spline) 
+void JointProcess::set_spline(keisan::Spline spline)
 {
-  this->position_spline = spline; 
+  this->position_spline = spline;
 }
 
 void JointProcess::set_initial_position(float initial_position)
@@ -82,9 +82,9 @@ bool JointProcess::is_finished() const
   return (initial_position == target_position) || (additional_position == 0.0);
 }
 
-JointProcess::operator tachimawari::joint::Joint() const 
+JointProcess::operator tachimawari::joint::Joint() const
 {
- return joint; 
+  return joint;
 }
 
 }  // namespace akushon
