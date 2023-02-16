@@ -123,7 +123,6 @@ bool ActionNode::start(const std::string & action_name)
 bool ActionNode::start(const Action & action)
 {
   Pose pose = this->initial_pose;
-
   if (!pose.get_joints().empty()) {
     action_manager->start(action, pose);
   } else {

@@ -36,13 +36,15 @@ public:
   explicit JointProcess(uint8_t joint_id, float position = 0.0);
 
   void set_target_position(float target_position, float speed = 1.0);
-  void set_spline(keisan::Spline spline);
+  void set_spline(const keisan::Spline & spline);
   void set_initial_position(float initial_position);
 
   void interpolate();
   void interpolate_spline(float t);
 
   bool is_finished() const;
+
+  void reset_time();
 
   operator tachimawari::joint::Joint() const;
 

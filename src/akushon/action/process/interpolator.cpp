@@ -54,6 +54,10 @@ void Interpolator::process(int time)
         if (init_state) {
           init_state = false;
           start_stop_time = time;
+          for (const auto & [id, spline] : get_current_action().joint_splines) {
+            joint_processes.at(id).set_spline(*spline);
+            joint_processes.at(id).reset_time();
+          }
         }
 
         if ((time - start_stop_time) > (get_current_action().get_start_delay() * 1000)) {
@@ -69,6 +73,7 @@ void Interpolator::process(int time)
           if (init_pause) {
             init_pause = false;
             pause_time = time;
+            prev_time = time;
           }
 
           if (current_pose_index == get_current_action().get_pose_count()) {
@@ -128,12 +133,6 @@ void Interpolator::next_pose()
     if (joint_processes.find(joint.get_id()) != joint_processes.end()) {
       joint_processes.at(joint.get_id())
       .set_target_position(joint.get_position(), current_pose.get_speed());
-    }
-
-    Action current_action = get_current_action();
-    auto current_joint_spline = current_action.joint_splines.find(joint.get_id());
-    if (current_joint_spline != current_action.joint_splines.end()) {
-      joint_processes.at(joint.get_id()).set_spline(*current_joint_spline->second);
     }
   }
   ++current_pose_index;

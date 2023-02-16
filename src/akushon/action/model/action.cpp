@@ -108,9 +108,6 @@ const std::string & Action::get_next_action() const
 void Action::reset()
 {
   poses.clear();
-  for (auto & [id, spline] : joint_splines) {
-    delete spline;
-  }
   joint_splines.clear();
 }
 
@@ -126,12 +123,12 @@ bool Action::is_using_spline() const
 
 void Action::generate_splines()
 {
+  joint_splines.clear();
   for (auto pose : poses) {
     for (auto & joint : pose.get_joints()) {
       uint8_t joint_id = joint.get_id();
-
-      if (joint_splines.find(joint_id) != joint_splines.end()) {
-        joint_splines[joint_id] = new keisan::SmoothSpline();
+      if (joint_splines.find(joint_id) == joint_splines.end()) {
+        joint_splines[joint_id] = std::make_shared<keisan::SmoothSpline>();
       }
       joint_splines[joint_id]->add_point(joint.get_position(), pose.get_time());
     }

@@ -44,7 +44,7 @@ void JointProcess::set_target_position(float target_position, float speed)
   additional_position = (fabs(additional_position) < 0.1) ? 0.0 : additional_position;
 }
 
-void JointProcess::set_spline(keisan::Spline spline)
+void JointProcess::set_spline(const keisan::Spline & spline)
 {
   this->position_spline = spline;
 }
@@ -80,6 +80,11 @@ void JointProcess::interpolate_spline(float t)
 bool JointProcess::is_finished() const
 {
   return (initial_position == target_position) || (additional_position == 0.0);
+}
+
+void JointProcess::reset_time()
+{
+  current_time = 0;
 }
 
 JointProcess::operator tachimawari::joint::Joint() const
