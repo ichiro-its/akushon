@@ -41,8 +41,8 @@ public:
   static const char * LEFT_KICK;
   static const char * RIGHT_KICK_SHORT;
   static const char * LEFT_KICK_SHORT;
-  static const char *RIGHT_KICK_WIDE;
-  static const char *LEFT_KICK_WIDE;
+  static const char * RIGHT_KICK_WIDE;
+  static const char * LEFT_KICK_WIDE;
   static const char * LEFT_SIDEKICK;
   static const char * RIGHT_SIDEKICK;
   static const char * KEEPER_SIT;
