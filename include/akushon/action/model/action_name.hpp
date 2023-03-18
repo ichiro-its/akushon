@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Ichiro ITS
+// Copyright (c) 2023 Ichiro ITS
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -27,30 +27,30 @@
 namespace akushon
 {
 
-  class ActionName
-  {
-  public:
-    static const char *INIT;
-    static const char *WALKREADY;
-    static const char *SIT_DOWN;
-    static const char *FORWARD_UP;
-    static const char *BACKWARD_UP;
-    static const char *LEFTWARD_UP;
-    static const char *RIGHTWARD_UP;
-    static const char *RIGHT_KICK;
-    static const char *LEFT_KICK;
-    static const char *RIGHT_KICK_SHORT;
-    static const char *LEFT_KICK_SHORT;
-    static const char *RIGHT_KICK_WIDE;
-    static const char *LEFT_KICK_WIDE;
-    static const char *LEFT_SIDEKICK;
-    static const char *RIGHT_SIDEKICK;
-    static const char *KEEPER_SIT;
-    static const char *KEEPER_UP;
+class ActionName
+{
+public:
+  static const char * INIT;
+  static const char * WALKREADY;
+  static const char * SIT_DOWN;
+  static const char * FORWARD_UP;
+  static const char * BACKWARD_UP;
+  static const char * LEFTWARD_UP;
+  static const char * RIGHTWARD_UP;
+  static const char * RIGHT_KICK;
+  static const char * LEFT_KICK;
+  static const char * RIGHT_KICK_SHORT;
+  static const char * LEGT_KICK_SHORT;
+  static const char *RIGHT_KICK_WIDE;
+  static const char *LEFT_KICK_WIDE;
+  static const char * LEFT_SIDEKICK;
+  static const char * RIGHT_SIDEKICK;
+  static const char * KEEPER_SIT;
+  static const char * KEEPER_UP;
 
-    static const std::map<std::string, int> map;
-  };
+  static const std::map<std::string, int> map;
+};
 
-} // namespace akushon
+}  // namespace akushon
 
-#endif // AKUSHON__ACTION__MODEL__ACTION_NAME_HPP_
+#endif  // AKUSHON__ACTION__MODEL__ACTION_NAME_HPP_
