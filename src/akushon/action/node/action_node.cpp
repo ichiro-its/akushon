@@ -32,7 +32,7 @@
 #include "akushon/action/node/action_manager.hpp"
 #include "nlohmann/json.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "tachimawari/joint/model/joint.hpp"
+#include "tachimawari/joint/joint.hpp"
 #include "tachimawari_interfaces/msg/set_joints.hpp"
 
 namespace akushon
@@ -49,21 +49,25 @@ std::string ActionNode::status_topic() { return get_node_prefix() + "/status"; }
 ActionNode::ActionNode(rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> action_manager)
 : node(node), action_manager(action_manager), initial_pose(Pose("initial_pose"))
 {
-  current_joints_subscriber = node->create_subscription<CurrentJoints>(
-    "/joint/current_joints", 10, [this](const CurrentJoints::SharedPtr message) {
-      {
-        using tachimawari::joint::Joint;
-        std::vector<Joint> current_joints;
+  {
+    using tachimawari::joint::JointNode;
 
-        for (const auto & joint : message->joints) {
-          current_joints.push_back(Joint(joint.id, joint.position));
+    current_joints_subscriber = node->create_subscription<CurrentJoints>(
+      JointNode::current_joints_topic(), 10, [this](const CurrentJoints::SharedPtr message) {
+        {
+          using tachimawari::joint::Joint;
+          std::vector<Joint> current_joints;
+
+          for (const auto & joint : message->joints) {
+            current_joints.push_back(Joint(joint.id, joint.position));
+          }
+
+          this->initial_pose.set_joints(current_joints);
         }
+      });
 
-        this->initial_pose.set_joints(current_joints);
-      }
-    });
-
-  set_joints_publisher = node->create_publisher<SetJoints>("/joint/set_joints", 10);
+    set_joints_publisher = node->create_publisher<SetJoints>(JointNode::set_joints_topic(), 10);
+  }
 
   status_publisher = node->create_publisher<Status>(status_topic(), 10);
 
