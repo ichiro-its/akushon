@@ -46,25 +46,16 @@ public:
   using SetJoints = tachimawari_interfaces::msg::SetJoints;
   using Status = akushon_interfaces::msg::Status;
 
-  enum
-  {
-    READY,
-    PLAYING
-  };
+  enum { READY, PLAYING };
 
-  enum
-  {
-    RUN_ACTION_BY_NAME,
-    RUN_ACTION_BY_JSON
-  };
+  enum { RUN_ACTION_BY_NAME, RUN_ACTION_BY_JSON };
 
   static std::string get_node_prefix();
   static std::string run_action_topic();
   static std::string brake_action_topic();
   static std::string status_topic();
 
-  explicit ActionNode(
-    rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> action_manager);
+  explicit ActionNode(rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> action_manager);
 
   bool start(const std::string & action_name);
   bool start(const Action & action);
@@ -73,6 +64,7 @@ public:
 
 private:
   void publish_joints();
+  void publish_status();
 
   Pose initial_pose;
   rclcpp::Node::SharedPtr node;
