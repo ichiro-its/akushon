@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Ichiro ITS
+// Copyright (c) 2021-2023 Ichiro ITS
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,6 @@
 #include "akushon/action/node/action_node.hpp"
 
 #include <iomanip>
-#include <iostream>
 #include <memory>
 #include <string>
 #include <thread>
@@ -38,15 +37,16 @@
 namespace akushon
 {
 
-std::string ActionNode::get_node_prefix() { return "action"; }
+std::string ActionNode::get_node_prefix() {return "action";}
 
-std::string ActionNode::run_action_topic() { return get_node_prefix() + "/run_action"; }
+std::string ActionNode::run_action_topic() {return get_node_prefix() + "/run_action";}
 
-std::string ActionNode::brake_action_topic() { return get_node_prefix() + "/brake_action"; }
+std::string ActionNode::brake_action_topic() {return get_node_prefix() + "/brake_action";}
 
-std::string ActionNode::status_topic() { return get_node_prefix() + "/status"; }
+std::string ActionNode::status_topic() {return get_node_prefix() + "/status";}
 
-ActionNode::ActionNode(rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> action_manager)
+ActionNode::ActionNode(
+  rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> & action_manager)
 : node(node), action_manager(action_manager), initial_pose(Pose("initial_pose"))
 {
   {
@@ -86,7 +86,7 @@ ActionNode::ActionNode(rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManag
 
   brake_action_subscriber = node->create_subscription<Empty>(
     brake_action_topic(), 10,
-    [this](std::shared_ptr<Empty> message) { this->action_manager->brake(); });
+    [this](std::shared_ptr<Empty> message) {this->action_manager->brake();});
 }
 
 bool ActionNode::start(const std::string & action_name)
