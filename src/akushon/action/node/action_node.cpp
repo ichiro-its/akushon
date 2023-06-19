@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Ichiro ITS
+// Copyright (c) 2021-2023 Ichiro ITS
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,75 +18,61 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <iostream>
+#include "akushon/action/node/action_node.hpp"
+
 #include <iomanip>
 #include <memory>
 #include <string>
 #include <thread>
 #include <vector>
 
-#include "akushon/action/node/action_node.hpp"
-
-#include "akushon/action/node/action_manager.hpp"
 #include "akushon/action/model/action_name.hpp"
 #include "akushon/action/model/pose.hpp"
+#include "akushon/action/node/action_manager.hpp"
 #include "nlohmann/json.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "tachimawari/joint/model/joint.hpp"
+#include "tachimawari/joint/joint.hpp"
 #include "tachimawari_interfaces/msg/set_joints.hpp"
 
 namespace akushon
 {
 
-std::string ActionNode::get_node_prefix()
-{
-  return "action";
-}
+std::string ActionNode::get_node_prefix() {return "action";}
 
-std::string ActionNode::run_action_topic()
-{
-  return get_node_prefix() + "/run_action";
-}
+std::string ActionNode::run_action_topic() {return get_node_prefix() + "/run_action";}
 
-std::string ActionNode::brake_action_topic()
-{
-  return get_node_prefix() + "/brake_action";
-}
+std::string ActionNode::brake_action_topic() {return get_node_prefix() + "/brake_action";}
 
-std::string ActionNode::status_topic()
-{
-  return get_node_prefix() + "/status";
-}
+std::string ActionNode::status_topic() {return get_node_prefix() + "/status";}
 
 ActionNode::ActionNode(
-  rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> action_manager)
-: node(node), action_manager(action_manager),
-  initial_pose(Pose("initial_pose"))
+  rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> & action_manager)
+: node(node), action_manager(action_manager), initial_pose(Pose("initial_pose"))
 {
-  current_joints_subscriber = node->create_subscription<CurrentJoints>(
-    "/joint/current_joints", 10,
-    [this](const CurrentJoints::SharedPtr message) {
-      {
-        using tachimawari::joint::Joint;
-        std::vector<Joint> current_joints;
+  {
+    using tachimawari::joint::JointNode;
 
-        for (const auto & joint : message->joints) {
-          current_joints.push_back(Joint(joint.id, joint.position));
+    current_joints_subscriber = node->create_subscription<CurrentJoints>(
+      JointNode::current_joints_topic(), 10, [this](const CurrentJoints::SharedPtr message) {
+        {
+          using tachimawari::joint::Joint;
+          std::vector<Joint> current_joints;
+
+          for (const auto & joint : message->joints) {
+            current_joints.push_back(Joint(joint.id, joint.position));
+          }
+
+          this->initial_pose.set_joints(current_joints);
         }
+      });
 
-        this->initial_pose.set_joints(current_joints);
-      }
-    }
-  );
-
-  set_joints_publisher = node->create_publisher<SetJoints>(
-    "/joint/set_joints", 10);
+    set_joints_publisher = node->create_publisher<SetJoints>(JointNode::set_joints_topic(), 10);
+  }
 
   status_publisher = node->create_publisher<Status>(status_topic(), 10);
 
   run_action_subscriber = node->create_subscription<RunAction>(
-    run_action_topic(), 10,
-    [this](std::shared_ptr<RunAction> message) {
+    run_action_topic(), 10, [this](std::shared_ptr<RunAction> message) {
       std::cout << message->action_name << std::endl;
       if (message->control_type == RUN_ACTION_BY_NAME) {
         this->start(message->action_name);
@@ -96,15 +82,11 @@ ActionNode::ActionNode(
 
         this->start(action);
       }
-    }
-  );
+    });
 
   brake_action_subscriber = node->create_subscription<Empty>(
     brake_action_topic(), 10,
-    [this](std::shared_ptr<Empty> message) {
-      this->action_manager->brake();
-    }
-  );
+    [this](std::shared_ptr<Empty> message) {this->action_manager->brake();});
 }
 
 bool ActionNode::start(const std::string & action_name)
@@ -142,6 +124,8 @@ bool ActionNode::update(int time)
     return true;
   }
 
+  publish_status();
+
   return false;
 }
 
@@ -159,6 +143,15 @@ void ActionNode::publish_joints()
   }
 
   set_joints_publisher->publish(joints_msg);
+}
+
+void ActionNode::publish_status()
+{
+  auto message = Status();
+
+  message.is_running = action_manager->is_playing();
+
+  status_publisher->publish(message);
 }
 
 }  // namespace akushon
