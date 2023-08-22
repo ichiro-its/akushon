@@ -22,6 +22,49 @@ find_package(std_msgs REQUIRED)
 find_package(tachimawari REQUIRED)
 find_package(tachimawari_interfaces REQUIRED)
 
+set(protobuf_MODULE_COMPATIBLE TRUE)
+find_package(Protobuf CONFIG REQUIRED)
+message(STATUS "Using protobuf ${Protobuf_VERSION}")
+
+set(_PROTOBUF_LIBPROTOBUF protobuf::libprotobuf)
+set(_REFLECTION gRPC::grpc++_reflection)
+if(CMAKE_CROSSCOMPILING)
+  find_program(_PROTOBUF_PROTOC protoc)
+else()
+  set(_PROTOBUF_PROTOC $<TARGET_FILE:protobuf::protoc>)
+endif()
+
+# Find gRPC installation
+# Looks for gRPCConfig.cmake file installed by gRPC's cmake installation.
+find_package(gRPC CONFIG REQUIRED)
+message(STATUS "Using gRPC ${gRPC_VERSION}")
+
+set(_GRPC_GRPCPP gRPC::grpc++)
+if(CMAKE_CROSSCOMPILING)
+  find_program(_GRPC_CPP_PLUGIN_EXECUTABLE grpc_cpp_plugin)
+else()
+  set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:gRPC::grpc_cpp_plugin>)
+endif()
+
+# Proto file
+get_filename_component(akushon_proto "../akushon_interfaces/proto/akushon.proto" ABSOLUTE)
+get_filename_component(akushon_proto_path "${akushon_proto}" PATH)
+
+# Generated sources
+set(akushon_proto_srcs "${CMAKE_CURRENT_BINARY_DIR}/akushon.pb.cc")
+set(akushon_proto_hdrs "${CMAKE_CURRENT_BINARY_DIR}/akushon.pb.h")
+set(akushon_grpc_srcs "${CMAKE_CURRENT_BINARY_DIR}/akushon.grpc.pb.cc")
+set(akushon_grpc_hdrs "${CMAKE_CURRENT_BINARY_DIR}/akushon.grpc.pb.h")
+add_custom_command(
+      OUTPUT "${akushon_proto_srcs}" "${akushon_proto_hdrs}" "${akushon_grpc_srcs}" "${akushon_grpc_hdrs}"
+      COMMAND ${_PROTOBUF_PROTOC}
+      ARGS --grpc_out "${CMAKE_CURRENT_BINARY_DIR}"
+        --cpp_out "${CMAKE_CURRENT_BINARY_DIR}"
+        -I "${akushon_proto_path}"
+        --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
+        "${akushon_proto}"
+      DEPENDS "${akushon_proto}")
+            
 add_library(${PROJECT_NAME} SHARED
   "src/${PROJECT_NAME}/action/model/action_name.cpp"
   "src/${PROJECT_NAME}/action/model/action.cpp"
@@ -32,9 +75,15 @@ add_library(${PROJECT_NAME} SHARED
   "src/${PROJECT_NAME}/action/process/joint_process.cpp"
   "src/${PROJECT_NAME}/config/node/config_node.cpp"
   "src/${PROJECT_NAME}/config/utils/config.cpp"
-  "src/${PROJECT_NAME}/node/akushon_node.cpp")
+  "src/${PROJECT_NAME}/config/grpc/config.cpp"
+  "src/${PROJECT_NAME}/node/akushon_node.cpp"
+  "${akushon_proto_srcs}"
+  "${akushon_proto_hdrs}"
+  "${akushon_grpc_srcs}"
+  "${akushon_grpc_hdrs}")
 
 target_include_directories(${PROJECT_NAME} PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 
@@ -45,7 +94,14 @@ ament_target_dependencies(${PROJECT_NAME}
   rclcpp_action
   std_msgs
   tachimawari
-  tachimawari_interfaces)
+  tachimawari_interfaces
+  gRPC)
+
+  target_link_libraries(${PROJECT_NAME}
+  ${_REFLECTION}
+  ${_GRPC_GRPCPP}
+  ${_PROTOBUF_LIBPROTOBUF}
+)
 
 install(DIRECTORY "include" DESTINATION ".")
 

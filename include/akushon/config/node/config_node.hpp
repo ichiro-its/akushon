@@ -25,6 +25,7 @@
 #include <string>
 
 #include "akushon/config/utils/config.hpp"
+#include "akushon/config/grpc/config.hpp"
 #include "akushon_interfaces/srv/save_actions.hpp"
 #include "akushon_interfaces/srv/get_actions.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -44,6 +45,7 @@ private:
   std::string get_node_prefix() const;
 
   Config config_util;
+  ConfigGrpc config_grpc;
 
   rclcpp::Service<SaveActions>::SharedPtr save_actions_service;
   rclcpp::Service<GetActions>::SharedPtr get_actions_service;
