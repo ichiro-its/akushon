@@ -38,15 +38,20 @@
 #include "grpcpp/grpcpp.h"
 #include "nlohmann/json.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include "tachimawari_interfaces/msg/set_joints.hpp"
+#include "tachimawari_interfaces/msg/set_torques.hpp"
+#include "tachimawari_interfaces/msg/current_joints.hpp"
+#include "akushon_interfaces/msg/run_action.hpp"
 
 using akushon_interfaces::proto::Config;
 
-namespace akushon {
-
-class ConfigGrpc {
+namespace akushon
+{
+class ConfigGrpc
+{
 public:
   explicit ConfigGrpc();
-  explicit ConfigGrpc(const std::string &path);
+  explicit ConfigGrpc(const std::string & path);
 
   ~ConfigGrpc();
 
@@ -56,7 +61,8 @@ private:
   std::string path;
   static void SignIntHandler(int signum);
 
-  class CallDataBase {
+  class CallDataBase
+  {
   public:
     CallDataBase();
 
@@ -68,10 +74,12 @@ private:
   };
 
   template <class ConfigRequest, class ConfigReply>
-  class CallData : CallDataBase {
+  class CallData : CallDataBase
+  {
   public:
-    CallData(akushon_interfaces::proto::Config::AsyncService *service,
-             grpc::ServerCompletionQueue *cq, const std::string path);
+    CallData(
+      akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
+      const std::string path);
 
     virtual void Proceed() override;
 
@@ -80,24 +88,26 @@ private:
 
     enum CallStatus { CREATE, PROCESS, FINISH };
 
-    CallStatus status_; // The current serving state.
+    CallStatus status_;  // The current serving state.
 
-    akushon_interfaces::proto::Config::AsyncService *service_;
+    akushon_interfaces::proto::Config::AsyncService * service_;
 
     const std::string path_;
 
-    grpc::ServerCompletionQueue *cq_;
+    grpc::ServerCompletionQueue * cq_;
     grpc::ServerContext ctx_;
     ConfigRequest request_;
     ConfigReply reply_;
     grpc::ServerAsyncResponseWriter<ConfigReply> responder_;
   };
 
-  class CallDataGetConfig : CallData<akushon_interfaces::proto::Empty,
-                                     akushon_interfaces::proto::AkushonConfig> {
+  class CallDataGetConfig
+  : CallData<akushon_interfaces::proto::Empty, akushon_interfaces::proto::ConfigActions>
+  {
   public:
-    CallDataGetConfig(akushon_interfaces::proto::Config::AsyncService *service,
-                      grpc::ServerCompletionQueue *cq, const std::string path);
+    CallDataGetConfig(
+      akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
+      const std::string path);
 
   protected:
     virtual void AddNextToCompletionQueue() override;
@@ -105,16 +115,83 @@ private:
     virtual void HandleRequest() override;
   };
 
-  class CallDataSaveConfig : CallData<akushon_interfaces::proto::AkushonConfig,
-                                     akushon_interfaces::proto::Empty> {
+  class CallDataSaveConfig
+  : CallData<akushon_interfaces::proto::ConfigActions, akushon_interfaces::proto::Empty>
+  {
   public:
-    CallDataSaveConfig(akushon_interfaces::proto::Config::AsyncService *service,
-                      grpc::ServerCompletionQueue *cq, const std::string path);
+    CallDataSaveConfig(
+      akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
+      const std::string path);
 
   protected:
     virtual void AddNextToCompletionQueue() override;
     virtual void WaitForRequest() override;
     virtual void HandleRequest() override;
+  };
+
+  class CallDataPublishSetJoints
+  : CallData<akushon_interfaces::proto::SetJointsData, akushon_interfaces::proto::Empty>
+  {
+  public:
+    CallDataPublishSetJoints(
+      akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
+      const std::string path, rclcpp::Node::SharedPtr node);
+
+  protected:
+    virtual void AddNextToCompletionQueue() override;
+    virtual void WaitForRequest() override;
+    virtual void HandleRequest() override;
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Publisher<tachimawari_interfaces::msg::SetJoints>::SharedPtr set_joints_publisher_;
+  };
+
+  class CallDataRunAction
+  : CallData<akushon_interfaces::proto::ConfigRunAction, akushon_interfaces::proto::Empty>
+  {
+  public:
+    CallDataRunAction(
+      akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
+      const std::string path, rclcpp::Node::SharedPtr node);
+
+  protected:
+    virtual void AddNextToCompletionQueue() override;
+    virtual void WaitForRequest() override;
+    virtual void HandleRequest() override;
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Publisher<akushon_interfaces::msg::RunAction>::SharedPtr run_action_publisher_;
+  };
+
+  class CallDataPublishSetTorques
+  : CallData<akushon_interfaces::proto::SetTorquesData, akushon_interfaces::proto::Empty>
+  {
+  public:
+    CallDataPublishSetTorques(
+      akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
+      const std::string path, rclcpp::Node::SharedPtr node);
+
+  protected:
+    virtual void AddNextToCompletionQueue() override;
+    virtual void WaitForRequest() override;
+    virtual void HandleRequest() override;
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Publisher<tachimawari_interfaces::msg::SetTorques>::SharedPtr set_torque_publisher_;
+  };
+
+  class CallDataSubscribeCurrentJoints
+  : CallData<akushon_interfaces::proto::Empty, akushon_interfaces::proto::CurrentJoints>
+  {
+  public:
+    CallDataSubscribeCurrentJoints(
+      akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
+      const std::string path, rclcpp::Node::SharedPtr node);
+
+  protected:
+    virtual void AddNextToCompletionQueue() override;
+    virtual void WaitForRequest() override;
+    virtual void HandleRequest() override;
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Subscription<tachimawari_interfaces::msg::CurrentJoints>::SharedPtr current_joint_subscription_;
+    tachimawari_interfaces::msg::CurrentJoints curr_joints_;
   };
 
   static inline std::unique_ptr<grpc::ServerCompletionQueue> cq_;
@@ -122,9 +199,9 @@ private:
   std::shared_ptr<std::thread> thread_;
   akushon_interfaces::proto::Config::AsyncService service_;
 
-  rclcpp::TimerBase::SharedPtr timer_;
+  std::thread async_server;
 };
 
-} // namespace akushon
+}  // namespace akushon
 
-#endif // AKUSHON__CONFIG__GRPC__CONFIG_HPP_
+#endif  // AKUSHON__CONFIG__GRPC__CONFIG_HPP_
