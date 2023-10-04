@@ -49,7 +49,7 @@ void ConfigGrpc::SignIntHandler(int signum)
   exit(signum);
 }
 
-void ConfigGrpc::Run(uint16_t port, const std::string path)
+void ConfigGrpc::Run(uint16_t port, const std::string path, rclcpp::Node::SharedPtr node)
 {
   std::string server_address = absl::StrFormat("0.0.0.0:%d", port);
 
@@ -62,9 +62,12 @@ void ConfigGrpc::Run(uint16_t port, const std::string path)
   std::cout << "Server listening on " << server_address << std::endl;
 
   signal(SIGINT, SignIntHandler);
-  async_server = std::thread([&path, this]() {
+  async_server = std::thread([&path, this, &node]() {
     new ConfigGrpc::CallDataGetConfig(&service_, cq_.get(), path);
     new ConfigGrpc::CallDataSaveConfig(&service_, cq_.get(), path);
+    new ConfigGrpc::CallDataPublishSetJoints(&service_, cq_.get(), path, node);
+    new ConfigGrpc::CallDataPublishSetTorques(&service_, cq_.get(), path, node);
+    new ConfigGrpc::CallDataSubscribeCurrentJoints(&service_, cq_.get(), path, node);
     void * tag;  // uniquely identifies a request.
     bool ok = true;
     while (true) {

@@ -55,7 +55,7 @@ public:
 
   ~ConfigGrpc();
 
-  void Run(uint16_t port, const std::string path);
+  void Run(uint16_t port, const std::string path, rclcpp::Node::SharedPtr node);
 
 private:
   std::string path;
