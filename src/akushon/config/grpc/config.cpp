@@ -67,6 +67,7 @@ void ConfigGrpc::Run(uint16_t port, const std::string path, rclcpp::Node::Shared
     new ConfigGrpc::CallDataSaveConfig(&service_, cq_.get(), path);
     new ConfigGrpc::CallDataPublishSetJoints(&service_, cq_.get(), path, node);
     new ConfigGrpc::CallDataPublishSetTorques(&service_, cq_.get(), path, node);
+    new ConfigGrpc::CallDataRunAction(&service_, cq_.get(), path, node);
     new ConfigGrpc::CallDataSubscribeCurrentJoints(&service_, cq_.get(), path, node);
     void * tag;  // uniquely identifies a request.
     bool ok = true;
