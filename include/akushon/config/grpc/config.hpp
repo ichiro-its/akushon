@@ -175,6 +175,7 @@ private:
     virtual void HandleRequest() override;
     rclcpp::Node::SharedPtr node_;
     rclcpp::Publisher<tachimawari_interfaces::msg::SetTorques>::SharedPtr set_torque_publisher_;
+  
   };
 
   class CallDataSubscribeCurrentJoints

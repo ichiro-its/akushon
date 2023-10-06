@@ -244,6 +244,7 @@ void ConfigGrpc::CallDataRunAction::HandleRequest()
   run_action.json = request_.json_action();
   run_action_publisher_->publish(run_action);
   RCLCPP_INFO(rclcpp::get_logger("PublishSetJoints"), "run action config has been published!");
+
 }
 
 ConfigGrpc::CallDataPublishSetTorques::CallDataPublishSetTorques(
@@ -272,12 +273,12 @@ void ConfigGrpc::CallDataPublishSetTorques::HandleRequest()
     tachimawari_interfaces::msg::SetTorques set_torque;
     set_torque.torque_enable = request_.torque_enable();
 
-    nlohmann::json publish_set_joint = nlohmann::json::parse(request_.ids());
-    for (const auto & items : publish_set_joint.items()) {
-      set_torque.ids.push_back((uint8_t)atoi(items.value().get<std::string>().c_str()));
-    }
-    set_torque_publisher_->publish(set_torque);
+    nlohmann::json publish_set_torque = nlohmann::json::parse(request_.ids());
 
+    for (const auto & items : publish_set_torque["id"].items()) {
+      set_torque.ids.push_back((uint8_t)items.value().get<uint8_t>());
+    }
+    set_torque_publisher_->publish(set_torque);  
     RCLCPP_INFO(rclcpp::get_logger("PublishSetTorques"), "set torques has been published!");
 
   } catch (std::ofstream::failure f) {
