@@ -197,11 +197,11 @@ void ConfigGrpc::CallDataPublishSetJoints::HandleRequest()
     set_joints_.control_type = control_type;
     // set_joints_.joints.push_back(joint_actions);
     nlohmann::json publish_set_joint = nlohmann::json::parse(request_.joints_actions());
-    for (const auto & items_json_ : publish_set_joint.items()) {
+    for (const auto & items_json_ : publish_set_joint["joints"].items()) {
       nlohmann::json obj = items_json_.value();
       tachimawari_interfaces::msg::Joint joint;
-      joint.id = (uint8_t)atoi(obj.at("id").get<std::string>().c_str());
-      joint.position = (float)atoi(obj.at("position").get<std::string>().c_str());
+      joint.id = (uint8_t)obj.at("id").get<uint8_t>();
+      joint.position = (float)obj.at("position").get<float>();
       set_joints_.joints.push_back(joint);
     }
     set_joints_publisher_->publish(set_joints_);
@@ -299,7 +299,7 @@ ConfigGrpc::CallDataSubscribeCurrentJoints::CallDataSubscribeCurrentJoints(
     node_->create_subscription<tachimawari_interfaces::msg::CurrentJoints>(
       "/joint/current_joints", 10,
       [this](const tachimawari_interfaces::msg::CurrentJoints::SharedPtr curr_joints) {
-        RCLCPP_INFO(rclcpp::get_logger("SubscribeCurrentJoints"), "current joints received from tachimawari");        
+        // RCLCPP_INFO(rclcpp::get_logger("SubscribeCurrentJoints"), "current joints received from tachimawari");        
           curr_joints_.joints = curr_joints->joints;
       });
   Proceed();
