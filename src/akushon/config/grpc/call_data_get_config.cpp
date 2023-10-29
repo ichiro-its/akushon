@@ -18,52 +18,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__CONFIG__GRPC__CONFIG_HPP_
-#define AKUSHON__CONFIG__GRPC__CONFIG_HPP_
-
-#include <chrono>
-#include <fstream>
-#include <iostream>
-#include <map>
-#include <memory>
-#include <string>
-#include <thread>
-
-#include "absl/flags/flag.h"
-#include "absl/flags/parse.h"
-#include "absl/strings/str_format.h"
-#include "akushon.grpc.pb.h"
-#include "akushon.pb.h"
-#include "grpc/support/log.h"
-#include "grpcpp/grpcpp.h"
+#include "akushon/config/grpc/call_data_get_config.hpp"
+#include "akushon/config/utils/config.hpp"
 #include "rclcpp/rclcpp.hpp"
-
-using akushon_interfaces::proto::Config;
 
 namespace akushon
 {
-class ConfigGrpc
+
+CallDataGetConfig::CallDataGetConfig(
+  akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
+  const std::string path)
+: CallData(service, cq, path)
 {
-public:
-  explicit ConfigGrpc();
-  explicit ConfigGrpc(const std::string & path);
+  Proceed();
+}
 
-  ~ConfigGrpc();
+void CallDataGetConfig::AddNextToCompletionQueue()
+{
+  new CallDataGetConfig(service_, cq_, path_);
+}
 
-  void Run(uint16_t port, const std::string path, rclcpp::Node::SharedPtr node);
+void CallDataGetConfig::WaitForRequest()
+{
+  service_->RequestGetConfig(&ctx_, &request_, &responder_, cq_, cq_, this);
+}
 
-private:
-  std::string path;
-  static void SignIntHandler(int signum);              
+void CallDataGetConfig::HandleRequest()
+{
+  Config config(path_);
 
-  static inline std::unique_ptr<grpc::ServerCompletionQueue> cq_;
-  static inline std::unique_ptr<grpc::Server> server_;
-  std::shared_ptr<std::thread> thread_;
-  akushon_interfaces::proto::Config::AsyncService service_;
+  reply_.set_json_actions(config.get_config());
+  RCLCPP_INFO(rclcpp::get_logger("GetConfig"), "config has been sent!");
+}
 
-  std::thread async_server;
-};
-
-}  // namespace akushon
-
-#endif  // AKUSHON__CONFIG__GRPC__CONFIG_HPP_
+} // namespace akushon

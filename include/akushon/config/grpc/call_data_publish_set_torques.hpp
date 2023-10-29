@@ -18,52 +18,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__CONFIG__GRPC__CONFIG_HPP_
-#define AKUSHON__CONFIG__GRPC__CONFIG_HPP_
+#ifndef AKUSHON__CONFIG__GRPC__CALL_DATA_PUBLISH_SET_TORQUES_HPP_
+#define AKUSHON__CONFIG__GRPC__CALL_DATA_PUBLISH_SET_TORQUES_HPP_
 
-#include <chrono>
-#include <fstream>
-#include <iostream>
-#include <map>
-#include <memory>
-#include <string>
-#include <thread>
-
-#include "absl/flags/flag.h"
-#include "absl/flags/parse.h"
-#include "absl/strings/str_format.h"
-#include "akushon.grpc.pb.h"
-#include "akushon.pb.h"
-#include "grpc/support/log.h"
-#include "grpcpp/grpcpp.h"
+#include "akushon/config/grpc/call_data.hpp"
+#include "tachimawari_interfaces/msg/set_torques.hpp"
 #include "rclcpp/rclcpp.hpp"
-
-using akushon_interfaces::proto::Config;
 
 namespace akushon
 {
-class ConfigGrpc
+class CallDataPublishSetTorques
+: CallData<akushon_interfaces::proto::SetTorquesData, akushon_interfaces::proto::Empty>
 {
 public:
-  explicit ConfigGrpc();
-  explicit ConfigGrpc(const std::string & path);
+  CallDataPublishSetTorques(
+    akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
+    const std::string path, rclcpp::Node::SharedPtr node);
 
-  ~ConfigGrpc();
-
-  void Run(uint16_t port, const std::string path, rclcpp::Node::SharedPtr node);
-
-private:
-  std::string path;
-  static void SignIntHandler(int signum);              
-
-  static inline std::unique_ptr<grpc::ServerCompletionQueue> cq_;
-  static inline std::unique_ptr<grpc::Server> server_;
-  std::shared_ptr<std::thread> thread_;
-  akushon_interfaces::proto::Config::AsyncService service_;
-
-  std::thread async_server;
+protected:
+  virtual void AddNextToCompletionQueue() override;
+  virtual void WaitForRequest() override;
+  virtual void HandleRequest() override;
+  rclcpp::Node::SharedPtr node_;
+  rclcpp::Publisher<tachimawari_interfaces::msg::SetTorques>::SharedPtr set_torque_publisher_;
 };
-
 }  // namespace akushon
 
-#endif  // AKUSHON__CONFIG__GRPC__CONFIG_HPP_
+#endif  // AKUSHON__CONFIG__GRPC__CALL_DATA_PUBLISH_SET_TORQUES_HPP_

@@ -18,52 +18,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__CONFIG__GRPC__CONFIG_HPP_
-#define AKUSHON__CONFIG__GRPC__CONFIG_HPP_
+#ifndef AKUSHON__CONFIG__GRPC__CALL_DATA_HPP_
+#define AKUSHON__CONFIG__GRPC__CALL_DATA_HPP_
 
-#include <chrono>
-#include <fstream>
-#include <iostream>
-#include <map>
-#include <memory>
-#include <string>
-#include <thread>
-
-#include "absl/flags/flag.h"
-#include "absl/flags/parse.h"
-#include "absl/strings/str_format.h"
 #include "akushon.grpc.pb.h"
 #include "akushon.pb.h"
 #include "grpc/support/log.h"
 #include "grpcpp/grpcpp.h"
-#include "rclcpp/rclcpp.hpp"
-
-using akushon_interfaces::proto::Config;
+#include "akushon/config/grpc/call_data_base.hpp"
 
 namespace akushon
 {
-class ConfigGrpc
+template <class ConfigRequest, class ConfigReply>
+class CallData : CallDataBase
 {
 public:
-  explicit ConfigGrpc();
-  explicit ConfigGrpc(const std::string & path);
+  CallData(
+    akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
+    const std::string path);
 
-  ~ConfigGrpc();
+  virtual void Proceed() override;
 
-  void Run(uint16_t port, const std::string path, rclcpp::Node::SharedPtr node);
+protected:
+  virtual void AddNextToCompletionQueue() = 0;
 
-private:
-  std::string path;
-  static void SignIntHandler(int signum);              
+  enum CallStatus { CREATE, PROCESS, FINISH };
 
-  static inline std::unique_ptr<grpc::ServerCompletionQueue> cq_;
-  static inline std::unique_ptr<grpc::Server> server_;
-  std::shared_ptr<std::thread> thread_;
-  akushon_interfaces::proto::Config::AsyncService service_;
+  CallStatus status_;  // The current serving state.
 
-  std::thread async_server;
+  akushon_interfaces::proto::Config::AsyncService * service_;
+
+  const std::string path_;
+
+  grpc::ServerCompletionQueue * cq_;
+  grpc::ServerContext ctx_;
+  ConfigRequest request_;
+  ConfigReply reply_;
+  grpc::ServerAsyncResponseWriter<ConfigReply> responder_;
 };
-
 }  // namespace akushon
 
-#endif  // AKUSHON__CONFIG__GRPC__CONFIG_HPP_
+#endif  // AKUSHON__CONFIG__GRPC__CALL_DATA_HPP_

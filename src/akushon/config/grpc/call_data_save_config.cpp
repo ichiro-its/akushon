@@ -18,52 +18,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__CONFIG__GRPC__CONFIG_HPP_
-#define AKUSHON__CONFIG__GRPC__CONFIG_HPP_
-
-#include <chrono>
-#include <fstream>
-#include <iostream>
-#include <map>
-#include <memory>
-#include <string>
-#include <thread>
-
-#include "absl/flags/flag.h"
-#include "absl/flags/parse.h"
-#include "absl/strings/str_format.h"
-#include "akushon.grpc.pb.h"
-#include "akushon.pb.h"
-#include "grpc/support/log.h"
-#include "grpcpp/grpcpp.h"
+#include "akushon/config/grpc/call_data_save_config.hpp"
+#include "akushon/config/utils/config.hpp"
 #include "rclcpp/rclcpp.hpp"
-
-using akushon_interfaces::proto::Config;
+#include "nlohmann/json.hpp"
 
 namespace akushon
 {
-class ConfigGrpc
+
+CallDataSaveConfig::CallDataSaveConfig(
+  akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
+  const std::string path)
+: CallData(service, cq, path)
 {
-public:
-  explicit ConfigGrpc();
-  explicit ConfigGrpc(const std::string & path);
+  Proceed();
+}
 
-  ~ConfigGrpc();
+void CallDataSaveConfig::AddNextToCompletionQueue()
+{
+  new CallDataSaveConfig(service_, cq_, path_);
+}
 
-  void Run(uint16_t port, const std::string path, rclcpp::Node::SharedPtr node);
+void CallDataSaveConfig::WaitForRequest()
+{
+  service_->RequestSaveConfig(&ctx_, &request_, &responder_, cq_, cq_, this);
+}
 
-private:
-  std::string path;
-  static void SignIntHandler(int signum);              
+void CallDataSaveConfig::HandleRequest()
+{
+  Config config(path_);
+  try {
+    nlohmann::json akushon_data = nlohmann::json::parse(request_.json_actions());
+    config.save_config(akushon_data);
+    RCLCPP_INFO(rclcpp::get_logger("SaveConfig"), "config has been saved!");
+  } catch (std::ofstream::failure f) {
+    RCLCPP_ERROR(rclcpp::get_logger("SaveConfig"), f.what());
+  } catch (nlohmann::json::exception e) {
+    RCLCPP_ERROR(rclcpp::get_logger("SaveConfig"), e.what());
+  }
+}
 
-  static inline std::unique_ptr<grpc::ServerCompletionQueue> cq_;
-  static inline std::unique_ptr<grpc::Server> server_;
-  std::shared_ptr<std::thread> thread_;
-  akushon_interfaces::proto::Config::AsyncService service_;
-
-  std::thread async_server;
-};
-
-}  // namespace akushon
-
-#endif  // AKUSHON__CONFIG__GRPC__CONFIG_HPP_
+} // namespace akushon
