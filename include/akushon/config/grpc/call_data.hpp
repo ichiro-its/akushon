@@ -21,8 +21,8 @@
 #ifndef AKUSHON__CONFIG__GRPC__CALL_DATA_HPP_
 #define AKUSHON__CONFIG__GRPC__CALL_DATA_HPP_
 
-#include "akushon.grpc.pb.h"
-#include "akushon.pb.h"
+#include "akushon_interfaces/akushon.grpc.pb.h"
+#include "akushon_interfaces/akushon.pb.h"
 #include "grpc/support/log.h"
 #include "grpcpp/grpcpp.h"
 #include "akushon/config/grpc/call_data_base.hpp"

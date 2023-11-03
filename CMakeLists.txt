@@ -85,13 +85,10 @@ add_library(${PROJECT_NAME} SHARED
   "src/${PROJECT_NAME}/config/grpc/call_data_subscribe_current_joints.cpp"
   "src/${PROJECT_NAME}/config/grpc/call_data_run_action.cpp"
   "src/${PROJECT_NAME}/node/akushon_node.cpp"
-  "${akushon_proto_srcs}"
-  "${akushon_proto_hdrs}"
-  "${akushon_grpc_srcs}"
-  "${akushon_grpc_hdrs}")
+  )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+  # $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 
@@ -117,7 +114,8 @@ install(TARGETS ${PROJECT_NAME}
   EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION "lib"
   LIBRARY DESTINATION "lib"
-  RUNTIME DESTINATION "bin")
+  RUNTIME DESTINATION "bin"
+  INCLUDES DESTINATION "include")
 
 add_executable(action "src/action_main.cpp")
 target_include_directories(action PUBLIC
