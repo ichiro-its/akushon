@@ -74,6 +74,9 @@ void ActionManager::load_config(const std::string & path)
     for (int i = path.length(); i < file_name.length() - extension_json.length(); i++) {
       name += file_name[i];
     }
+
+    // remove "/" from the start of the name string
+    name.erase(0, 1);
     try {
       std::ifstream file(file_name);
       nlohmann::json action_data = nlohmann::json::parse(file);
