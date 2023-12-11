@@ -18,12 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#include <cmath>
 #include <string>
 #include <vector>
-#include <cmath>
 
 #include "akushon/action/process/joint_process.hpp"
-
 #include "tachimawari/joint/model/joint.hpp"
 
 namespace akushon
@@ -45,6 +44,11 @@ void JointProcess::set_target_position(float target_position, float speed)
   additional_position = (fabs(additional_position) < 0.1) ? 0.0 : additional_position;
 }
 
+void JointProcess::set_spline(const keisan::Spline & spline)
+{
+  this->position_spline = spline;
+}
+
 void JointProcess::set_initial_position(float initial_position)
 {
   this->initial_position = initial_position;
@@ -53,10 +57,10 @@ void JointProcess::set_initial_position(float initial_position)
 void JointProcess::interpolate()
 {
   bool target_position_is_reached = false;
-  target_position_is_reached |= (additional_position >= 0 &&
-    (joint.get_position() + additional_position >= target_position));
-  target_position_is_reached |= (additional_position <= 0 &&
-    (joint.get_position() + additional_position < target_position));
+  target_position_is_reached |=
+    (additional_position >= 0 && (joint.get_position() + additional_position >= target_position));
+  target_position_is_reached |=
+    (additional_position <= 0 && (joint.get_position() + additional_position < target_position));
 
   if (target_position_is_reached) {
     joint.set_position(target_position);
@@ -67,9 +71,20 @@ void JointProcess::interpolate()
   }
 }
 
+void JointProcess::interpolate_spline(float t)
+{
+  current_time += t;
+  joint.set_position(position_spline.interpolate_value(current_time, keisan::Polynom::POSITION));
+}
+
 bool JointProcess::is_finished() const
 {
   return (initial_position == target_position) || (additional_position == 0.0);
+}
+
+void JointProcess::reset_time()
+{
+  current_time = 0;
 }
 
 JointProcess::operator tachimawari::joint::Joint() const

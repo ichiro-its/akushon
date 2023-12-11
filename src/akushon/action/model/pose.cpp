@@ -18,10 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#include "akushon/action/model/pose.hpp"
+
 #include <string>
 #include <vector>
-
-#include "akushon/action/model/pose.hpp"
 
 #include "tachimawari/joint/model/joint.hpp"
 
@@ -29,48 +29,29 @@ namespace akushon
 {
 
 Pose::Pose(const std::string & pose_name)
-: name(pose_name), speed(0.0), pause(0.0), joints({})
-{
-}
+: name(pose_name), speed(0.0), pause(0.0), joints({}) {}
 
-void Pose::set_speed(float speed)
-{
-  this->speed = speed;
-}
+void Pose::set_speed(float speed) {this->speed = speed;}
 
-float Pose::get_speed() const
-{
-  return speed;
-}
+float Pose::get_speed() const {return speed;}
 
-void Pose::set_pause(float pause)
-{
-  this->pause = pause;
-}
+void Pose::set_pause(float pause) {this->pause = pause;}
 
-float Pose::get_pause() const
-{
-  return pause;
-}
+float Pose::get_pause() const {return pause;}
 
-void Pose::set_name(const std::string & pose_name)
-{
-  name = pose_name;
-}
+float Pose::get_time() const {return time;}
 
-const std::string & Pose::get_name() const
-{
-  return name;
-}
+void Pose::set_time(float time_s) {this->time = time_s * 1000;}
+
+void Pose::set_name(const std::string & pose_name) {name = pose_name;}
+
+const std::string & Pose::get_name() const {return name;}
 
 void Pose::set_joints(const std::vector<tachimawari::joint::Joint> & joints)
 {
   this->joints = joints;
 }
 
-const std::vector<tachimawari::joint::Joint> & Pose::get_joints() const
-{
-  return joints;
-}
+const std::vector<tachimawari::joint::Joint> & Pose::get_joints() const {return joints;}
 
 }  // namespace akushon
