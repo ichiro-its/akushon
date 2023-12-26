@@ -31,12 +31,12 @@ class CallDataSaveConfig
 public:
   CallDataSaveConfig(
     akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
-    const std::string path);
+    const std::string& path);
 
 protected:
-  virtual void AddNextToCompletionQueue() override;
-  virtual void WaitForRequest() override;
-  virtual void HandleRequest() override;
+  void AddNextToCompletionQueue() override;
+  void WaitForRequest() override;
+  void HandleRequest() override;
 };
 }  // namespace akushon
 

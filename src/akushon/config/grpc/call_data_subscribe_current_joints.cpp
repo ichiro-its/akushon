@@ -30,7 +30,7 @@ namespace akushon
 {
 CallDataSubscribeCurrentJoints::CallDataSubscribeCurrentJoints(
   akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
-  const std::string path, rclcpp::Node::SharedPtr node)
+  const std::string& path, rclcpp::Node::SharedPtr& node)
 : CallData(service, cq, path), node_(node)
 {
   Proceed();
@@ -66,8 +66,6 @@ void CallDataSubscribeCurrentJoints::HandleRequest()
     reply_.set_msg_joints(curr_joints.dump());
     RCLCPP_INFO(rclcpp::get_logger("PublishSetTorques"), "curr joints has been sended!");
     current_joint_subscription_.reset();
-  } catch (std::ofstream::failure f) {
-    RCLCPP_ERROR(rclcpp::get_logger("PublishSetTorques"), f.what());
   } catch (nlohmann::json::exception e) {
     RCLCPP_ERROR(rclcpp::get_logger("PublishSetTorques"), e.what());
   }

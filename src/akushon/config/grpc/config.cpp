@@ -48,14 +48,7 @@ ConfigGrpc::~ConfigGrpc()
   cq_->Shutdown();
 }
 
-void ConfigGrpc::SignIntHandler(int signum)
-{
-  server_->Shutdown();
-  cq_->Shutdown();
-  exit(signum);
-}
-
-void ConfigGrpc::Run(uint16_t port, const std::string path, rclcpp::Node::SharedPtr node)
+void ConfigGrpc::Run(uint16_t port, const std::string& path, rclcpp::Node::SharedPtr& node)
 {
   std::string server_address = absl::StrFormat("0.0.0.0:%d", port);
 
@@ -67,8 +60,12 @@ void ConfigGrpc::Run(uint16_t port, const std::string path, rclcpp::Node::Shared
   server_ = builder.BuildAndStart();
   std::cout << "Server listening on " << server_address << std::endl;
 
-  signal(SIGINT, SignIntHandler);
-  async_server = std::thread([&path, this, &node]() {
+  std::signal(SIGINT, [](int signum) {
+    server_->Shutdown();
+    cq_->Shutdown();
+    exit(signum);
+  });
+  async_server = std::thread([path, this, &node]() {
     new CallDataGetConfig(&service_, cq_.get(), path);
     new CallDataSaveConfig(&service_, cq_.get(), path);
     new CallDataPublishSetJoints(&service_, cq_.get(), path, node);

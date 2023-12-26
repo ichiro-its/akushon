@@ -35,20 +35,34 @@ class CallData : CallDataBase
 public:
   CallData(
     akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
-    const std::string path);
-
-  virtual void Proceed() override;
+    const std::string& path) : status_(CallStatus::CREATE), service_(service), cq_(cq), responder_(&ctx_), path_(path)
+{
+}
+  void Proceed() override {
+    if (status_ == CallStatus::CREATE) {
+    status_ = CallStatus::PROCESS;
+    WaitForRequest();
+  } else if (status_ == CallStatus::PROCESS) {
+    AddNextToCompletionQueue();
+    HandleRequest();
+    status_ = CallStatus::FINISH;
+    responder_.Finish(reply_, grpc::Status::OK, this);
+  } else {
+    GPR_ASSERT(status_ == CallStatus::FINISH);
+    delete this;
+  }
+  }
 
 protected:
   virtual void AddNextToCompletionQueue() = 0;
 
-  enum CallStatus { CREATE, PROCESS, FINISH };
+  enum class CallStatus { CREATE, PROCESS, FINISH };
 
   CallStatus status_;  // The current serving state.
 
   akushon_interfaces::proto::Config::AsyncService * service_;
 
-  const std::string path_;
+  const std::string& path_;
 
   grpc::ServerCompletionQueue * cq_;
   grpc::ServerContext ctx_;

@@ -27,7 +27,7 @@ namespace akushon
 
 CallDataGetConfig::CallDataGetConfig(
   akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
-  const std::string path)
+  const std::string& path)
 : CallData(service, cq, path)
 {
   Proceed();

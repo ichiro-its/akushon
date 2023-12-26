@@ -50,11 +50,10 @@ public:
 
   ~ConfigGrpc();
 
-  void Run(uint16_t port, const std::string path, rclcpp::Node::SharedPtr node);
+  void Run(uint16_t port, const std::string& path, rclcpp::Node::SharedPtr& node);
 
 private:
-  std::string path;
-  static void SignIntHandler(int signum);              
+  std::string path;  
 
   static inline std::unique_ptr<grpc::ServerCompletionQueue> cq_;
   static inline std::unique_ptr<grpc::Server> server_;

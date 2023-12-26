@@ -33,12 +33,12 @@ class CallDataPublishSetJoints
 public:
   CallDataPublishSetJoints(
     akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
-    const std::string path, rclcpp::Node::SharedPtr node);
+    const std::string& path, rclcpp::Node::SharedPtr& node);
 
 protected:
-  virtual void AddNextToCompletionQueue() override;
-  virtual void WaitForRequest() override;
-  virtual void HandleRequest() override;
+  void AddNextToCompletionQueue() override;
+  void WaitForRequest() override;
+  void HandleRequest() override;
   rclcpp::Node::SharedPtr node_;
   rclcpp::Publisher<tachimawari_interfaces::msg::SetJoints>::SharedPtr set_joints_publisher_;
 };

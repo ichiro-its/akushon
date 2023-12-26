@@ -27,7 +27,7 @@ namespace akushon
 {
 CallDataPublishSetTorques::CallDataPublishSetTorques(
   akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
-  const std::string path, rclcpp::Node::SharedPtr node)
+  const std::string& path, rclcpp::Node::SharedPtr& node)
 : CallData(service, cq, path), node_(node)
 {
   set_torque_publisher_ =
@@ -58,9 +58,6 @@ void CallDataPublishSetTorques::HandleRequest()
     }
     set_torque_publisher_->publish(set_torque);
     RCLCPP_INFO(rclcpp::get_logger("PublishSetTorques"), "set torques has been published!");
-
-  } catch (std::ofstream::failure f) {
-    RCLCPP_ERROR(rclcpp::get_logger("PublishSetTorques"), f.what());
 
   } catch (nlohmann::json::exception e) {
     RCLCPP_ERROR(rclcpp::get_logger("PublishSetTorques"), e.what());

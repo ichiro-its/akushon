@@ -8,7 +8,6 @@ endif()
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
 endif()
-set( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fPIC" )
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic -fPIC)
@@ -27,25 +26,13 @@ set(protobuf_MODULE_COMPATIBLE TRUE)
 find_package(Protobuf CONFIG REQUIRED)
 message(STATUS "Using protobuf ${Protobuf_VERSION}")
 
-set(_PROTOBUF_LIBPROTOBUF protobuf::libprotobuf)
-set(_REFLECTION gRPC::grpc++_reflection)
-if(CMAKE_CROSSCOMPILING)
-  find_program(_PROTOBUF_PROTOC protoc)
-else()
-  set(_PROTOBUF_PROTOC $<TARGET_FILE:protobuf::protoc>)
-endif()
-
 # Find gRPC installation
 # Looks for gRPCConfig.cmake file installed by gRPC's cmake installation.
 find_package(gRPC CONFIG REQUIRED)
 message(STATUS "Using gRPC ${gRPC_VERSION}")
 
 set(_GRPC_GRPCPP gRPC::grpc++)
-if(CMAKE_CROSSCOMPILING)
-  find_program(_GRPC_CPP_PLUGIN_EXECUTABLE grpc_cpp_plugin)
-else()
-  set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:gRPC::grpc_cpp_plugin>)
-endif()
+set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:gRPC::grpc_cpp_plugin>)
 
 # Proto file
 get_filename_component(akushon_proto "../akushon_interfaces/proto/akushon.proto" ABSOLUTE)
@@ -104,9 +91,9 @@ ament_target_dependencies(${PROJECT_NAME}
   gRPC)
 
   target_link_libraries(${PROJECT_NAME}
-  ${_REFLECTION}
+  gRPC::grpc++_reflection
   ${_GRPC_GRPCPP}
-  ${_PROTOBUF_LIBPROTOBUF}
+  protobuf::libprotobuf
 )
 
 install(DIRECTORY "include" DESTINATION ".")
@@ -117,6 +104,8 @@ install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION "lib"
   RUNTIME DESTINATION "bin"
   INCLUDES DESTINATION "include")
+
+target_compile_options(${PROJECT_NAME} PRIVATE -fPIC)
 
 add_executable(action "src/action_main.cpp")
 target_include_directories(action PUBLIC

@@ -26,7 +26,7 @@ namespace akushon
 {
 CallDataPublishSetJoints::CallDataPublishSetJoints(
   akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
-  const std::string path, rclcpp::Node::SharedPtr node)
+  const std::string& path, rclcpp::Node::SharedPtr& node)
 : CallData(service, cq, path), node_(node)
 {
   set_joints_publisher_ =
@@ -62,8 +62,6 @@ void CallDataPublishSetJoints::HandleRequest()
     set_joints_publisher_->publish(set_joints_);
     
     RCLCPP_INFO(rclcpp::get_logger("PublishSetJoints"), "set joints has been published!");
-  } catch (std::ofstream::failure f) {
-    RCLCPP_ERROR(rclcpp::get_logger("PublishSetJoints"), f.what());
   } catch (nlohmann::json::exception e) {
     RCLCPP_ERROR(rclcpp::get_logger("PublishSetJoints"), e.what());
   }

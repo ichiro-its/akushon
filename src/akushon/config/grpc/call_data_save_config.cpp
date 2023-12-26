@@ -28,7 +28,7 @@ namespace akushon
 
 CallDataSaveConfig::CallDataSaveConfig(
   akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
-  const std::string path)
+  const std::string& path)
 : CallData(service, cq, path)
 {
   Proceed();
@@ -51,8 +51,6 @@ void CallDataSaveConfig::HandleRequest()
     nlohmann::json akushon_data = nlohmann::json::parse(request_.json_actions());
     config.save_config(akushon_data);
     RCLCPP_INFO(rclcpp::get_logger("SaveConfig"), "config has been saved!");
-  } catch (std::ofstream::failure f) {
-    RCLCPP_ERROR(rclcpp::get_logger("SaveConfig"), f.what());
   } catch (nlohmann::json::exception e) {
     RCLCPP_ERROR(rclcpp::get_logger("SaveConfig"), e.what());
   }
