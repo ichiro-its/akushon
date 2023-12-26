@@ -30,29 +30,8 @@ message(STATUS "Using protobuf ${Protobuf_VERSION}")
 # Looks for gRPCConfig.cmake file installed by gRPC's cmake installation.
 find_package(gRPC CONFIG REQUIRED)
 message(STATUS "Using gRPC ${gRPC_VERSION}")
-
-set(_GRPC_GRPCPP gRPC::grpc++)
 set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:gRPC::grpc_cpp_plugin>)
 
-# Proto file
-get_filename_component(akushon_proto "../akushon_interfaces/proto/akushon.proto" ABSOLUTE)
-get_filename_component(akushon_proto_path "${akushon_proto}" PATH)
-
-# Generated sources
-set(akushon_proto_srcs "${CMAKE_CURRENT_BINARY_DIR}/akushon.pb.cc")
-set(akushon_proto_hdrs "${CMAKE_CURRENT_BINARY_DIR}/akushon.pb.h")
-set(akushon_grpc_srcs "${CMAKE_CURRENT_BINARY_DIR}/akushon.grpc.pb.cc")
-set(akushon_grpc_hdrs "${CMAKE_CURRENT_BINARY_DIR}/akushon.grpc.pb.h")
-add_custom_command(
-      OUTPUT "${akushon_proto_srcs}" "${akushon_proto_hdrs}" "${akushon_grpc_srcs}" "${akushon_grpc_hdrs}"
-      COMMAND ${_PROTOBUF_PROTOC}
-      ARGS --grpc_out "${CMAKE_CURRENT_BINARY_DIR}"
-        --cpp_out "${CMAKE_CURRENT_BINARY_DIR}"
-        -I "${akushon_proto_path}"
-        --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
-        "${akushon_proto}"
-      DEPENDS "${akushon_proto}")
-            
 add_library(${PROJECT_NAME} SHARED
   "src/${PROJECT_NAME}/action/model/action_name.cpp"
   "src/${PROJECT_NAME}/action/model/action.cpp"
@@ -74,8 +53,7 @@ add_library(${PROJECT_NAME} SHARED
   "src/${PROJECT_NAME}/node/akushon_node.cpp"
   )
 
-target_include_directories(${PROJECT_NAME} PUBLIC
-  # $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+target_include_directories(${PROJECT_NAME} PUBLIC  
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 
@@ -91,7 +69,7 @@ ament_target_dependencies(${PROJECT_NAME}
 
   target_link_libraries(${PROJECT_NAME}
   gRPC::grpc++_reflection
-  ${_GRPC_GRPCPP}
+  gRPC::grpc++
   protobuf::libprotobuf
 )
 
