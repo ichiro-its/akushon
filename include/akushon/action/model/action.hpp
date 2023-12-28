@@ -63,7 +63,7 @@ public:
   bool is_using_spline() const;
   void generate_splines();
 
-  std::map<uint8_t, keisan::SmoothSpline *> joint_splines;
+  std::unordered_map<uint8_t, std::shared_ptr<keisan::SmoothSpline>> joint_splines;
 
 private:
   std::string name;
