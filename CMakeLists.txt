@@ -22,7 +22,6 @@ find_package(std_msgs REQUIRED)
 find_package(tachimawari REQUIRED)
 find_package(tachimawari_interfaces REQUIRED)
 
-set(protobuf_MODULE_COMPATIBLE TRUE)
 find_package(Protobuf CONFIG REQUIRED)
 message(STATUS "Using protobuf ${Protobuf_VERSION}")
 
@@ -35,6 +34,7 @@ set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:gRPC::grpc_cpp_plugin>)
 add_library(${PROJECT_NAME} SHARED
   "src/${PROJECT_NAME}/action/model/action_name.cpp"
   "src/${PROJECT_NAME}/action/model/action.cpp"
+  "src/${PROJECT_NAME}/config/grpc/call_data.cpp"  
   "src/${PROJECT_NAME}/action/model/pose.cpp"
   "src/${PROJECT_NAME}/action/node/action_manager.cpp"
   "src/${PROJECT_NAME}/action/node/action_node.cpp"
@@ -69,8 +69,7 @@ ament_target_dependencies(${PROJECT_NAME}
 
   target_link_libraries(${PROJECT_NAME}
   gRPC::grpc++_reflection
-  gRPC::grpc++
-  protobuf::libprotobuf
+  gRPC::grpc++  
 )
 
 install(DIRECTORY "include" DESTINATION ".")
