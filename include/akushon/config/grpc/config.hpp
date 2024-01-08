@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Ichiro ITS
+// Copyright (c) 2024 Ichiro ITS
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,20 +21,11 @@
 #ifndef AKUSHON__CONFIG__GRPC__CONFIG_HPP_
 #define AKUSHON__CONFIG__GRPC__CONFIG_HPP_
 
-#include <chrono>
-#include <fstream>
-#include <iostream>
-#include <map>
 #include <memory>
-#include <string>
 #include <thread>
 
-#include "absl/flags/flag.h"
-#include "absl/flags/parse.h"
-#include "absl/strings/str_format.h"
 #include "akushon_interfaces/akushon.grpc.pb.h"
 #include "akushon_interfaces/akushon.pb.h"
-#include "grpc/support/log.h"
 #include "grpcpp/grpcpp.h"
 #include "rclcpp/rclcpp.hpp"
 
@@ -50,10 +41,10 @@ public:
 
   ~ConfigGrpc();
 
-  void Run(uint16_t port, const std::string& path, rclcpp::Node::SharedPtr& node);
+  void Run(uint16_t port, const std::string & path, rclcpp::Node::SharedPtr & node);
 
 private:
-  std::string path;  
+  std::string path;
 
   static inline std::unique_ptr<grpc::ServerCompletionQueue> cq_;
   static inline std::unique_ptr<grpc::Server> server_;
