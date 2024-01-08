@@ -33,8 +33,7 @@ set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:gRPC::grpc_cpp_plugin>)
 
 add_library(${PROJECT_NAME} SHARED
   "src/${PROJECT_NAME}/action/model/action_name.cpp"
-  "src/${PROJECT_NAME}/action/model/action.cpp"
-  "src/${PROJECT_NAME}/config/grpc/call_data.cpp"  
+  "src/${PROJECT_NAME}/action/model/action.cpp"  
   "src/${PROJECT_NAME}/action/model/pose.cpp"
   "src/${PROJECT_NAME}/action/node/action_manager.cpp"
   "src/${PROJECT_NAME}/action/node/action_node.cpp"
