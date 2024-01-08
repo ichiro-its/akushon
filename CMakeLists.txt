@@ -67,7 +67,7 @@ ament_target_dependencies(${PROJECT_NAME}
   tachimawari_interfaces
   gRPC)
 
-  target_link_libraries(${PROJECT_NAME}
+target_link_libraries(${PROJECT_NAME}
   gRPC::grpc++_reflection
   gRPC::grpc++  
 )

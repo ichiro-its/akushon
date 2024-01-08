@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Ichiro ITS
+// Copyright (c) 2024 Ichiro ITS
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,22 +21,23 @@
 #ifndef AKUSHON__CONFIG__GRPC__CALL_DATA_HPP_
 #define AKUSHON__CONFIG__GRPC__CALL_DATA_HPP_
 
+#include "akushon/config/grpc/call_data_base.hpp"
 #include "akushon_interfaces/akushon.grpc.pb.h"
 #include "akushon_interfaces/akushon.pb.h"
 #include "grpc/support/log.h"
 #include "grpcpp/grpcpp.h"
-#include "akushon/config/grpc/call_data_base.hpp"
 
 namespace akushon
 {
 template <class ConfigRequest, class ConfigReply>
-class CallData : CallDataBase {
+class CallData : CallDataBase
+{
 public:
   CallData(
     akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
-    const std::string& path);    
+    const std::string & path);
   void Proceed() override;
-  
+
 protected:
   virtual void AddNextToCompletionQueue() = 0;
 
@@ -46,7 +47,7 @@ protected:
 
   akushon_interfaces::proto::Config::AsyncService * service_;
 
-  const std::string& path_;
+  const std::string & path_;
 
   grpc::ServerCompletionQueue * cq_;
   grpc::ServerContext ctx_;
@@ -54,6 +55,35 @@ protected:
   ConfigReply reply_;
   grpc::ServerAsyncResponseWriter<ConfigReply> responder_;
 };
+
+template <class ConfigRequest, class ConfigReply>
+CallData<ConfigRequest, ConfigReply>::CallData(
+  akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
+  const std::string & path)
+: status_(CallStatus::CREATE), service_(service), cq_(cq), responder_(&ctx_), path_(path)
+{
+}
+
+template <class ConfigRequest, class ConfigReply>
+void CallData<ConfigRequest, ConfigReply>::Proceed()
+{
+  switch (status_) {
+    case CallStatus::CREATE:
+      status_ = CallStatus::PROCESS;
+      WaitForRequest();
+      break;
+    case CallStatus::PROCESS:
+      AddNextToCompletionQueue();
+      HandleRequest();
+      status_ = CallStatus::FINISH;
+      responder_.Finish(reply_, grpc::Status::OK, this);
+      break;
+    default:
+      delete this;
+      break;
+  }
+}
+
 }  // namespace akushon
 
 #endif  // AKUSHON__CONFIG__GRPC__CALL_DATA_HPP_
