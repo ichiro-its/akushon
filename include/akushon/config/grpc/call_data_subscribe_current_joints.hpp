@@ -1,4 +1,4 @@
-// Copyright (c) 2021-2023 Ichiro ITS
+// Copyright (c) 2023 Ichiro ITS
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,39 +18,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__CONFIG__NODE__CONFIG_NODE_HPP_
-#define AKUSHON__CONFIG__NODE__CONFIG_NODE_HPP_
+#ifndef AKUSHON__CONFIG__GRPC__CALL_DATA_SUBSCRIBE_CURRENT_JOINTS_HPP_
+#define AKUSHON__CONFIG__GRPC__CALL_DATA_SUBSCRIBE_CURRENT_JOINTS_HPP_
 
-#include <memory>
-#include <string>
-
-#include "akushon/config/utils/config.hpp"
-#include "akushon/config/grpc/config.hpp"
-#include "akushon_interfaces/srv/save_actions.hpp"
-#include "akushon_interfaces/srv/get_actions.hpp"
+#include "akushon/config/grpc/call_data.hpp"
+#include "akushon_interfaces/msg/run_action.hpp"
+#include "tachimawari_interfaces/msg/current_joints.hpp"
 #include "rclcpp/rclcpp.hpp"
 
 namespace akushon
 {
-
-class ConfigNode
+class CallDataSubscribeCurrentJoints
+: CallData<akushon_interfaces::proto::Empty, akushon_interfaces::proto::CurrentJoints>
 {
 public:
-  using SaveActions = akushon_interfaces::srv::SaveActions;
-  using GetActions = akushon_interfaces::srv::GetActions;
+  CallDataSubscribeCurrentJoints(
+    akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
+    const std::string& path, rclcpp::Node::SharedPtr& node);
 
-  explicit ConfigNode(rclcpp::Node::SharedPtr node, const std::string & path);
-
-private:
-  std::string get_node_prefix() const;
-
-  Config config_util;
-  ConfigGrpc config_grpc;
-
-  rclcpp::Service<SaveActions>::SharedPtr save_actions_service;
-  rclcpp::Service<GetActions>::SharedPtr get_actions_service;
+protected:
+  void AddNextToCompletionQueue() override;
+  void WaitForRequest() override;
+  void HandleRequest() override;
+  rclcpp::Node::SharedPtr node_;
+  rclcpp::Subscription<tachimawari_interfaces::msg::CurrentJoints>::SharedPtr
+    current_joint_subscription_;
+  tachimawari_interfaces::msg::CurrentJoints curr_joints_;
 };
-
 }  // namespace akushon
 
-#endif  // AKUSHON__CONFIG__NODE__CONFIG_NODE_HPP_
+#endif  // AKUSHON__CONFIG__GRPC__CALL_DATA_SUBSCRIBE_CURRENT_JOINTS_HPP_
