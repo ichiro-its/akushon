@@ -29,7 +29,6 @@ message(STATUS "Using protobuf ${Protobuf_VERSION}")
 # Looks for gRPCConfig.cmake file installed by gRPC's cmake installation.
 find_package(gRPC CONFIG REQUIRED)
 message(STATUS "Using gRPC ${gRPC_VERSION}")
-set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:gRPC::grpc_cpp_plugin>)
 
 add_library(${PROJECT_NAME} SHARED
   "src/${PROJECT_NAME}/action/model/action_name.cpp"
