@@ -129,7 +129,7 @@ Action ActionManager::load_action(
       } else if (key == "next") {
         action.set_next_action(val);
       } else if (key == "use_spline") {
-        action.enable_spline(true);
+        action.enable_spline(val);
       }
     }
     action.generate_splines();
