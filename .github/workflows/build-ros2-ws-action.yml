@@ -20,6 +20,18 @@ jobs:
           repository: ichiro-its/akushon_interfaces
           path: akushon_interfaces
 
+      - name: Checkout Kansei Interfaces
+        uses: actions/checkout@v2.3.4
+        with:
+          repository: ichiro-its/kansei_interfaces
+          path: kansei_interfaces
+
+      - name: Checkout Keisan
+        uses: actions/checkout@v2.3.4
+        with:
+          repository: ichiro-its/keisan
+          path: keisan
+
       - name: Checkout tachimawari
         uses: actions/checkout@v2.3.4
         with:
