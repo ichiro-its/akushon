@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   pull_request:
   push:
-    branches: [master]
+    branches: [master, feature/fix-github-actions]
 jobs:
   build-and-test:
     name: Build and Test
