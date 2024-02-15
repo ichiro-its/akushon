@@ -4,11 +4,10 @@ on:
   pull_request:
     branches: [master]
   push:
-    branches: [master]
+    branches: [master, feature/fix-github-actions]
   workflow_run:
     workflows: [CI]
-    types: 
-      - requested
+    types:  [requested]
     branches: [feature/fix-github-actions]
 jobs:
   build-and-test-nightly:
