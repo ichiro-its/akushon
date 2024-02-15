@@ -7,7 +7,8 @@ on:
     branches: [master, feature/fix-github-actions]
   workflow_run:
     workflows: [CI]
-    types: [completed]
+    types: 
+      - requested
 jobs:
   build-and-test-nightly:
     runs-on: ubuntu-20.04
