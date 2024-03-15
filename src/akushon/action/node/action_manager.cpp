@@ -76,7 +76,7 @@ void ActionManager::load_config(const std::string & path)
     }
 
     // remove "/" from the start of the name string
-    name.erase(0, 1);
+    // name.erase(0, 1);
     try {
       std::ifstream file(file_name);
       nlohmann::json action_data = nlohmann::json::parse(file);
