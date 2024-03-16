@@ -67,6 +67,7 @@ private:
   int start_stop_time;
   bool init_pause;
   int pause_time;
+  int prev_time;
 
   int current_action_index;
   int current_pose_index;

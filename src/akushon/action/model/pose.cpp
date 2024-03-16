@@ -53,6 +53,16 @@ float Pose::get_pause() const
   return pause;
 }
 
+float Pose::get_time() const 
+{
+  return time;
+}
+
+void Pose::set_time(float time_s) 
+{
+  this->time = time_s * 1000;
+}
+
 void Pose::set_name(const std::string & pose_name)
 {
   name = pose_name;

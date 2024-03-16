@@ -24,14 +24,13 @@
 #include <vector>
 
 #include "akushon/action/model/action.hpp"
-
 #include "akushon/action/model/pose.hpp"
 
 namespace akushon
 {
 
 Action::Action(const std::string & action_name)
-: name(action_name), poses({}), start_delay(0), stop_delay(0), next_action("")
+: name(action_name), poses({}), start_delay(0), stop_delay(0), next_action(""), use_spline(false)
 {
 }
 
@@ -108,6 +107,30 @@ const std::string & Action::get_next_action() const
 void Action::reset()
 {
   poses.clear();
+  joint_splines.clear();
 }
 
+void Action::enable_spline(bool enable)
+{
+  use_spline = enable;
+}
+
+bool Action::is_using_spline() const
+{
+  return use_spline;
+}
+
+void Action::generate_splines()
+{
+  joint_splines.clear();
+  for (auto pose : poses) {
+    for (auto & joint : pose.get_joints()) {
+      auto it = joint_splines.find(joint.get_id());
+      if (it == joint_splines.end()) {
+        it = joint_splines.emplace(joint.get_id(), std::make_shared<keisan::SmoothSpline>()).first;
+      }
+      it->second->add_point(joint.get_position(), pose.get_time());
+    }
+  }
+}
 }  // namespace akushon

@@ -27,9 +27,11 @@
       },
       "name": "walkready",
       "pause": 0,
-      "speed": 0.003
+      "speed": 0.003,
+      "time": 1.0
     }
   ],
   "start_delay": 0,
-  "stop_delay": 0
+  "stop_delay": 0,
+  "use_spline": false
 }

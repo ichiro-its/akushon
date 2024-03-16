@@ -76,7 +76,7 @@ void ActionManager::load_config(const std::string & path)
     }
 
     // remove "/" from the start of the name string
-    name.erase(0, 1);
+    // name.erase(0, 1);
     try {
       std::ifstream file(file_name);
       nlohmann::json action_data = nlohmann::json::parse(file);
@@ -117,6 +117,7 @@ Action ActionManager::load_action(
 
             pose.set_pause(raw_pose["pause"]);
             pose.set_speed(raw_pose["speed"]);
+            pose.set_time(raw_pose["time"]);
             pose.set_joints(joints);
             action.add_pose(pose);
           }
@@ -127,8 +128,11 @@ Action ActionManager::load_action(
         action.set_stop_delay(val);
       } else if (key == "next") {
         action.set_next_action(val);
+      } else if (key == "use_spline") {
+        action.enable_spline(val);
       }
     }
+    action.generate_splines();
   } catch (nlohmann::json::parse_error & ex) {
     // TODO(any): will be used for logging
     // std::cerr << "parse error at byte " << ex.byte << std::endl;
