@@ -35,9 +35,17 @@ using namespace std::chrono_literals;
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
+  
+  const char * help_message = 
+    "Usage: ros2 run akushon action <path> <action_name>\n"
+    "  <path>        Path to the action configuration file\n"
+    "  <action_name> Name of the action to run\n";
 
-  if (argc < 2) {
-    std::cerr << "Please specify the path!" << std::endl;
+  std::string action_name = "";
+
+  if (argc < 3) {
+    std::cout << "Bad arguments!\n";
+    std::cout << help_message;
     return 0;
   }
 
@@ -51,7 +59,7 @@ int main(int argc, char * argv[])
   rclcpp::Rate rcl_rate(8ms);
   int time = 0;
 
-  if (action_node->start(akushon::ActionName::WALKREADY)) {
+  if (action_node->start(action_name)) {
     while (rclcpp::ok()) {
       rcl_rate.sleep();
 
