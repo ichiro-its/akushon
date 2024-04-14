@@ -96,6 +96,7 @@ void Interpolator::process(int time)
           if (current_action_index == actions.size()) {
             change_state(END);
           } else {
+            current_pose_index = 0;
             change_state(START_DELAY);
           }
         }
