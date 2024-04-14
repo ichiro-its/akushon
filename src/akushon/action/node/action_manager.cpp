@@ -75,8 +75,6 @@ void ActionManager::load_config(const std::string & path)
       name += file_name[i];
     }
 
-    // remove "/" from the start of the name string
-    name.erase(0, 1);
     try {
       std::ifstream file(file_name);
       nlohmann::json action_data = nlohmann::json::parse(file);
@@ -85,8 +83,9 @@ void ActionManager::load_config(const std::string & path)
 
       actions.insert({name, action});
     } catch (nlohmann::json::parse_error & ex) {
-      // TODO(any): will be used for logging
-      // std::cerr << "parse error at byte " << ex.byte << std::endl;
+      std::cerr << "failed to load action: " << name << std::endl;
+      std::cerr << "parse error at byte " << ex.byte << std::endl;
+      throw ex;
     }
   }
 }
@@ -130,8 +129,7 @@ Action ActionManager::load_action(
       }
     }
   } catch (nlohmann::json::parse_error & ex) {
-    // TODO(any): will be used for logging
-    // std::cerr << "parse error at byte " << ex.byte << std::endl;
+    throw ex;
   }
 
   return action;
