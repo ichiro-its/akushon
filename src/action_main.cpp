@@ -41,7 +41,6 @@ int main(int argc, char * argv[])
     "  <path>        Path to the action configuration file\n"
     "  <action_name> Name of the action to run\n";
 
-  std::string action_name = "";
 
   if (argc < 3) {
     std::cout << "Bad arguments!\n";
@@ -51,6 +50,7 @@ int main(int argc, char * argv[])
 
   auto action_manager = std::make_shared<akushon::ActionManager>();
   std::string path = argv[1];
+  std::string action_name = argv[2];
   action_manager->load_config(path);
 
   auto node = std::make_shared<rclcpp::Node>("akushon_node");
