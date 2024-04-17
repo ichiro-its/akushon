@@ -157,6 +157,25 @@ void ActionManager::start(std::string action_name, const Pose & initial_pose)
   is_running = true;
 }
 
+void ActionManager::start(Action & action, const Action & target_action, const Pose & initial_pose, float ball_x, float right_map_x_min_, float right_map_x_max_, float left_map_x_min_, float left_map_x_max_, bool right)
+{
+  for (int pose_index = 0; pose_index < action.get_pose_count(); pose_index++) {
+    if (right)
+    {
+      {
+        action.map_action(action, target_action, pose_index, ball_x, right_map_x_min_, right_map_x_max_);
+      }
+    } else {
+        action.map_action(action, target_action, pose_index, ball_x, left_map_x_min_, left_map_x_max_);
+    }
+  }
+
+  std::vector<Action> target_actions {action};
+
+  interpolator = std::make_shared<Interpolator>(target_actions, initial_pose);
+  is_running = true;
+}
+
 void ActionManager::start(const Action & action, const Pose & initial_pose)
 {
   std::vector<Action> target_actions {action};

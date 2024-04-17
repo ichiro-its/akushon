@@ -110,4 +110,21 @@ void Action::reset()
   poses.clear();
 }
 
+void Action::map_action(const Action & source_action, const Action & target_action, int target_pose_index, float source_val, float source_min, float source_max)
+{
+  
+  std::vector<tachimawari::joint::Joint> src_joints = source_action.get_pose(target_pose_index).get_joints();
+  std::vector<tachimawari::joint::Joint> target_joints = target_action.get_pose(target_pose_index).get_joints();
+
+  for (int joint = 0; joint < 22; joint++)
+  {
+      float target_min = src_joints.at(joint).get_position_value();
+      float target_max = target_joints.at(joint).get_position_value();
+      float new_joint_value = keisan::map(source_val, source_min, source_max, target_min, target_max);
+      new_joint_value = keisan::curve(new_joint_value, target_min, target_max, float(2.0));
+      new_joint_value = keisan::clamp(new_joint_value, target_min, target_max);
+      target_joints[joint].set_position_value(new_joint_value);
+  }
+}
+
 }  // namespace akushon
