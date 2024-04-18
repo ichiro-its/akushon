@@ -123,7 +123,7 @@ void Action::map_action(const Action & source_action, const Action & target_acti
       float new_joint_value = keisan::map(source_val, source_min, source_max, target_min, target_max);
       new_joint_value = keisan::curve(new_joint_value, target_min, target_max, float(2.0));
       new_joint_value = keisan::clamp(new_joint_value, target_min, target_max);
-      target_joints[joint].set_position_value(new_joint_value);
+      src_joints[joint].set_position_value(new_joint_value);
   }
 }
 
