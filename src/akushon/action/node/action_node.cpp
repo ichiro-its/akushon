@@ -45,6 +45,8 @@ std::string ActionNode::brake_action_topic() {return get_node_prefix() + "/brake
 
 std::string ActionNode::status_topic() {return get_node_prefix() + "/status";}
 
+std::string ActionNode::ball_topic() {return get_node_prefix() + "/ball";}
+
 ActionNode::ActionNode(
   rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> & action_manager)
 : node(node), action_manager(action_manager), initial_pose(Pose("initial_pose"))
@@ -88,6 +90,18 @@ ActionNode::ActionNode(
   brake_action_subscriber = node->create_subscription<Empty>(
     brake_action_topic(), 10,
     [this](std::shared_ptr<Empty> message) {this->action_manager->brake();});
+  
+  ball_subscriber = node->create_subscription<rcl_interfaces::msg::ParameterEvent>(
+    ball_topic(), 10, [this](const std::shared_ptr<rcl_interfaces::msg::ParameterEvent> message) {
+      for (const auto &p : message->new_parameters) {
+        if (p.name == "x") {
+          ball_pos.x = p.value.double_value;
+        }
+        else if (p.name == "y") {
+          ball_pos.y = p.value.double_value;
+        }
+      }
+    });
 }
 
 bool ActionNode::start(const std::string & action_name)
@@ -95,7 +109,22 @@ bool ActionNode::start(const std::string & action_name)
   Pose pose = this->initial_pose;
 
   if (!pose.get_joints().empty()) {
-    action_manager->start(action_name, pose);
+    if (action_name == akushon::ActionName::LEFT_KICK_WIDE || action_name == akushon::ActionName::RIGHT_KICK_WIDE)
+    {
+      std::size_t pos = action_name.find("_WIDE");
+      std::string source_action;
+    
+      if (pos != std::string::npos) {
+        source_action = action_name.substr(0, pos);
+      } else {
+        source_action = action_name;
+      }
+
+      action_manager->start(source_action, action_name, pose, ball_pos.x, 100.0, 100.0, 100.0, 100.0, true); // TODO: Pass ball x to here
+    }
+    else {
+      action_manager->start(action_name, pose);
+    }
   } else {
     return false;
   }

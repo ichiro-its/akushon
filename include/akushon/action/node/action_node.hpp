@@ -33,6 +33,7 @@
 #include "std_msgs/msg/empty.hpp"
 #include "tachimawari_interfaces/msg/current_joints.hpp"
 #include "tachimawari_interfaces/msg/set_joints.hpp"
+#include "keisan/keisan.hpp"
 
 namespace akushon
 {
@@ -54,6 +55,7 @@ public:
   static std::string run_action_topic();
   static std::string brake_action_topic();
   static std::string status_topic();
+  static std::string ball_topic();
 
   explicit ActionNode(
     rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> & action_manager);
@@ -68,6 +70,8 @@ private:
   void publish_status();
 
   Pose initial_pose;
+  keisan::Point2 ball_pos;
+
   rclcpp::Node::SharedPtr node;
 
   std::shared_ptr<ActionManager> action_manager;
@@ -77,6 +81,7 @@ private:
 
   rclcpp::Subscription<RunAction>::SharedPtr run_action_subscriber;
   rclcpp::Subscription<Empty>::SharedPtr brake_action_subscriber;
+  rclcpp::Subscription<rcl_interfaces::msg::ParameterEvent>::SharedPtr ball_subscriber;
   rclcpp::Publisher<Status>::SharedPtr status_publisher;
 };
 
