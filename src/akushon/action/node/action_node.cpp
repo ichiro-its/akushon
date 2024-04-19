@@ -73,14 +73,15 @@ ActionNode::ActionNode(
 
   run_action_subscriber = node->create_subscription<RunAction>(
     run_action_topic(), 10, [this](std::shared_ptr<RunAction> message) {
-      std::cout << message->action_name << std::endl;
-      if (message->control_type == RUN_ACTION_BY_NAME) {
-        this->start(message->action_name);
-      } else {
-        nlohmann::json action_data = nlohmann::json::parse(message->json);
-        Action action = this->action_manager->load_action(action_data, message->action_name);
+      if (!this->action_manager->is_playing()) {
+        if (message->control_type == RUN_ACTION_BY_NAME) {
+          this->start(message->action_name);
+        } else {
+          nlohmann::json action_data = nlohmann::json::parse(message->json);
+          Action action = this->action_manager->load_action(action_data, message->action_name);
 
-        this->start(action);
+          this->start(action);
+        }
       }
     });
 
