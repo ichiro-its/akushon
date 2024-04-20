@@ -143,6 +143,8 @@ void ActionNode::publish_joints()
     joint_msgs[i].position = joints[i].get_position();
   }
 
+  joints_msg.control_type = tachimawari::joint::Middleware::FOR_ACTION;
+
   set_joints_publisher->publish(joints_msg);
 }
 
