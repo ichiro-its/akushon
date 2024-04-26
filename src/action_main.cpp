@@ -43,8 +43,8 @@ int main(int argc, char * argv[])
 
 
   if (argc < 3) {
-    std::cout << "Bad arguments!\n";
-    std::cout << help_message;
+    std::cerr << "Bad arguments!\n";
+    std::cerr << help_message;
     return 0;
   }
 
