@@ -96,40 +96,36 @@ Action ActionManager::load_action(
 {
   Action action = Action(action_name);
 
-  try {
-    action.set_name(action_data["name"]);
+  action.set_name(action_data["name"]);
 
-    for (const auto & [key, val] : action_data.items()) {
-      if (key.find("poses") != std::string::npos) {
-        for (const auto & raw_pose : action_data["poses"]) {
-          {
-            using tachimawari::joint::JointId;
-            using tachimawari::joint::Joint;
+  for (const auto & [key, val] : action_data.items()) {
+    if (key.find("poses") != std::string::npos) {
+      for (const auto & raw_pose : action_data["poses"]) {
+        {
+          using tachimawari::joint::JointId;
+          using tachimawari::joint::Joint;
 
-            Pose pose(raw_pose["name"]);
-            std::vector<Joint> joints;
+          Pose pose(raw_pose["name"]);
+          std::vector<Joint> joints;
 
-            for (const auto & [joint_key, joint_val] : raw_pose["joints"].items()) {
-              Joint joint(JointId::by_name.at(joint_key), joint_val);
-              joints.push_back(joint);
-            }
-
-            pose.set_pause(raw_pose["pause"]);
-            pose.set_speed(raw_pose["speed"]);
-            pose.set_joints(joints);
-            action.add_pose(pose);
+          for (const auto & [joint_key, joint_val] : raw_pose["joints"].items()) {
+            Joint joint(JointId::by_name.at(joint_key), joint_val);
+            joints.push_back(joint);
           }
+
+          pose.set_pause(raw_pose["pause"]);
+          pose.set_speed(raw_pose["speed"]);
+          pose.set_joints(joints);
+          action.add_pose(pose);
         }
-      } else if (key == "start_delay") {
-        action.set_start_delay(val);
-      } else if (key == "stop_delay") {
-        action.set_stop_delay(val);
-      } else if (key == "next") {
-        action.set_next_action(val);
       }
+    } else if (key == "start_delay") {
+      action.set_start_delay(val);
+    } else if (key == "stop_delay") {
+      action.set_stop_delay(val);
+    } else if (key == "next") {
+      action.set_next_action(val);
     }
-  } catch (nlohmann::json::parse_error & ex) {
-    throw ex;
   }
 
   return action;
