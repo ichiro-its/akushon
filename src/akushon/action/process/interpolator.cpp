@@ -56,7 +56,7 @@ void Interpolator::process(int time)
           start_stop_time = time;
         }
 
-        if ((time - start_stop_time) > (get_current_action().get_start_delay() * 1000)) {
+        if ((time - start_stop_time) > (get_current_action().get_start_delay())) {
           change_state(PLAYING);
         }
 
@@ -74,7 +74,7 @@ void Interpolator::process(int time)
           if (current_pose_index == get_current_action().get_pose_count()) {
             change_state(STOP_DELAY);
             init_pause = true;
-          } else if ((time - pause_time) > (get_current_pose().get_pause() * 1000)) {
+          } else if ((time - pause_time) > (get_current_pose().get_pause())) {
             next_pose();
             init_pause = true;
           }
@@ -90,12 +90,13 @@ void Interpolator::process(int time)
           start_stop_time = time;
         }
 
-        if ((time - start_stop_time) > (get_current_action().get_stop_delay() * 1000)) {
+        if ((time - start_stop_time) > (get_current_action().get_stop_delay())) {
           ++current_action_index;
 
           if (current_action_index == actions.size()) {
             change_state(END);
           } else {
+            current_pose_index = 0;
             change_state(START_DELAY);
           }
         }

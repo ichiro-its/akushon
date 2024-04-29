@@ -44,7 +44,7 @@ AkushonNode::AkushonNode(rclcpp::Node::SharedPtr node)
     [this]() {
       if (this->action_node) {
         double time = this->node->now().seconds() - this->start_time;
-        this->action_node->update(time * 1000);
+        this->action_node->update(time);
       }
     }
   );
