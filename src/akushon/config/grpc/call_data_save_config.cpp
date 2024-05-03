@@ -1,4 +1,4 @@
-// Copyright (c) 2021-2023 Ichiro ITS
+// Copyright (c) 2023 Ichiro ITS
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,39 +18,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__CONFIG__NODE__CONFIG_NODE_HPP_
-#define AKUSHON__CONFIG__NODE__CONFIG_NODE_HPP_
-
-#include <memory>
-#include <string>
-
+#include "akushon/config/grpc/call_data_save_config.hpp"
 #include "akushon/config/utils/config.hpp"
-#include "akushon/config/grpc/config.hpp"
-#include "akushon_interfaces/srv/save_actions.hpp"
-#include "akushon_interfaces/srv/get_actions.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include "nlohmann/json.hpp"
 
 namespace akushon
 {
 
-class ConfigNode
+CallDataSaveConfig::CallDataSaveConfig(
+  akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
+  const std::string& path)
+: CallData(service, cq, path)
 {
-public:
-  using SaveActions = akushon_interfaces::srv::SaveActions;
-  using GetActions = akushon_interfaces::srv::GetActions;
+  Proceed();
+}
 
-  explicit ConfigNode(rclcpp::Node::SharedPtr node, const std::string & path);
+void CallDataSaveConfig::AddNextToCompletionQueue()
+{
+  new CallDataSaveConfig(service_, cq_, path_);
+}
 
-private:
-  std::string get_node_prefix() const;
+void CallDataSaveConfig::WaitForRequest()
+{
+  service_->RequestSaveConfig(&ctx_, &request_, &responder_, cq_, cq_, this);
+}
 
-  Config config_util;
-  ConfigGrpc config_grpc;
+void CallDataSaveConfig::HandleRequest()
+{
+  Config config(path_);
+  try {
+    nlohmann::json akushon_data = nlohmann::json::parse(request_.json_actions());
+    config.save_config(akushon_data);
+    RCLCPP_INFO(rclcpp::get_logger("SaveConfig"), "config has been saved!");
+  } catch (nlohmann::json::exception e) {
+    RCLCPP_ERROR(rclcpp::get_logger("SaveConfig"), e.what());
+  }
+}
 
-  rclcpp::Service<SaveActions>::SharedPtr save_actions_service;
-  rclcpp::Service<GetActions>::SharedPtr get_actions_service;
-};
-
-}  // namespace akushon
-
-#endif  // AKUSHON__CONFIG__NODE__CONFIG_NODE_HPP_
+} // namespace akushon
