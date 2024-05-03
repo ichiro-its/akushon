@@ -51,9 +51,24 @@ add_library(${PROJECT_NAME} SHARED
   "src/${PROJECT_NAME}/node/akushon_node.cpp"
   )
 
+add_library(${PROJECT_NAME}_exported SHARED
+"src/${PROJECT_NAME}/action/model/action_name.cpp"
+"src/${PROJECT_NAME}/action/model/action.cpp"  
+"src/${PROJECT_NAME}/action/model/pose.cpp"
+"src/${PROJECT_NAME}/action/node/action_manager.cpp"
+"src/${PROJECT_NAME}/action/node/action_node.cpp"
+"src/${PROJECT_NAME}/action/process/interpolator.cpp"
+"src/${PROJECT_NAME}/action/process/joint_process.cpp"
+)
+
 target_include_directories(${PROJECT_NAME} PUBLIC  
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
+
+
+target_include_directories(${PROJECT_NAME}_exported PUBLIC  
+$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+$<INSTALL_INTERFACE:include>)
 
 ament_target_dependencies(${PROJECT_NAME}
   ament_index_cpp
@@ -65,6 +80,15 @@ ament_target_dependencies(${PROJECT_NAME}
   tachimawari_interfaces
   gRPC)
 
+  ament_target_dependencies(${PROJECT_NAME}_exported
+  ament_index_cpp
+  akushon_interfaces
+  rclcpp
+  rclcpp_action
+  std_msgs
+  tachimawari
+  tachimawari_interfaces)
+
 target_link_libraries(${PROJECT_NAME}
   gRPC::grpc++_reflection
   gRPC::grpc++  
@@ -74,6 +98,13 @@ install(DIRECTORY "include" DESTINATION ".")
 
 install(TARGETS ${PROJECT_NAME}
   EXPORT export_${PROJECT_NAME}
+  ARCHIVE DESTINATION "lib"
+  LIBRARY DESTINATION "lib"
+  RUNTIME DESTINATION "bin"
+  INCLUDES DESTINATION "include")
+
+  install(TARGETS ${PROJECT_NAME}_exported
+  EXPORT export_${PROJECT_NAME}_exported
   ARCHIVE DESTINATION "lib"
   LIBRARY DESTINATION "lib"
   RUNTIME DESTINATION "bin"
@@ -119,5 +150,5 @@ ament_export_dependencies(
   tachimawari
   tachimawari_interfaces)
 ament_export_include_directories("include")
-ament_export_libraries(${PROJECT_NAME})
+ament_export_libraries(${PROJECT_NAME}_exported)
 ament_package()
