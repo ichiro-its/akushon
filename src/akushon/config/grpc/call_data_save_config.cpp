@@ -48,8 +48,7 @@ void CallDataSaveConfig::HandleRequest()
 {
   Config config(path_);
   try {
-    nlohmann::json akushon_data = nlohmann::json::parse(request_.json_actions());
-    config.save_config(akushon_data);
+    config.save_config(request_.json_actions());
     RCLCPP_INFO(rclcpp::get_logger("SaveConfig"), "config has been saved!");
   } catch (nlohmann::json::exception e) {
     RCLCPP_ERROR(rclcpp::get_logger("SaveConfig"), e.what());
