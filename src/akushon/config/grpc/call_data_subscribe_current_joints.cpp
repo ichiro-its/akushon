@@ -33,6 +33,13 @@ CallDataSubscribeCurrentJoints::CallDataSubscribeCurrentJoints(
   const std::string& path, rclcpp::Node::SharedPtr& node)
 : CallData(service, cq, path), node_(node)
 {
+  current_joint_subscription_ =
+    node_->create_subscription<tachimawari_interfaces::msg::CurrentJoints>(
+      "/joint/current_joints", 10,
+      [this](const tachimawari_interfaces::msg::CurrentJoints::SharedPtr curr_joints) {          
+        curr_joints_.joints = curr_joints->joints;
+      });
+
   Proceed();
 }  // namespace akushon
 
@@ -49,12 +56,6 @@ void CallDataSubscribeCurrentJoints::WaitForRequest()
 void CallDataSubscribeCurrentJoints::HandleRequest()
 {
   try {
-    current_joint_subscription_ =
-      node_->create_subscription<tachimawari_interfaces::msg::CurrentJoints>(
-        "/joint/current_joints", 10,
-        [this](const tachimawari_interfaces::msg::CurrentJoints::SharedPtr curr_joints) {          
-          curr_joints_.joints = curr_joints->joints;
-        });
     nlohmann::json curr_joints;
     
     for (const auto & items : curr_joints_.joints) {
