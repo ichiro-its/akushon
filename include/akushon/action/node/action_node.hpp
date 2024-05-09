@@ -31,6 +31,7 @@
 #include "akushon_interfaces/msg/status.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/empty.hpp"
+#include "std_msgs/msg/float64.hpp"
 #include "tachimawari_interfaces/msg/current_joints.hpp"
 #include "tachimawari_interfaces/msg/set_joints.hpp"
 #include "keisan/keisan.hpp"
@@ -46,6 +47,7 @@ public:
   using RunAction = akushon_interfaces::msg::RunAction;
   using SetJoints = tachimawari_interfaces::msg::SetJoints;
   using Status = akushon_interfaces::msg::Status;
+  using Float64 = std_msgs::msg::Float64;
 
   enum { READY, PLAYING };
 
@@ -70,7 +72,7 @@ private:
   void publish_status();
 
   Pose initial_pose;
-  keisan::Point2 ball_pos;
+  double ball_pos;
 
   rclcpp::Node::SharedPtr node;
 
@@ -81,7 +83,7 @@ private:
 
   rclcpp::Subscription<RunAction>::SharedPtr run_action_subscriber;
   rclcpp::Subscription<Empty>::SharedPtr brake_action_subscriber;
-  rclcpp::Subscription<rcl_interfaces::msg::ParameterEvent>::SharedPtr ball_subscriber;
+  rclcpp::Subscription<Float64>::SharedPtr ball_subscriber;
   rclcpp::Publisher<Status>::SharedPtr status_publisher;
 };
 

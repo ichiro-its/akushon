@@ -91,16 +91,10 @@ ActionNode::ActionNode(
     brake_action_topic(), 10,
     [this](std::shared_ptr<Empty> message) {this->action_manager->brake();});
   
-  ball_subscriber = node->create_subscription<rcl_interfaces::msg::ParameterEvent>(
-    ball_topic(), 10, [this](const std::shared_ptr<rcl_interfaces::msg::ParameterEvent> message) {
-      for (const auto &p : message->new_parameters) {
-        if (p.name == "x") {
-          ball_pos.x = p.value.double_value;
-        }
-        else if (p.name == "y") {
-          ball_pos.y = p.value.double_value;
-        }
-      }
+  ball_subscriber = node->create_subscription<Float64>(
+    ball_topic(), 10, [this](const std::shared_ptr<Float64> message) {
+      ball_pos = message->data;
+      std::cout << "BALL_POS: " << ball_pos << std::endl;
     });
 }
 
@@ -120,7 +114,7 @@ bool ActionNode::start(const std::string & action_name)
         source_action = action_name;
       }
 
-      action_manager->start(source_action, action_name, pose, ball_pos.x, 100.0, 100.0, 100.0, 100.0, true); // TODO: Pass ball x to here
+      action_manager->start(source_action, action_name, pose, ball_pos, 100.0, 100.0, 100.0, 100.0, true); // TODO: Pass ball x to here
     }
     else {
       action_manager->start(action_name, pose);
