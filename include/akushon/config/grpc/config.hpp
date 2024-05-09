@@ -1,4 +1,4 @@
-// Copyright (c) 2021-2023 Ichiro ITS
+// Copyright (c) 2024 Ichiro ITS
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,39 +18,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__CONFIG__NODE__CONFIG_NODE_HPP_
-#define AKUSHON__CONFIG__NODE__CONFIG_NODE_HPP_
+#ifndef AKUSHON__CONFIG__GRPC__CONFIG_HPP_
+#define AKUSHON__CONFIG__GRPC__CONFIG_HPP_
 
 #include <memory>
-#include <string>
+#include <thread>
 
-#include "akushon/config/utils/config.hpp"
-#include "akushon/config/grpc/config.hpp"
-#include "akushon_interfaces/srv/save_actions.hpp"
-#include "akushon_interfaces/srv/get_actions.hpp"
+#include "akushon_interfaces/akushon.grpc.pb.h"
+#include "akushon_interfaces/akushon.pb.h"
+#include "grpcpp/grpcpp.h"
 #include "rclcpp/rclcpp.hpp"
+
+using akushon_interfaces::proto::Config;
 
 namespace akushon
 {
-
-class ConfigNode
+class ConfigGrpc
 {
 public:
-  using SaveActions = akushon_interfaces::srv::SaveActions;
-  using GetActions = akushon_interfaces::srv::GetActions;
+  explicit ConfigGrpc();
+  explicit ConfigGrpc(const std::string & path);
 
-  explicit ConfigNode(rclcpp::Node::SharedPtr node, const std::string & path);
+  ~ConfigGrpc();
+
+  void Run(uint16_t port, const std::string & path, rclcpp::Node::SharedPtr & node);
 
 private:
-  std::string get_node_prefix() const;
+  std::string path;
 
-  Config config_util;
-  ConfigGrpc config_grpc;
+  static inline std::unique_ptr<grpc::ServerCompletionQueue> cq_;
+  static inline std::unique_ptr<grpc::Server> server_;
+  std::shared_ptr<std::thread> thread_;
+  akushon_interfaces::proto::Config::AsyncService service_;
 
-  rclcpp::Service<SaveActions>::SharedPtr save_actions_service;
-  rclcpp::Service<GetActions>::SharedPtr get_actions_service;
+  std::thread async_server;
 };
 
 }  // namespace akushon
 
-#endif  // AKUSHON__CONFIG__NODE__CONFIG_NODE_HPP_
+#endif  // AKUSHON__CONFIG__GRPC__CONFIG_HPP_

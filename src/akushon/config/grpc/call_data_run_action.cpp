@@ -1,4 +1,4 @@
-// Copyright (c) 2021-2023 Ichiro ITS
+// Copyright (c) 2023 Ichiro ITS
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,39 +18,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__CONFIG__NODE__CONFIG_NODE_HPP_
-#define AKUSHON__CONFIG__NODE__CONFIG_NODE_HPP_
-
-#include <memory>
-#include <string>
-
+#include "akushon/config/grpc/call_data_run_action.hpp"
 #include "akushon/config/utils/config.hpp"
-#include "akushon/config/grpc/config.hpp"
-#include "akushon_interfaces/srv/save_actions.hpp"
-#include "akushon_interfaces/srv/get_actions.hpp"
 #include "rclcpp/rclcpp.hpp"
 
 namespace akushon
 {
-
-class ConfigNode
+CallDataRunAction::CallDataRunAction(
+  akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
+  const std::string& path, rclcpp::Node::SharedPtr& node)
+: CallData(service, cq, path), node_(node)
 {
-public:
-  using SaveActions = akushon_interfaces::srv::SaveActions;
-  using GetActions = akushon_interfaces::srv::GetActions;
+  run_action_publisher_ =
+    node_->create_publisher<akushon_interfaces::msg::RunAction>("/action/run_action", 10);
+  Proceed();
+}
 
-  explicit ConfigNode(rclcpp::Node::SharedPtr node, const std::string & path);
+void CallDataRunAction::AddNextToCompletionQueue()
+{
+  new CallDataRunAction(service_, cq_, path_, node_);
+}
 
-private:
-  std::string get_node_prefix() const;
+void CallDataRunAction::WaitForRequest()
+{
+  service_->RequestRunAction(&ctx_, &request_, &responder_, cq_, cq_, this);
+}
 
-  Config config_util;
-  ConfigGrpc config_grpc;
-
-  rclcpp::Service<SaveActions>::SharedPtr save_actions_service;
-  rclcpp::Service<GetActions>::SharedPtr get_actions_service;
-};
-
-}  // namespace akushon
-
-#endif  // AKUSHON__CONFIG__NODE__CONFIG_NODE_HPP_
+void CallDataRunAction::HandleRequest()
+{
+  akushon_interfaces::msg::RunAction run_action;
+  run_action.control_type = request_.control_type();
+  run_action.action_name = request_.action_name();
+  run_action.json = request_.json_action();
+  run_action_publisher_->publish(run_action);
+  RCLCPP_INFO(rclcpp::get_logger("PublishSetJoints"), "run action config has been published!");
+}
+} // namespace akushon
