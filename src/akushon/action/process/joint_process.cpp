@@ -63,7 +63,10 @@ void JointProcess::interpolate_time(double time)
   double passed_time = time - initial_time;
   double divider = passed_time / action_time;
 
-  time_is_reached |= (divider <= 0.0);
+  printf("passed_time: %1.f", passed_time);
+  printf("action_time: %1.f", action_time);
+
+  time_is_reached |= (divider >= 1.0);
 
   if (time_is_reached) {
       joint.set_position(target_position);
@@ -72,7 +75,7 @@ void JointProcess::interpolate_time(double time)
   } else {
       additional_position = (target_position - initial_position) * divider;
       additional_position = (fabs(additional_position) < 0.1) ? 0.0 : additional_position;
-      joint.set_position(joint.get_position() + additional_position);
+      joint.set_position(initial_position + additional_position);
   }
 }
 
