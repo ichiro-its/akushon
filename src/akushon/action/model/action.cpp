@@ -31,7 +31,7 @@ namespace akushon
 {
 
 Action::Action(const std::string & action_name)
-: name(action_name), poses({}), start_delay(0), stop_delay(0), next_action("")
+: name(action_name), poses({}), start_delay(0), stop_delay(0), time_based(false), next_action("")
 {
 }
 
@@ -103,6 +103,16 @@ void Action::set_next_action(const std::string & next_action)
 const std::string & Action::get_next_action() const
 {
   return next_action;
+}
+
+void Action::set_interpolation(bool time_based)
+{
+  this->time_based = time_based;
+}
+
+bool Action::get_interpolation() const
+{
+  return time_based;
 }
 
 void Action::reset()

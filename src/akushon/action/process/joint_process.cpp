@@ -31,8 +31,15 @@ namespace akushon
 
 JointProcess::JointProcess(uint8_t joint_id, float position)
 : joint(tachimawari::joint::Joint(joint_id, position)), initial_position(position),
-  target_position(position), additional_position(0.0)
+  target_position(position), additional_position(0.0), initial_time(0.0), action_time(0.0)
 {
+}
+
+void JointProcess::set_target_position_time(float target_position, double time, float action_time)
+{
+  this->target_position = target_position;
+  this->action_time = action_time;
+  this->initial_time = time;
 }
 
 void JointProcess::set_target_position(float target_position, float speed)
@@ -48,6 +55,25 @@ void JointProcess::set_target_position(float target_position, float speed)
 void JointProcess::set_initial_position(float initial_position)
 {
   this->initial_position = initial_position;
+}
+
+void JointProcess::interpolate_time(double time)
+{
+  bool time_is_reached = false;
+  double passed_time = time - initial_time;
+  double divider = passed_time / action_time;
+
+  time_is_reached |= (divider <= 0.0);
+
+  if (time_is_reached) {
+      joint.set_position(target_position);
+      additional_position = 0.0;
+      initial_position = target_position;
+  } else {
+      additional_position = (target_position - initial_position) * divider;
+      additional_position = (fabs(additional_position) < 0.1) ? 0.0 : additional_position;
+      joint.set_position(joint.get_position() + additional_position);
+  }
 }
 
 void JointProcess::interpolate()

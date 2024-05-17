@@ -51,7 +51,7 @@ public:
   void start(std::string action_name, const Pose & initial_pose);
   void start(const Action & action, const Pose & initial_pose);
   void brake();
-  void process(int time);
+  void process(double time);
 
   bool is_playing() const;
 

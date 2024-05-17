@@ -45,7 +45,7 @@ public:
 
   explicit Interpolator(const std::vector<Action> & actions, const Pose & initial_pose);
 
-  void process(int time);
+  void process(double time);
   bool is_finished() const;
 
   std::vector<tachimawari::joint::Joint> get_joints() const;
@@ -55,7 +55,7 @@ private:
   const Pose & get_current_pose() const;
 
   bool check_for_next();
-  void next_pose();
+  void next_pose(double time);
 
   void change_state(int state);
 
