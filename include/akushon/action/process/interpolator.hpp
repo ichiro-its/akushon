@@ -64,9 +64,9 @@ private:
   int state;
   bool init_state;
 
-  int start_stop_time;
+  double start_stop_time;
   bool init_pause;
-  int pause_time;
+  double pause_time;
 
   int current_action_index;
   int current_pose_index;
