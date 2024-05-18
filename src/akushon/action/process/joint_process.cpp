@@ -63,9 +63,6 @@ void JointProcess::interpolate_time(double time)
   double passed_time = time - initial_time;
   double divider = passed_time / action_time;
 
-  printf("passed_time: %1.f", passed_time);
-  printf("action_time: %1.f", action_time);
-
   time_is_reached |= (divider >= 1.0);
 
   if (time_is_reached) {
@@ -74,7 +71,6 @@ void JointProcess::interpolate_time(double time)
       initial_position = target_position;
   } else {
       additional_position = (target_position - initial_position) * divider;
-      additional_position = (fabs(additional_position) < 0.1) ? 0.0 : additional_position;
       joint.set_position(initial_position + additional_position);
   }
 }
@@ -98,7 +94,7 @@ void JointProcess::interpolate()
 
 bool JointProcess::is_finished() const
 {
-  return (initial_position == target_position) || (additional_position == 0.0);
+  return (initial_position == target_position);
 }
 
 JointProcess::operator tachimawari::joint::Joint() const
