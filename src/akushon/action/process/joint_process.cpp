@@ -31,18 +31,17 @@ namespace akushon
 
 JointProcess::JointProcess(uint8_t joint_id, float position)
 : joint(tachimawari::joint::Joint(joint_id, position)), initial_position(position),
-  target_position(position), additional_position(0.0)
+  target_position(position), additional_position(0.0), filtered_speed(0.0), speed(0.0),
+  section(PRE_SECTION)
 {
 }
 
 void JointProcess::set_target_position(float target_position, float speed)
 {
-  float filtered_speed = (speed > 1.0) ? 1.0 : speed;
+  filtered_speed = (speed > 1.0) ? 1.0 : speed;
   filtered_speed = (filtered_speed < 0.0) ? 0.0 : filtered_speed;
 
   this->target_position = target_position;
-  additional_position = (this->target_position - initial_position) * filtered_speed;
-  additional_position = (fabs(additional_position) < 0.1) ? 0.0 : additional_position;
 }
 
 void JointProcess::set_initial_position(float initial_position)
@@ -52,7 +51,33 @@ void JointProcess::set_initial_position(float initial_position)
 
 void JointProcess::interpolate()
 {
+  float displacement = target_position - initial_position;
   bool target_position_is_reached = false;
+  switch(section) {
+    case PRE_SECTION:
+      speed = keisan::sinusoidalmap(joint.get_position(), initial_position, initial_position + displacement * 0.1, 0.01, filtered_speed);
+      if (std::abs(initial_position - joint.get_position()) >= std::abs(displacement * 0.1)) {
+        section = MAIN_SECTION;
+      }
+      break;
+    case MAIN_SECTION:
+      speed = filtered_speed;
+      if (std::abs(initial_position - joint.get_position()) >= std::abs(displacement * 0.9)) {
+        section = POST_SECTION;
+      }
+      break;
+    case POST_SECTION:
+      speed = keisan::sinusoidalmap(joint.get_position(), initial_position + displacement * 0.9, target_position, filtered_speed, 0.01);
+      if (std::abs(initial_position - joint.get_position()) >= std::abs(displacement)) {
+        section = PRE_SECTION;
+      }
+      break;
+    default:
+      break;
+  }
+
+  additional_position = displacement * speed;
+  
   target_position_is_reached |= (additional_position >= 0 &&
     (joint.get_position() + additional_position >= target_position));
   target_position_is_reached |= (additional_position <= 0 &&

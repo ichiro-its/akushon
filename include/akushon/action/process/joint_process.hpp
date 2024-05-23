@@ -44,11 +44,21 @@ public:
   operator tachimawari::joint::Joint() const;
 
 private:
+  enum SECTION {
+    PRE_SECTION,
+    MAIN_SECTION,
+    POST_SECTION
+  };
+
+  SECTION section;
+
   tachimawari::joint::Joint joint;
 
   float target_position;
   float initial_position;
   float additional_position;
+  float filtered_speed;
+  float speed;
 };
 
 }  // namespace akushon
