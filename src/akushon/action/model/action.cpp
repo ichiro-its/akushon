@@ -105,16 +105,6 @@ const std::string & Action::get_next_action() const
   return next_action;
 }
 
-void Action::set_interpolation(bool time_based)
-{
-  this->time_based = time_based;
-}
-
-bool Action::get_interpolation() const
-{
-  return time_based;
-}
-
 void Action::reset()
 {
   poses.clear();

@@ -55,11 +55,9 @@ public:
   void set_next_action(const std::string & next_action);
   const std::string & get_next_action() const;
 
-  void set_interpolation(bool time_based);
-  bool get_interpolation() const;
-
   void reset();
 
+  bool time_based;
 private:
   std::string name;
 
@@ -67,7 +65,6 @@ private:
 
   int stop_delay;
   int start_delay;
-  bool time_based;
 
   std::string next_action;
 };

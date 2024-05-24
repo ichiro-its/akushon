@@ -59,13 +59,10 @@ void JointProcess::set_initial_position(float initial_position)
 
 void JointProcess::interpolate_time(double time)
 {
-  bool time_is_reached = false;
   double passed_time = time - initial_time;
   double divider = passed_time / action_time;
 
-  time_is_reached |= (divider >= 1.0);
-
-  if (time_is_reached) {
+  if (divider >= 1.0) {
       joint.set_position(target_position);
       additional_position = 0.0;
       initial_position = target_position;

@@ -106,7 +106,7 @@ void Interpolator::process(double time)
   }
 
   for (const auto & [id, joint] : joint_processes) {
-    if (get_current_action().get_interpolation())
+    if (get_current_action().time_based)
       joint_processes.at(id).interpolate_time(time);
     else
       joint_processes.at(id).interpolate();
@@ -123,8 +123,8 @@ void Interpolator::next_pose(double time)
   auto current_pose = get_current_pose();
   for (const auto & joint : current_pose.get_joints()) {
     if (joint_processes.find(joint.get_id()) != joint_processes.end()) {
-      if(get_current_action().get_interpolation())
-        joint_processes.at(joint.get_id()).set_target_position_time(joint.get_position(), time, current_pose.get_time());
+      if(get_current_action().time_based)
+        joint_processes.at(joint.get_id()).set_target_position_time(joint.get_position(), time, current_pose.action_time);
       else
         joint_processes.at(joint.get_id()).set_target_position(joint.get_position(), current_pose.get_speed());
     }

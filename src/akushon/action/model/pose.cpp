@@ -33,16 +33,6 @@ Pose::Pose(const std::string & pose_name)
 {
 }
 
-void Pose::set_time(float action_time)
-{
-  this->action_time = action_time;
-}
-
-float Pose::get_time() const
-{
-  return action_time;
-}
-
 void Pose::set_speed(float speed)
 {
   this->speed = speed;

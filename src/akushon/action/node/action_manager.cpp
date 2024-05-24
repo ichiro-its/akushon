@@ -115,7 +115,7 @@ Action ActionManager::load_action(
 
           pose.set_pause(raw_pose["pause"]);
           pose.set_speed(raw_pose["speed"]);
-          pose.set_time(raw_pose["time"]);
+          pose.action_time = raw_pose["time"];
           pose.set_joints(joints);
           action.add_pose(pose);
         }
@@ -127,7 +127,7 @@ Action ActionManager::load_action(
     } else if (key == "next") {
       action.set_next_action(val);
     } else if (key == "time_based") {
-      action.set_interpolation(val);
+      action.time_based = val;
     }
   }
 

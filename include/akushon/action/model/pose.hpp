@@ -34,9 +34,6 @@ class Pose
 public:
   explicit Pose(const std::string & pose_name);
 
-  void set_time(float action_time);
-  float get_time() const;
-
   void set_speed(float speed);
   float get_speed() const;
 
@@ -51,10 +48,10 @@ public:
 
   void set_target_position(const Pose & target_pose);
 
+  float action_time;
 private:
   float speed;
   float pause;
-  float action_time;
 
   std::string name;
 
