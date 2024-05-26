@@ -21,7 +21,6 @@ find_package(rclcpp_action REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(tachimawari REQUIRED)
 find_package(tachimawari_interfaces REQUIRED)
-
 find_package(Protobuf CONFIG REQUIRED)
 message(STATUS "Using protobuf ${Protobuf_VERSION}")
 
@@ -30,6 +29,10 @@ message(STATUS "Using protobuf ${Protobuf_VERSION}")
 find_package(gRPC CONFIG REQUIRED)
 message(STATUS "Using gRPC ${gRPC_VERSION}")
 
+# moveit
+find_package(moveit_ros_planning_interface REQUIRED)
+find_package(sensor_msgs REQUIRED)
+
 add_library(${PROJECT_NAME} SHARED
   "src/${PROJECT_NAME}/action/model/action_name.cpp"
   "src/${PROJECT_NAME}/action/model/action.cpp"  
@@ -37,6 +40,7 @@ add_library(${PROJECT_NAME} SHARED
   "src/${PROJECT_NAME}/action/node/action_manager.cpp"
   "src/${PROJECT_NAME}/action/node/action_node.cpp"
   "src/${PROJECT_NAME}/action/process/interpolator.cpp"
+  "src/${PROJECT_NAME}/action/process/moveit.cpp"
   "src/${PROJECT_NAME}/action/process/joint_process.cpp"
   "src/${PROJECT_NAME}/config/node/config_node.cpp"
   "src/${PROJECT_NAME}/config/utils/config.cpp"
@@ -59,6 +63,7 @@ add_library(${PROJECT_NAME}_exported SHARED
 "src/${PROJECT_NAME}/action/node/action_node.cpp"
 "src/${PROJECT_NAME}/action/process/interpolator.cpp"
 "src/${PROJECT_NAME}/action/process/joint_process.cpp"
+"src/${PROJECT_NAME}/action/process/moveit.cpp"
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC  
@@ -78,7 +83,9 @@ ament_target_dependencies(${PROJECT_NAME}
   std_msgs
   tachimawari
   tachimawari_interfaces
-  gRPC)
+  gRPC
+  sensor_msgs
+  moveit_ros_planning_interface)
 
   ament_target_dependencies(${PROJECT_NAME}_exported
   ament_index_cpp
@@ -87,7 +94,9 @@ ament_target_dependencies(${PROJECT_NAME}
   rclcpp_action
   std_msgs
   tachimawari
-  tachimawari_interfaces)
+  tachimawari_interfaces
+  sensor_msgs
+  moveit_ros_planning_interface)
 
 target_link_libraries(${PROJECT_NAME}
   gRPC::grpc++_reflection

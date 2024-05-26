@@ -33,6 +33,7 @@
 #include "std_msgs/msg/empty.hpp"
 #include "tachimawari_interfaces/msg/current_joints.hpp"
 #include "tachimawari_interfaces/msg/set_joints.hpp"
+#include <sensor_msgs/msg/joint_state.hpp>
 
 namespace akushon
 {
@@ -45,6 +46,7 @@ public:
   using RunAction = akushon_interfaces::msg::RunAction;
   using SetJoints = tachimawari_interfaces::msg::SetJoints;
   using Status = akushon_interfaces::msg::Status;
+  using JointState = sensor_msgs::msg::JointState;
 
   enum { READY, PLAYING };
 
@@ -73,6 +75,7 @@ private:
   std::shared_ptr<ActionManager> action_manager;
 
   rclcpp::Subscription<CurrentJoints>::SharedPtr current_joints_subscriber;
+  rclcpp::Subscription<JointState>::SharedPtr joint_state_subscriber;
   rclcpp::Publisher<SetJoints>::SharedPtr set_joints_publisher;
 
   rclcpp::Subscription<RunAction>::SharedPtr run_action_subscriber;

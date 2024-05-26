@@ -25,10 +25,12 @@
 #include <map>
 #include <vector>
 #include <memory>
+#include <moveit/move_group_interface/move_group_interface.h>
 
 #include "akushon/action/model/action.hpp"
 #include "akushon/action/model/pose.hpp"
 #include "akushon/action/process/interpolator.hpp"
+#include "akushon/action/process/moveit.hpp"
 #include "nlohmann/json.hpp"
 #include "tachimawari/joint/model/joint.hpp"
 
@@ -57,11 +59,17 @@ public:
 
   std::vector<tachimawari::joint::Joint> get_joints() const;
 
+  void load_move_group_interface(moveit::planning_interface::MoveGroupInterfacePtr move_group_interface);
+
 private:
   std::map<std::string, Action> actions;
 
   std::shared_ptr<Interpolator> interpolator;
+  std::shared_ptr<Moveit> moveit;
   bool is_running;
+  bool is_using_speed_based;
+
+  moveit::planning_interface::MoveGroupInterfacePtr move_group_interface;
 };
 
 }  // namespace akushon

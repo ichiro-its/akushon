@@ -65,6 +65,11 @@ Action ActionManager::get_action(std::string action_name) const
   return Action("");
 }
 
+void ActionManager::load_move_group_interface(moveit::planning_interface::MoveGroupInterfacePtr move_group_interface)
+{
+  move_group_interface = move_group_interface;
+}
+
 void ActionManager::load_config(const std::string & path)
 {
   for (const auto & entry : std::filesystem::directory_iterator(path)) {
@@ -97,6 +102,14 @@ Action ActionManager::load_action(
   Action action = Action(action_name);
 
   action.set_name(action_data["name"]);
+
+  if (action_data.find("type") != action_data.end()) {
+    if (action_data["type"] == "speed_based") {
+      action.set_action_type(Action::SPEED_BASED);
+    } else {
+      action.set_action_type(Action::TIME_BASED);
+    }
+  }
 
   for (const auto & [key, val] : action_data.items()) {
     if (key.find("poses") != std::string::npos) {
@@ -154,6 +167,7 @@ void ActionManager::start(std::string action_name, const Pose & initial_pose)
   }
 
   interpolator = std::make_shared<Interpolator>(target_actions, initial_pose);
+  moveit = std::make_shared<Moveit>(target_actions, initial_pose, move_group_interface);
   is_running = true;
 }
 
@@ -163,15 +177,22 @@ void ActionManager::start(const Action & action, const Pose & initial_pose)
 
   interpolator = std::make_shared<Interpolator>(target_actions, initial_pose);
   is_running = true;
+  is_using_speed_based = action.get_action_type() == Action::SPEED_BASED;
 }
 
 void ActionManager::process(int time)
 {
-  if (interpolator) {
+  if (interpolator && !is_using_speed_based) {
     interpolator->process(time);
 
     if (interpolator->is_finished()) {
       interpolator = nullptr;
+    }
+  } else if (moveit && is_using_speed_based) {
+    moveit->process(time);
+
+    if (moveit->is_finished()) {
+      moveit = nullptr;
     }
   } else {
     is_running = false;
@@ -181,6 +202,7 @@ void ActionManager::process(int time)
 void ActionManager::brake()
 {
   interpolator = nullptr;
+  moveit = nullptr;
 }
 
 bool ActionManager::is_playing() const

@@ -18,8 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include <memory>
+#include <moveit/move_group_interface/move_group_interface.h>
+
 #include <iostream>
+#include <memory>
 #include <string>
 
 #include "akushon/action/node/action_manager.hpp"
@@ -35,14 +37,19 @@ int main(int argc, char * argv[])
     return 0;
   }
 
-  auto node = std::make_shared<rclcpp::Node>("akushon_node");
+  auto node = std::make_shared<rclcpp::Node>(
+    "akushon_node", rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true));
   auto akushon_node = std::make_shared<akushon::AkushonNode>(node);
+
+  using moveit::planning_interface::MoveGroupInterface;
+  moveit::planning_interface::MoveGroupInterfacePtr move_group_interface(new MoveGroupInterface(node, "robot"));
 
   auto action_manager = std::make_shared<akushon::ActionManager>();
 
   std::string path = argv[1];
 
   action_manager->load_config(path);
+  action_manager->load_move_group_interface(move_group_interface);
 
   akushon_node->run_action_manager(action_manager);
   akushon_node->run_config_service(path);

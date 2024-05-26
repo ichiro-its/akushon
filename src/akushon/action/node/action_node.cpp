@@ -22,6 +22,7 @@
 
 #include <iomanip>
 #include <memory>
+#include <sensor_msgs/msg/joint_state.hpp>
 #include <string>
 #include <thread>
 #include <vector>
@@ -37,13 +38,13 @@
 namespace akushon
 {
 
-std::string ActionNode::get_node_prefix() {return "action";}
+std::string ActionNode::get_node_prefix() { return "action"; }
 
-std::string ActionNode::run_action_topic() {return get_node_prefix() + "/run_action";}
+std::string ActionNode::run_action_topic() { return get_node_prefix() + "/run_action"; }
 
-std::string ActionNode::brake_action_topic() {return get_node_prefix() + "/brake_action";}
+std::string ActionNode::brake_action_topic() { return get_node_prefix() + "/brake_action"; }
 
-std::string ActionNode::status_topic() {return get_node_prefix() + "/status";}
+std::string ActionNode::status_topic() { return get_node_prefix() + "/status"; }
 
 ActionNode::ActionNode(
   rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> & action_manager)
@@ -69,6 +70,16 @@ ActionNode::ActionNode(
     set_joints_publisher = node->create_publisher<SetJoints>(JointNode::set_joints_topic(), 10);
   }
 
+  joint_state_subscriber = node->create_subscription<sensor_msgs::msg::JointState>(
+    "joint_states", 10, [this](const sensor_msgs::msg::JointState::SharedPtr message) {
+      {
+        for (size_t i = 0; i < message->name.size(); i++)
+          {
+            
+          }
+      }
+    });
+
   status_publisher = node->create_publisher<Status>(status_topic(), 10);
 
   run_action_subscriber = node->create_subscription<RunAction>(
@@ -87,7 +98,7 @@ ActionNode::ActionNode(
 
   brake_action_subscriber = node->create_subscription<Empty>(
     brake_action_topic(), 10,
-    [this](std::shared_ptr<Empty> message) {this->action_manager->brake();});
+    [this](std::shared_ptr<Empty> message) { this->action_manager->brake(); });
 }
 
 bool ActionNode::start(const std::string & action_name)

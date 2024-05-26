@@ -1,4 +1,4 @@
-// Copyright (c) 2021-2023 Ichiro ITS
+// Copyright (c) 2021-2024 Ichiro ITS
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,58 +18,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__ACTION__MODEL__ACTION_HPP_
-#define AKUSHON__ACTION__MODEL__ACTION_HPP_
+#ifndef AKUSHON__ACTION__PROCESS__MOVEIT_HPP_
+#define AKUSHON__ACTION__PROCESS__MOVEIT_HPP_
 
-#include <memory>
+#include <map>
 #include <string>
 #include <vector>
 
+#include <moveit/move_group_interface/move_group_interface.h>
+#include "akushon/action/model/action.hpp"
 #include "akushon/action/model/pose.hpp"
 
 namespace akushon
 {
-
-class Action
+class Moveit
 {
 public:
-  explicit Action(const std::string & action_name);
+  explicit Moveit(
+    const std::vector<Action> & actions, const Pose & initial_pose,
+    moveit::planning_interface::MoveGroupInterfacePtr move_group_interface);
 
-  void add_pose(const Pose & pose);
-  void set_pose(int index, const Pose & pose);
-  void delete_pose(int index);
-  const Pose & get_pose(int index) const;
-  const std::vector<Pose> & get_poses() const;
+  void process(double time);
 
-  void set_name(const std::string & action_name);
-  const std::string & get_name() const;
+  bool is_finished();
 
-  int get_pose_count() const;
-
-  void set_start_delay(int start_delay);
-  int get_start_delay() const;
-
-  void set_stop_delay(int stop_delay);
-  int get_stop_delay() const;
-
-  void set_next_action(const std::string & next_action);
-  const std::string & get_next_action() const;
-
-  void reset();
-
-  bool time_based;
-  
 private:
-  std::string name;
+  std::vector<Action> actions;
 
-  std::vector<Pose> poses;
+  moveit::planning_interface::MoveGroupInterfacePtr move_group_interface;
+  Pose initial_pose;
 
-  int stop_delay;
-  int start_delay;
-
-  std::string next_action;
+  bool finished;
 };
 
 }  // namespace akushon
 
-#endif  // AKUSHON__ACTION__MODEL__ACTION_HPP_
+#endif  // AKUSHON__ACTION__PROCESS__MOVEIT_HPP_
