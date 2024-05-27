@@ -116,7 +116,7 @@ bool ActionNode::start(const Action & action)
   return true;
 }
 
-bool ActionNode::update(int time)
+bool ActionNode::update(double time)
 {
   if (action_manager->is_playing()) {
     action_manager->process(time);

@@ -57,6 +57,7 @@ public:
 
   void reset();
 
+  bool time_based;
 private:
   std::string name;
 

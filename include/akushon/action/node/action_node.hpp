@@ -61,7 +61,7 @@ public:
   bool start(const std::string & action_name);
   bool start(const Action & action);
 
-  bool update(int time);
+  bool update(double time);
 
 private:
   void publish_joints();

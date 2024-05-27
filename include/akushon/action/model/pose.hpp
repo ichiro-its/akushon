@@ -48,6 +48,7 @@ public:
 
   void set_target_position(const Pose & target_pose);
 
+  float action_time;
 private:
   float speed;
   float pause;
