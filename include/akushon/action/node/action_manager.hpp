@@ -52,7 +52,7 @@ public:
   void start(std::string action_name, std::string target_action_name, const Pose & initial_pose, float ball_x, float right_map_x_min_, float right_map_x_max_, float left_map_x_min_, float left_map_x_max_, bool right);
   void start(const Action & action, const Pose & initial_pose);
   void brake();
-  void process(int time);
+  void process(double time);
 
   bool is_playing() const;
 

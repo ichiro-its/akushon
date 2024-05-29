@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "tachimawari/joint/model/joint.hpp"
+#include "rclcpp/rclcpp.hpp"
 
 namespace akushon
 {
@@ -35,9 +36,12 @@ public:
   explicit JointProcess(uint8_t joint_id, float position = 0.0);
 
   void set_target_position(float target_position, float speed = 1.0);
+  void set_target_position_time(float target_position, double time, float action_time = 1.0);
+
   void set_initial_position(float initial_position);
 
   void interpolate();
+  void interpolate_time(double time);
 
   bool is_finished() const;
 
@@ -49,6 +53,8 @@ private:
   float target_position;
   float initial_position;
   float additional_position;
+  float action_time;
+  float initial_time;
 };
 
 }  // namespace akushon

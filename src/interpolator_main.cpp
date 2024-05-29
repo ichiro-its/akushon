@@ -64,6 +64,7 @@ int main(int argc, char * argv[])
     }
     pose.set_pause(0.0);
     pose.set_speed(0.0);
+    pose.action_time = 0.0;
     pose.set_joints(joints);
   }
 
