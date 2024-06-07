@@ -41,7 +41,7 @@ namespace akushon
 {
 
 ActionManager::ActionManager()
-: actions({}), is_running(false)
+: actions({}), is_running(false), config_name("dynamic_kick.json")
 {
   interpolator = std::make_shared<Interpolator>(std::vector<Action>(), Pose(""));
 }
@@ -67,9 +67,25 @@ Action ActionManager::get_action(std::string action_name) const
 
 void ActionManager::load_config(const std::string & path)
 {
+  try {
+    std::ifstream file(path + config_name);
+    nlohmann::json data = nlohmann::json::parse(file);
+
+    set_config(data);
+
+    file.close();
+  } catch (nlohmann::json::parse_error & ex) {
+      std::cerr << "failed to load action: " << config_name << std::endl;
+      std::cerr << "parse error at byte " << ex.byte << std::endl;
+      throw ex;
+  }
+
   for (const auto & entry : std::filesystem::directory_iterator(path)) {
     std::string name = "";
     std::string file_name = entry.path();
+    if (file_name.find(config_name) != std::string::npos) {
+      continue;
+    }
     std::string extension_json = ".json";
     for (int i = path.length(); i < file_name.length() - extension_json.length(); i++) {
       name += file_name[i];
@@ -86,6 +102,25 @@ void ActionManager::load_config(const std::string & path)
       std::cerr << "failed to load action: " << name << std::endl;
       std::cerr << "parse error at byte " << ex.byte << std::endl;
       throw ex;
+    }
+  }
+}
+
+void ActionManager::set_config(const nlohmann::json & json)
+{
+  for (auto &[key, val] : json.items()) {
+    if (key == "dynamic kick") {
+      try {
+        val.at("right_map_x_min").get_to(right_map_x_min);
+        val.at("right_map_x_max").get_to(right_map_x_max);
+        val.at("left_map_x_min").get_to(left_map_x_min);
+        val.at("left_map_x_max").get_to(left_map_x_max);
+        val.at("using_dynamic_kick").get_to(using_dynamic_kick);
+      } catch (nlohmann::json::parse_error & ex) {
+        std::cerr << "error key: " << key << std::endl;
+        std::cerr << "parse error at byte " << ex.byte << std::endl;
+        throw ex;
+      }
     }
   }
 }

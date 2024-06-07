@@ -94,7 +94,6 @@ ActionNode::ActionNode(
   ball_subscriber = node->create_subscription<Float64>(
     ball_topic(), 10, [this](const std::shared_ptr<Float64> message) {
       ball_pos = message->data;
-      std::cout << "BALL_POS: " << ball_pos << std::endl;
     });
 }
 
@@ -107,6 +106,7 @@ bool ActionNode::start(const std::string & action_name)
     {
       std::size_t pos = action_name.find("_WIDE");
       std::string source_action;
+      bool right = false;
     
       if (pos != std::string::npos) {
         source_action = action_name.substr(0, pos);
@@ -114,7 +114,15 @@ bool ActionNode::start(const std::string & action_name)
         source_action = action_name;
       }
 
-      action_manager->start(source_action, action_name, pose, ball_pos, 100.0, 100.0, 100.0, 100.0, true); // TODO: Pass ball x to here
+      if (source_action == "RIGHT_KICK") {
+        right = true;
+      }
+      // Print source_action, action_name, and right
+      RCLCPP_INFO(rclcpp::get_logger("DEBUG"), "source_action: %s, action_name: %s, right: %s", source_action.c_str(), action_name.c_str(), right ? "true" : "false");
+      if (action_manager->using_dynamic_kick)
+        action_manager->start(source_action, action_name, pose, ball_pos, action_manager->right_map_x_min, action_manager->right_map_x_max, action_manager->left_map_x_min, action_manager->left_map_x_max, right);
+      else
+        action_manager->start(source_action, pose);  
     }
     else {
       action_manager->start(action_name, pose);

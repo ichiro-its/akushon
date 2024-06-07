@@ -45,6 +45,7 @@ public:
   Action get_action(std::string action_name) const;
 
   void load_config(const std::string & path);
+  void set_config(const nlohmann::json & json);
 
   Action load_action(const nlohmann::json & action_data, const std::string & action_name) const;
 
@@ -58,11 +59,17 @@ public:
 
   std::vector<tachimawari::joint::Joint> get_joints() const;
 
+  bool using_dynamic_kick;
+  double right_map_x_min;
+  double right_map_x_max;
+  double left_map_x_min;
+  double left_map_x_max;
 private:
   std::map<std::string, Action> actions;
 
   std::shared_ptr<Interpolator> interpolator;
   bool is_running;
+  std::string config_name;
 };
 
 }  // namespace akushon
