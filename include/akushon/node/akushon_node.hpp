@@ -42,7 +42,7 @@ public:
 
   void run_action_manager(std::shared_ptr<ActionManager> action_manager);
 
-  void run_config_service(const std::string & path);
+  void run_config_service(const std::string & path, const std::shared_ptr<ActionManager> & action_manager);
 
 private:
   double start_time;
