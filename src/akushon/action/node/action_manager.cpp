@@ -41,7 +41,7 @@ namespace akushon
 {
 
 ActionManager::ActionManager()
-: actions({}), is_running(false), config_name("dynamic_kick.json")
+: actions({}), is_running(false), config_name("dynamic_kick.json"), action_dir("actions/")
 {
   interpolator = std::make_shared<Interpolator>(std::vector<Action>(), Pose(""));
 }
@@ -80,14 +80,11 @@ void ActionManager::load_config(const std::string & path)
       throw ex;
   }
 
-  for (const auto & entry : std::filesystem::directory_iterator(path)) {
+  for (const auto & entry : std::filesystem::directory_iterator(path + action_dir)) {
     std::string name = "";
     std::string file_name = entry.path();
-    if (file_name.find(config_name) != std::string::npos) {
-      continue;
-    }
     std::string extension_json = ".json";
-    for (int i = path.length(); i < file_name.length() - extension_json.length(); i++) {
+    for (int i = (path + action_dir).length(); i < file_name.length() - extension_json.length(); i++) {
       name += file_name[i];
     }
 
@@ -109,7 +106,7 @@ void ActionManager::load_config(const std::string & path)
 void ActionManager::set_config(const nlohmann::json & json)
 {
   for (auto &[key, val] : json.items()) {
-    if (key == "dynamic kick") {
+    if (key == "dynamic_kick") {
       try {
         val.at("right_map_x_min").get_to(right_map_x_min);
         val.at("right_map_x_max").get_to(right_map_x_max);
@@ -206,14 +203,16 @@ void ActionManager::start(std::string action_name, std::string target_action_nam
     for (int pose_index = 0; pose_index < action.get_pose_count(); pose_index++) {
       if (right)
       {
+        RCLCPP_INFO(rclcpp::get_logger("DEBUG ACTION MANAGER"), "CEK1");
         action.map_action(action, target_action, pose_index, ball_x, right_map_x_min_, right_map_x_max_);
       } else {
+        RCLCPP_INFO(rclcpp::get_logger("DEBUG ACTION MANAGER"), "CEK1");
         action.map_action(action, target_action, pose_index, ball_x, left_map_x_min_, left_map_x_max_);
       }
     }
 
     target_actions.push_back(action);
-
+    RCLCPP_INFO(rclcpp::get_logger("DEBUG ACTION MANAGER"), "CEK");
     if (action.get_next_action() != "") {
       std::string next_action_name = action.get_next_action();
 

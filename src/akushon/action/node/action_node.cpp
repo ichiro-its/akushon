@@ -104,7 +104,7 @@ bool ActionNode::start(const std::string & action_name)
   if (!pose.get_joints().empty()) {
     if (action_name == akushon::ActionName::LEFT_KICK_WIDE || action_name == akushon::ActionName::RIGHT_KICK_WIDE)
     {
-      std::size_t pos = action_name.find("_WIDE");
+      std::size_t pos = action_name.find("_wide");
       std::string source_action;
       bool right = false;
     
@@ -114,11 +114,9 @@ bool ActionNode::start(const std::string & action_name)
         source_action = action_name;
       }
 
-      if (source_action == "RIGHT_KICK") {
+      if (source_action == "right_kick") {
         right = true;
       }
-      // Print source_action, action_name, and right
-      RCLCPP_INFO(rclcpp::get_logger("DEBUG"), "source_action: %s, action_name: %s, right: %s", source_action.c_str(), action_name.c_str(), right ? "true" : "false");
       if (action_manager->using_dynamic_kick)
         action_manager->start(source_action, action_name, pose, ball_pos, action_manager->right_map_x_min, action_manager->right_map_x_max, action_manager->left_map_x_min, action_manager->left_map_x_max, right);
       else

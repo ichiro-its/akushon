@@ -64,12 +64,14 @@ public:
   double right_map_x_max;
   double left_map_x_min;
   double left_map_x_max;
+
 private:
   std::map<std::string, Action> actions;
 
   std::shared_ptr<Interpolator> interpolator;
   bool is_running;
   std::string config_name;
+  std::string action_dir;
 };
 
 }  // namespace akushon

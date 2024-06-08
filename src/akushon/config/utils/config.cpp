@@ -31,7 +31,7 @@ namespace akushon
 {
 
 Config::Config(const std::string & path)
-: path(path)
+: path(path), action_dir("actions/")
 {
 }
 
@@ -39,7 +39,7 @@ std::string Config::get_config() const
 {
   nlohmann::json actions_list;
   std::cout << "[ ACTIONS LIST ] : " << std::endl;
-  for (const auto & action_file : std::filesystem::directory_iterator(path)) {
+  for (const auto & action_file : std::filesystem::directory_iterator(path + action_dir)) {
     std::string file_name = action_file.path();
 
     try {
@@ -63,18 +63,35 @@ std::string Config::get_config() const
 
 void Config::save_config(const std::string & actions_data)
 {
-  nlohmann::json actions_list = nlohmann::json::parse(actions_data);
-  for (const auto & [key, val] : actions_list.items()) {
-    std::locale loc;
-    std::string action_name = key;
-    std::replace(action_name.begin(), action_name.end(), ' ', '_');
-    std::string file_name = path + action_name + ".json";
-    std::ofstream file;
+  try {
+    clear_directory(path + action_dir);
+    nlohmann::json actions_list = nlohmann::json::parse(actions_data);
+    for (const auto & [key, val] : actions_list.items()) {
+      std::locale loc;
+      std::string action_name = key;
+      std::replace(action_name.begin(), action_name.end(), ' ', '_');
+      std::string file_name = path + action_dir + action_name + ".json";
+      std::ofstream file;
 
-    file.open(file_name);
-    file << val.dump(2);
-    file.close();
+      file.open(file_name);
+      file << val.dump(2);
+      file.close();
+    }
+  } catch (const std::exception &e) {
+    std::cerr << "Error: " << e.what() << std::endl;
   }
 }
 
+
+void Config::clear_directory(const std::string& directory_path) {
+  try {
+    for (const auto& entry : std::filesystem::directory_iterator(directory_path)) {
+      if (entry.is_regular_file() && entry.path().extension() == ".json") {
+        std::filesystem::remove(entry.path());
+      }
+    }
+  } catch (const std::exception &e) {
+    std::cerr << "Error clearing directory: " << e.what() << std::endl;
+  }
+}
 }  // namespace akushon
