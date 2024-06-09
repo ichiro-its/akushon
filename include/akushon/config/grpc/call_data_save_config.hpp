@@ -21,6 +21,7 @@
 #ifndef AKUSHON__CONFIG__GRPC__SAVE_CONFIG_HPP_
 #define AKUSHON__CONFIG__GRPC__SAVE_CONFIG_HPP_
 
+#include "akushon/action/node/action_manager.hpp"
 #include "akushon/config/grpc/call_data.hpp"
 
 namespace akushon
@@ -31,12 +32,13 @@ class CallDataSaveConfig
 public:
   CallDataSaveConfig(
     akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
-    const std::string& path);
+    const std::string& path, const std::shared_ptr<ActionManager>& action_manager);
 
 protected:
   void AddNextToCompletionQueue() override;
   void WaitForRequest() override;
   void HandleRequest() override;
+  std::shared_ptr<ActionManager> action_manager_;
 };
 }  // namespace akushon
 

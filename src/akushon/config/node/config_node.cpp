@@ -31,7 +31,8 @@
 namespace akushon
 {
 
-ConfigNode::ConfigNode(rclcpp::Node::SharedPtr node, const std::string & path)
+ConfigNode::ConfigNode(rclcpp::Node::SharedPtr node, const std::string & path,
+  const std::shared_ptr<ActionManager> & action_manager)
 : config_util(path)
 {
   get_actions_service = node->create_service<GetActions>(
@@ -50,7 +51,7 @@ ConfigNode::ConfigNode(rclcpp::Node::SharedPtr node, const std::string & path)
       response->status = "SAVED";
     }
   );
-  config_grpc.Run(5060, path, node);
+  config_grpc.Run(5060, path, node, action_manager);
   RCLCPP_INFO(rclcpp::get_logger("GrpcServers"), "grpc running");
 }
 

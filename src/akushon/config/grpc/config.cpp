@@ -48,7 +48,8 @@ ConfigGrpc::~ConfigGrpc()
   cq_->Shutdown();
 }
 
-void ConfigGrpc::Run(uint16_t port, const std::string& path, rclcpp::Node::SharedPtr& node)
+void ConfigGrpc::Run(uint16_t port, const std::string& path, rclcpp::Node::SharedPtr& node,
+  const std::shared_ptr<ActionManager>& action_manager)
 {
   std::string server_address = absl::StrFormat("0.0.0.0:%d", port);
 
@@ -65,9 +66,9 @@ void ConfigGrpc::Run(uint16_t port, const std::string& path, rclcpp::Node::Share
     cq_->Shutdown();
     exit(signum);
   });
-  async_server = std::thread([path, this, &node]() {
+  async_server = std::thread([path, this, &node, &action_manager]() {
     new CallDataGetConfig(&service_, cq_.get(), path);
-    new CallDataSaveConfig(&service_, cq_.get(), path);
+    new CallDataSaveConfig(&service_, cq_.get(), path, action_manager);
     new CallDataPublishSetJoints(&service_, cq_.get(), path, node);
     new CallDataPublishSetTorques(&service_, cq_.get(), path, node);
     new CallDataRunAction(&service_, cq_.get(), path, node);
