@@ -28,6 +28,7 @@
 #include "akushon/config/utils/config.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "akushon/config/grpc/call_data_get_config.hpp"
+#include "akushon/config/grpc/call_data_load_config.hpp"
 #include "akushon/config/grpc/call_data_save_config.hpp"
 #include "akushon/config/grpc/call_data_publish_set_joints.hpp"
 #include "akushon/config/grpc/call_data_publish_set_torques.hpp"
@@ -73,6 +74,7 @@ void ConfigGrpc::Run(uint16_t port, const std::string& path, rclcpp::Node::Share
     new CallDataPublishSetTorques(&service_, cq_.get(), path, node);
     new CallDataRunAction(&service_, cq_.get(), path, node);
     new CallDataSubscribeCurrentJoints(&service_, cq_.get(), path, node);
+    new CallDataLoadConfig(&service_, cq_.get(), path, action_manager);
     void * tag;  // uniquely identifies a request.
     bool ok = true;
     while (true) {
