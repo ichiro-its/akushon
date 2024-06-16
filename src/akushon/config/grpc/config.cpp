@@ -50,7 +50,7 @@ ConfigGrpc::~ConfigGrpc()
 }
 
 void ConfigGrpc::Run(
-  const std::string & path, rclcpp::Node::SharedPtr & node,
+  const std::string & path, const rclcpp::Node::SharedPtr & node,
   const std::shared_ptr<ActionManager> & action_manager)
 {
   Config config(path);

@@ -26,7 +26,7 @@ namespace akushon
 {
 CallDataRunAction::CallDataRunAction(
   akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
-  const std::string& path, rclcpp::Node::SharedPtr& node)
+  const std::string& path, const rclcpp::Node::SharedPtr& node)
 : CallData(service, cq, path), node_(node)
 {
   run_action_publisher_ =

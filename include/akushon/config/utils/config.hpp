@@ -22,8 +22,8 @@
 #define AKUSHON__CONFIG__UTILS__CONFIG_HPP_
 
 #include <fstream>
+#include <nlohmann/json.hpp>
 #include <string>
-#include "nlohmann/json.hpp"
 
 namespace akushon
 {

@@ -34,7 +34,7 @@ class CallDataSubscribeCurrentJoints
 public:
   CallDataSubscribeCurrentJoints(
     akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
-    const std::string& path, rclcpp::Node::SharedPtr& node);
+    const std::string& path, const rclcpp::Node::SharedPtr& node);
 
 protected:
   void AddNextToCompletionQueue() override;
