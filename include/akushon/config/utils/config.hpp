@@ -23,6 +23,7 @@
 
 #include <fstream>
 #include <string>
+#include "nlohmann/json.hpp"
 
 namespace akushon
 {
@@ -34,6 +35,8 @@ public:
 
   std::string get_config() const;
   void save_config(const std::string & actions_data);
+
+  nlohmann::json get_grpc_config() const;
 
 private:
   std::string path;
