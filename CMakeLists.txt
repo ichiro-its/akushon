@@ -16,6 +16,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(akushon_interfaces REQUIRED)
+find_package(jitsuyo REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(std_msgs REQUIRED)
@@ -74,6 +75,7 @@ $<INSTALL_INTERFACE:include>)
 ament_target_dependencies(${PROJECT_NAME}
   ament_index_cpp
   akushon_interfaces
+  jitsuyo
   rclcpp
   rclcpp_action
   std_msgs
@@ -84,6 +86,7 @@ ament_target_dependencies(${PROJECT_NAME}
   ament_target_dependencies(${PROJECT_NAME}_exported
   ament_index_cpp
   akushon_interfaces
+  jitsuyo
   rclcpp
   rclcpp_action
   std_msgs
@@ -145,6 +148,7 @@ endif()
 ament_export_dependencies(
   ament_index_cpp
   akushon_interfaces
+  jitsuyo
   rclcpp
   rclcpp_action
   std_msgs
