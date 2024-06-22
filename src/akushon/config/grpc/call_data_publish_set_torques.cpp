@@ -27,7 +27,7 @@ namespace akushon
 {
 CallDataPublishSetTorques::CallDataPublishSetTorques(
   akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
-  const std::string& path, rclcpp::Node::SharedPtr& node)
+  const std::string& path, const rclcpp::Node::SharedPtr& node)
 : CallData(service, cq, path), node_(node)
 {
   set_torque_publisher_ =

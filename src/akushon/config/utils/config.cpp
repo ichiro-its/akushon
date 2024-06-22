@@ -25,7 +25,6 @@
 
 #include "akushon/action/model/action_name.hpp"
 #include "akushon/config/utils/config.hpp"
-#include "nlohmann/json.hpp"
 
 namespace akushon
 {
@@ -47,6 +46,9 @@ std::string Config::get_config() const
       for (auto i = path.size(); i < file_name.size() - 5; i++) {
         action_name += file_name[i];
       }
+      if (action_name == "grpc") {
+        continue;
+      }
       std::cout << action_name << " | ";
 
       std::ifstream file(action_file.path());
@@ -59,6 +61,14 @@ std::string Config::get_config() const
   }
   std::cout << std::endl;
   return actions_list.dump();
+}
+
+nlohmann::json Config::get_grpc_config() const
+{  
+    std::ifstream grpc_file(this->path + "grpc.json");
+    nlohmann::json grpc_data = nlohmann::json::parse(grpc_file);
+    grpc_file.close();
+    return grpc_data;
 }
 
 void Config::save_config(const std::string & actions_data)

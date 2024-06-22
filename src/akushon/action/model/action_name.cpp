@@ -45,13 +45,19 @@ const char * ActionName::LEFTWARD_UP = "leftward_up";
 const char * ActionName::RIGHTWARD_UP = "rightward_up";
 const char * ActionName::RIGHT_KICK = "right_kick";
 const char * ActionName::LEFT_KICK = "left_kick";
-const char * ActionName::RIGHT_KICK_SHORT = "right_kick_short";
-const char * ActionName::LEFT_KICK_SHORT = "left_kick_short";
-const char * ActionName::RIGHT_KICK_WIDE = "right_kick_wide";
-const char * ActionName::LEFT_KICK_WIDE = "left_kick_wide";
-const char * ActionName::LEFT_SIDEKICK = "left_sidekick";
-const char * ActionName::RIGHT_SIDEKICK = "right_sidekick";
+const char * ActionName::RIGHT_KICK_SHORT = "right_kick";
+const char * ActionName::LEFT_KICK_SHORT = "walk_ready";
+const char * ActionName::RIGHT_KICK_WIDE = "right_kick";
+const char * ActionName::LEFT_KICK_WIDE = "left_kick";
+const char * ActionName::LEFT_SIDEKICK = "left_kick";
+const char * ActionName::RIGHT_SIDEKICK = "right_kick";
 const char * ActionName::KEEPER_SIT = "keeper_sit";
 const char * ActionName::KEEPER_UP = "keeper_up";
+const char * ActionName::MIDDOWN_KEEPER = "middown_keeper";
+const char * ActionName::MIDUP_KEEPER = "midup_keeper";
+const char * ActionName::KEEPER_LEFT = "left_keeper";
+const char * ActionName::KEEPER_RIGHT = "right_keeper";
+const char * ActionName::KEEPER_LEFT_UP = "leftup_keeper";
+const char * ActionName::KEEPER_RIGHT_UP = "rightup_keeper";
 
 }  // namespace akushon

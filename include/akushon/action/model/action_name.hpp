@@ -47,6 +47,12 @@ public:
   static const char * RIGHT_SIDEKICK;
   static const char * KEEPER_SIT;
   static const char * KEEPER_UP;
+  static const char * MIDDOWN_KEEPER;
+  static const char * MIDUP_KEEPER;
+  static const char * KEEPER_LEFT;
+  static const char * KEEPER_RIGHT;
+  static const char * KEEPER_LEFT_UP;
+  static const char * KEEPER_RIGHT_UP;
 
   static const std::map<std::string, int> map;
 };

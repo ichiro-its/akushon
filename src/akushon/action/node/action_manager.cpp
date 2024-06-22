@@ -76,6 +76,10 @@ void ActionManager::load_config(const std::string & path)
     }
 
     try {
+      if (name == "grpc") {
+        std::cout << "skipping grpc.json" << std::endl;
+        continue;
+      }
       std::ifstream file(file_name);
       nlohmann::json action_data = nlohmann::json::parse(file);
 

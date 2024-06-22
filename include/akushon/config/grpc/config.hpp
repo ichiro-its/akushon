@@ -42,7 +42,8 @@ public:
 
   ~ConfigGrpc();
 
-  void Run(uint16_t port, const std::string & path, rclcpp::Node::SharedPtr & node,
+  void Run(
+    const std::string & path, const rclcpp::Node::SharedPtr & node,
     const std::shared_ptr<akushon::ActionManager> & action_manager);
 
 private:

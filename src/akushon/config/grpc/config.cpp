@@ -23,17 +23,17 @@
 #include <chrono>
 #include <csignal>
 #include <future>
+#include <rclcpp/rclcpp.hpp>
 #include <string>
 
-#include "akushon/config/utils/config.hpp"
-#include "rclcpp/rclcpp.hpp"
 #include "akushon/config/grpc/call_data_get_config.hpp"
 #include "akushon/config/grpc/call_data_load_config.hpp"
-#include "akushon/config/grpc/call_data_save_config.hpp"
 #include "akushon/config/grpc/call_data_publish_set_joints.hpp"
 #include "akushon/config/grpc/call_data_publish_set_torques.hpp"
-#include "akushon/config/grpc/call_data_subscribe_current_joints.hpp"
 #include "akushon/config/grpc/call_data_run_action.hpp"
+#include "akushon/config/grpc/call_data_save_config.hpp"
+#include "akushon/config/grpc/call_data_subscribe_current_joints.hpp"
+#include "akushon/config/utils/config.hpp"
 
 using grpc::ServerBuilder;
 using namespace std::chrono_literals;
@@ -49,10 +49,13 @@ ConfigGrpc::~ConfigGrpc()
   cq_->Shutdown();
 }
 
-void ConfigGrpc::Run(uint16_t port, const std::string& path, rclcpp::Node::SharedPtr& node,
-  const std::shared_ptr<ActionManager>& action_manager)
+void ConfigGrpc::Run(
+  const std::string & path, const rclcpp::Node::SharedPtr & node,
+  const std::shared_ptr<ActionManager> & action_manager)
 {
-  std::string server_address = absl::StrFormat("0.0.0.0:%d", port);
+  Config config(path);
+  std::string server_address =
+    absl::StrFormat("0.0.0.0:%d", config.get_grpc_config()["port"].get<uint16_t>());
 
   ServerBuilder builder;
   builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
@@ -85,6 +88,7 @@ void ConfigGrpc::Run(uint16_t port, const std::string& path, rclcpp::Node::Share
     }
   });
   std::this_thread::sleep_for(200ms);
+  async_server.detach();
 }
 
 }  // namespace akushon
