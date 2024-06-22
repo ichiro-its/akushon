@@ -25,7 +25,7 @@
 
 #include "akushon/action/model/action_name.hpp"
 #include "akushon/config/utils/config.hpp"
-#include "jitsuyo/config.hpp"
+#include <jitsuyo/config.hpp>
 #include "nlohmann/json.hpp"
 
 namespace akushon
@@ -44,7 +44,7 @@ std::string Config::get_config() const
     std::string file_name = action_file.path();
 
     std::string action_name = "";
-    for (auto i = path.size(); i < file_name.size() - 5; i++) {
+    for (auto i = path.size(); i < file_name.size() - 5; ++i) {
       action_name += file_name[i];
     }
     std::cout << action_name << " | ";
