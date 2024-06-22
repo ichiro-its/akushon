@@ -23,6 +23,7 @@
 #include <chrono>
 #include <csignal>
 #include <future>
+#include <rclcpp/rclcpp.hpp>
 #include <string>
 
 #include "akushon/config/grpc/call_data_get_config.hpp"
@@ -33,7 +34,6 @@
 #include "akushon/config/grpc/call_data_save_config.hpp"
 #include "akushon/config/grpc/call_data_subscribe_current_joints.hpp"
 #include "akushon/config/utils/config.hpp"
-#include "rclcpp/rclcpp.hpp"
 
 using grpc::ServerBuilder;
 using namespace std::chrono_literals;
