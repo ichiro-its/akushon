@@ -39,7 +39,8 @@ public:
   using SaveActions = akushon_interfaces::srv::SaveActions;
   using GetActions = akushon_interfaces::srv::GetActions;
 
-  explicit ConfigNode(rclcpp::Node::SharedPtr node, const std::string & path);
+  explicit ConfigNode(rclcpp::Node::SharedPtr node, const std::string & path,
+    const std::shared_ptr<ActionManager> & action_manager);
 
 private:
   std::string get_node_prefix() const;

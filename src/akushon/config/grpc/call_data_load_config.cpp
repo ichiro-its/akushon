@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Ichiro ITS
+// Copyright (c) 2024 Ichiro ITS
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,28 +18,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__CONFIG__GRPC__SAVE_CONFIG_HPP_
-#define AKUSHON__CONFIG__GRPC__SAVE_CONFIG_HPP_
-
-#include "akushon/action/node/action_manager.hpp"
-#include "akushon/config/grpc/call_data.hpp"
+#include "akushon/config/grpc/call_data_load_config.hpp"
+#include "akushon/config/utils/config.hpp"
+#include "nlohmann/json.hpp"
+#include "rclcpp/rclcpp.hpp"
 
 namespace akushon
 {
-class CallDataSaveConfig
-: CallData<akushon_interfaces::proto::ConfigActions, akushon_interfaces::proto::Empty>
+
+CallDataLoadConfig::CallDataLoadConfig(
+  akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
+  const std::string& path, const std::shared_ptr<ActionManager>& action_manager)
+: CallData(service, cq, path), action_manager_(action_manager)
 {
-public:
-  CallDataSaveConfig(
-    akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
-    const std::string& path, const std::shared_ptr<ActionManager>& action_manager);
+  Proceed();
+}
 
-protected:
-  void AddNextToCompletionQueue() override;
-  void WaitForRequest() override;
-  void HandleRequest() override;
-  std::shared_ptr<ActionManager> action_manager_;
-};
-}  // namespace akushon
+void CallDataLoadConfig::AddNextToCompletionQueue()
+{
+  new CallDataLoadConfig(service_, cq_, path_, action_manager_);
+}
 
-#endif // AKUSHON__CONFIG__GRPC__SAVE_CONFIG_HPP_
+void CallDataLoadConfig::WaitForRequest()
+{
+  service_->RequestLoadConfig(&ctx_, &request_, &responder_, cq_, cq_, this);
+}
+
+void CallDataLoadConfig::HandleRequest()
+{
+  try {
+    action_manager_->load_config(path_);
+    RCLCPP_INFO(rclcpp::get_logger("LoadConfig"), "config has been loaded!");
+  } catch (nlohmann::json::exception e) {
+    RCLCPP_ERROR(rclcpp::get_logger("LoadConfig"), e.what());
+  }
+}
+
+} // namespace akushon

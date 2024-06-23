@@ -45,7 +45,7 @@ int main(int argc, char * argv[])
   action_manager->load_config(path);
 
   akushon_node->run_action_manager(action_manager);
-  akushon_node->run_config_service(path);
+  akushon_node->run_config_service(path, action_manager);
 
   rclcpp::spin(node);
   rclcpp::shutdown();
