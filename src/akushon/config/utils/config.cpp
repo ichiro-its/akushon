@@ -25,6 +25,7 @@
 
 #include "akushon/action/model/action_name.hpp"
 #include "akushon/config/utils/config.hpp"
+#include <jitsuyo/config.hpp>
 #include "nlohmann/json.hpp"
 
 namespace akushon
@@ -42,20 +43,30 @@ std::string Config::get_config() const
   for (const auto & action_file : std::filesystem::directory_iterator(path)) {
     std::string file_name = action_file.path();
 
-    try {
-      std::string action_name = "";
-      for (auto i = path.size(); i < file_name.size() - 5; i++) {
-        action_name += file_name[i];
-      }
-      std::cout << action_name << " | ";
-
-      std::ifstream file(action_file.path());
-      nlohmann::json action_data = nlohmann::json::parse(file);
-      actions_list[action_name] = action_data;
-    } catch (nlohmann::json::parse_error & ex) {
-      // TODO(maroqijalil): will be used for logging
-      // std::cerr << "parse error at byte " << ex.byte << std::endl;
+    std::string action_name = "";
+    for (auto i = path.size(); i < file_name.size() - 5; ++i) {
+      action_name += file_name[i];
     }
+    std::cout << action_name << " | ";
+
+    std::ifstream file(action_file.path());
+    nlohmann::json action_data;
+    if (!jitsuyo::load_config(path, action_name + ".json", action_data)) {
+      std::cerr << "Failed to load " << file_name << std::endl;
+      continue;
+    }
+
+    if (action_data["name"] != action_name) {
+      std::cerr << "Action name does not match file name in " << file_name << std::endl;
+      continue;
+    }
+
+    if (action_data["poses"].empty()) {
+      std::cerr << file_name << "\'s poses is empty" << std::endl;
+      continue;
+    }
+
+    actions_list[action_name] = action_data;
   }
   std::cout << std::endl;
   return actions_list.dump();
@@ -71,9 +82,10 @@ void Config::save_config(const std::string & actions_data)
     std::string file_name = path + action_name + ".json";
     std::ofstream file;
 
-    file.open(file_name);
-    file << val.dump(2);
-    file.close();
+    if (!jitsuyo::save_config(path, action_name + ".json", val)) {
+      std::cerr << "Failed to save " << file_name << std::endl;
+      continue;
+    }
   }
 }
 
