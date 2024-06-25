@@ -197,22 +197,26 @@ void ActionManager::start(std::string action_name, std::string target_action_nam
   std::vector<Action> target_actions;
 
   while (true) {
-    auto & action = actions.at(action_name);
+    auto action = actions.at(action_name);
     const auto & target_action = actions.at(target_action_name);
-
-    for (int pose_index = 0; pose_index < action.get_pose_count(); pose_index++) {
+    int pose_count = action.get_pose_count();
+    for (int pose_index = 0; pose_index < pose_count; pose_index++) {
       if (right)
       {
-        RCLCPP_INFO(rclcpp::get_logger("DEBUG ACTION MANAGER"), "CEK1");
+        RCLCPP_INFO(rclcpp::get_logger("DEBUG ACTION MANAGER"), "Start Mapping!");
         action.map_action(action, target_action, pose_index, ball_x, right_map_x_min_, right_map_x_max_);
       } else {
-        RCLCPP_INFO(rclcpp::get_logger("DEBUG ACTION MANAGER"), "CEK1");
+        RCLCPP_INFO(rclcpp::get_logger("DEBUG ACTION MANAGER"), "Start Mapping!");
         action.map_action(action, target_action, pose_index, ball_x, left_map_x_min_, left_map_x_max_);
       }
     }
 
+    RCLCPP_INFO(rclcpp::get_logger("DEBUG ACTION MANAGER"), "New Action Count: %d", action.get_pose_count());
+    for (const auto& the_action : target_actions) {
+      RCLCPP_INFO(rclcpp::get_logger("DEBUG ACTION MANAGER"), "Action Vector: %s", the_action.get_name().c_str());
+    }
     target_actions.push_back(action);
-    RCLCPP_INFO(rclcpp::get_logger("DEBUG ACTION MANAGER"), "CEK");
+
     if (action.get_next_action() != "") {
       std::string next_action_name = action.get_next_action();
 
