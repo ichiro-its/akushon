@@ -16,6 +16,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(akushon_interfaces REQUIRED)
+find_package(jitsuyo REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(std_msgs REQUIRED)
@@ -32,7 +33,7 @@ message(STATUS "Using gRPC ${gRPC_VERSION}")
 
 add_library(${PROJECT_NAME} SHARED
   "src/${PROJECT_NAME}/action/model/action_name.cpp"
-  "src/${PROJECT_NAME}/action/model/action.cpp"  
+  "src/${PROJECT_NAME}/action/model/action.cpp"
   "src/${PROJECT_NAME}/action/model/pose.cpp"
   "src/${PROJECT_NAME}/action/node/action_manager.cpp"
   "src/${PROJECT_NAME}/action/node/action_node.cpp"
@@ -41,8 +42,9 @@ add_library(${PROJECT_NAME} SHARED
   "src/${PROJECT_NAME}/config/node/config_node.cpp"
   "src/${PROJECT_NAME}/config/utils/config.cpp"
   "src/${PROJECT_NAME}/config/grpc/config.cpp"
-  "src/${PROJECT_NAME}/config/grpc/call_data_base.cpp"  
+  "src/${PROJECT_NAME}/config/grpc/call_data_base.cpp"
   "src/${PROJECT_NAME}/config/grpc/call_data_get_config.cpp"
+  "src/${PROJECT_NAME}/config/grpc/call_data_load_config.cpp"
   "src/${PROJECT_NAME}/config/grpc/call_data_save_config.cpp"
   "src/${PROJECT_NAME}/config/grpc/call_data_publish_set_joints.cpp"
   "src/${PROJECT_NAME}/config/grpc/call_data_publish_set_torques.cpp"
@@ -53,7 +55,7 @@ add_library(${PROJECT_NAME} SHARED
 
 add_library(${PROJECT_NAME}_exported SHARED
 "src/${PROJECT_NAME}/action/model/action_name.cpp"
-"src/${PROJECT_NAME}/action/model/action.cpp"  
+"src/${PROJECT_NAME}/action/model/action.cpp"
 "src/${PROJECT_NAME}/action/model/pose.cpp"
 "src/${PROJECT_NAME}/action/node/action_manager.cpp"
 "src/${PROJECT_NAME}/action/node/action_node.cpp"
@@ -61,18 +63,19 @@ add_library(${PROJECT_NAME}_exported SHARED
 "src/${PROJECT_NAME}/action/process/joint_process.cpp"
 )
 
-target_include_directories(${PROJECT_NAME} PUBLIC  
+target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 
 
-target_include_directories(${PROJECT_NAME}_exported PUBLIC  
+target_include_directories(${PROJECT_NAME}_exported PUBLIC
 $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 $<INSTALL_INTERFACE:include>)
 
 ament_target_dependencies(${PROJECT_NAME}
   ament_index_cpp
   akushon_interfaces
+  jitsuyo
   rclcpp
   rclcpp_action
   std_msgs
@@ -83,6 +86,7 @@ ament_target_dependencies(${PROJECT_NAME}
   ament_target_dependencies(${PROJECT_NAME}_exported
   ament_index_cpp
   akushon_interfaces
+  jitsuyo
   rclcpp
   rclcpp_action
   std_msgs
@@ -91,7 +95,7 @@ ament_target_dependencies(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   gRPC::grpc++_reflection
-  gRPC::grpc++  
+  gRPC::grpc++
 )
 
 install(DIRECTORY "include" DESTINATION ".")
@@ -144,6 +148,7 @@ endif()
 ament_export_dependencies(
   ament_index_cpp
   akushon_interfaces
+  jitsuyo
   rclcpp
   rclcpp_action
   std_msgs

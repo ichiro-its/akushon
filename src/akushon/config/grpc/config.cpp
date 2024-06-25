@@ -28,6 +28,7 @@
 #include "akushon/config/utils/config.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "akushon/config/grpc/call_data_get_config.hpp"
+#include "akushon/config/grpc/call_data_load_config.hpp"
 #include "akushon/config/grpc/call_data_save_config.hpp"
 #include "akushon/config/grpc/call_data_publish_set_joints.hpp"
 #include "akushon/config/grpc/call_data_publish_set_torques.hpp"
@@ -48,7 +49,8 @@ ConfigGrpc::~ConfigGrpc()
   cq_->Shutdown();
 }
 
-void ConfigGrpc::Run(uint16_t port, const std::string& path, rclcpp::Node::SharedPtr& node)
+void ConfigGrpc::Run(uint16_t port, const std::string& path, rclcpp::Node::SharedPtr& node,
+  const std::shared_ptr<ActionManager>& action_manager)
 {
   std::string server_address = absl::StrFormat("0.0.0.0:%d", port);
 
@@ -65,13 +67,14 @@ void ConfigGrpc::Run(uint16_t port, const std::string& path, rclcpp::Node::Share
     cq_->Shutdown();
     exit(signum);
   });
-  async_server = std::thread([path, this, &node]() {
+  async_server = std::thread([path, this, &node, &action_manager]() {
     new CallDataGetConfig(&service_, cq_.get(), path);
-    new CallDataSaveConfig(&service_, cq_.get(), path);
+    new CallDataSaveConfig(&service_, cq_.get(), path, action_manager);
     new CallDataPublishSetJoints(&service_, cq_.get(), path, node);
     new CallDataPublishSetTorques(&service_, cq_.get(), path, node);
     new CallDataRunAction(&service_, cq_.get(), path, node);
     new CallDataSubscribeCurrentJoints(&service_, cq_.get(), path, node);
+    new CallDataLoadConfig(&service_, cq_.get(), path, action_manager);
     void * tag;  // uniquely identifies a request.
     bool ok = true;
     while (true) {

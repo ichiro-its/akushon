@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Ichiro ITS
+// Copyright (c) 2024 Ichiro ITS
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,19 +18,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef AKUSHON__CONFIG__GRPC__SAVE_CONFIG_HPP_
-#define AKUSHON__CONFIG__GRPC__SAVE_CONFIG_HPP_
+#ifndef AKUSHON__CONFIG__GRPC__LOAD_CONFIG_HPP_
+#define AKUSHON__CONFIG__GRPC__LOAD_CONFIG_HPP_
 
 #include "akushon/action/node/action_manager.hpp"
 #include "akushon/config/grpc/call_data.hpp"
 
 namespace akushon
 {
-class CallDataSaveConfig
-: CallData<akushon_interfaces::proto::ConfigActions, akushon_interfaces::proto::Empty>
+class CallDataLoadConfig
+: CallData<akushon_interfaces::proto::Empty, akushon_interfaces::proto::Empty>
 {
 public:
-  CallDataSaveConfig(
+  CallDataLoadConfig(
     akushon_interfaces::proto::Config::AsyncService * service, grpc::ServerCompletionQueue * cq,
     const std::string& path, const std::shared_ptr<ActionManager>& action_manager);
 
@@ -42,4 +42,4 @@ protected:
 };
 }  // namespace akushon
 
-#endif // AKUSHON__CONFIG__GRPC__SAVE_CONFIG_HPP_
+#endif // AKUSHON__CONFIG__GRPC__LOAD_CONFIG_HPP_

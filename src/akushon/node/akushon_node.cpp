@@ -55,9 +55,9 @@ void AkushonNode::run_action_manager(std::shared_ptr<ActionManager> action_manag
   action_node = std::make_shared<ActionNode>(node, action_manager);
 }
 
-void AkushonNode::run_config_service(const std::string & path)
+void AkushonNode::run_config_service(const std::string & path, const std::shared_ptr<ActionManager> & action_manager)
 {
-  config_node = std::make_shared<ConfigNode>(node, path);
+  config_node = std::make_shared<ConfigNode>(node, path, action_manager);
 }
 
 }  // namespace akushon

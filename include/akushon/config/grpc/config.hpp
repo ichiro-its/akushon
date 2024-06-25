@@ -24,6 +24,7 @@
 #include <memory>
 #include <thread>
 
+#include "akushon/action/node/action_manager.hpp"
 #include "akushon_interfaces/akushon.grpc.pb.h"
 #include "akushon_interfaces/akushon.pb.h"
 #include "grpcpp/grpcpp.h"
@@ -41,7 +42,8 @@ public:
 
   ~ConfigGrpc();
 
-  void Run(uint16_t port, const std::string & path, rclcpp::Node::SharedPtr & node);
+  void Run(uint16_t port, const std::string & path, rclcpp::Node::SharedPtr & node,
+    const std::shared_ptr<akushon::ActionManager> & action_manager);
 
 private:
   std::string path;
@@ -50,6 +52,7 @@ private:
   static inline std::unique_ptr<grpc::Server> server_;
   std::shared_ptr<std::thread> thread_;
   akushon_interfaces::proto::Config::AsyncService service_;
+  std::shared_ptr<akushon::ActionManager> action_manager_;
 
   std::thread async_server;
 };
