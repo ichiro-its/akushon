@@ -200,12 +200,14 @@ void ActionManager::start(std::string action_name, std::string target_action_nam
     auto action = actions.at(action_name);
     const auto & target_action = actions.at(target_action_name);
     int pose_count = action.get_pose_count();
-    for (int pose_index = 0; pose_index < pose_count; pose_index++) {
-      if (right)
-      {
+    if (right)
+    {
+      for (int pose_index = pose_count - 1; pose_index >= 0; --pose_index) {
         RCLCPP_INFO(rclcpp::get_logger("DEBUG ACTION MANAGER"), "Start Mapping!");
         action.map_action(action, target_action, pose_index, ball_x, right_map_x_min_, right_map_x_max_);
-      } else {
+      }
+    } else {
+      for (int pose_index = pose_count - 1; pose_index >= 0; --pose_index) {
         RCLCPP_INFO(rclcpp::get_logger("DEBUG ACTION MANAGER"), "Start Mapping!");
         action.map_action(action, target_action, pose_index, ball_x, left_map_x_min_, left_map_x_max_);
       }

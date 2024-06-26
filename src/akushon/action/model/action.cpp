@@ -114,7 +114,7 @@ void Action::map_action(const Action & source_action, const Action & target_acti
 {
   std::vector<tachimawari::joint::Joint> src_joints = source_action.get_pose(target_pose_index).get_joints();
   std::vector<tachimawari::joint::Joint> target_joints = target_action.get_pose(target_pose_index).get_joints();
-  for (int joint = 0; joint < int(src_joints.size()); joint++)
+  for (int joint = 19; joint >= 0; --joint)
   {
       int joint_id = src_joints.at(joint).get_id();
       float target_min = src_joints.at(joint).get_position_value();
