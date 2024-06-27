@@ -53,5 +53,7 @@ const char * ActionName::LEFT_SIDEKICK = "left_sidekick";
 const char * ActionName::RIGHT_SIDEKICK = "right_sidekick";
 const char * ActionName::KEEPER_SIT = "keeper_sit";
 const char * ActionName::KEEPER_UP = "keeper_up";
+const char * ActionName::LEFT_SIDEKICK_90 = "left_sidekick90";
+const char * ActionName::RIGHT_SIDEKICK_90 = "right_sidekick90";
 
 }  // namespace akushon
