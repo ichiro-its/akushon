@@ -136,7 +136,7 @@ void Action::map_action(const Action & source_action, const Action & target_acti
   RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Cek new pose pause %f", new_pose.get_pause());
   RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Cek new pose speed %f", new_pose.get_speed());
   RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Cek new pose joints size %ld", new_pose.get_joints().size());
-  for (int joint = 0; joint < int(new_pose.get_joints().size()); joint++)
+  for (int joint = new_pose.get_joints().size() - 1; joint >= 0; --joint)
   {
     RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Cek new pose joints %d: %d", new_pose.get_joints().at(joint).get_id(), new_pose.get_joints().at(joint).get_position_value());
   }
@@ -148,7 +148,7 @@ void Action::map_action(const Action & source_action, const Action & target_acti
   RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Cek changed pose pause %f", this->get_pose(target_pose_index).get_pause());
   RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Cek changed pose speed %f", this->get_pose(target_pose_index).get_speed());
   RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Cek changed pose joints size %ld", this->get_pose(target_pose_index).get_joints().size());
-  for (int joint = 0; joint < int(this->get_pose(target_pose_index).get_joints().size()); joint++)
+  for (int joint = this->get_pose(target_pose_index).get_joints().size() - 1; joint >= 0; --joint)
   {
     RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Cek changed pose joints %d: %d", this->get_pose(target_pose_index).get_joints().at(joint).get_id(), this->get_pose(target_pose_index).get_joints().at(joint).get_position_value());
   }
