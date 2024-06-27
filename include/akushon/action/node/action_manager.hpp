@@ -45,7 +45,7 @@ public:
   Action get_action(std::string action_name) const;
 
   void load_config(const std::string & path);
-  void set_config(const nlohmann::json & json);
+  void set_config(const std::string & path);
 
   Action load_action(const nlohmann::json & action_data, const std::string & action_name) const;
 

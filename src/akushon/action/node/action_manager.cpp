@@ -31,7 +31,7 @@
 #include <vector>
 
 #include "akushon/action/node/action_manager.hpp"
-
+#include "jitsuyo/config.hpp"
 #include "akushon/action/model/action_name.hpp"
 #include "akushon/action/process/interpolator.hpp"
 #include "nlohmann/json.hpp"
@@ -71,7 +71,7 @@ void ActionManager::load_config(const std::string & path)
     std::ifstream file(path + config_name);
     nlohmann::json data = nlohmann::json::parse(file);
 
-    set_config(data);
+    set_config(path);
 
     file.close();
   } catch (nlohmann::json::parse_error & ex) {
@@ -103,22 +103,28 @@ void ActionManager::load_config(const std::string & path)
   }
 }
 
-void ActionManager::set_config(const nlohmann::json & json)
+void ActionManager::set_config(const std::string & path)
 {
-  for (auto &[key, val] : json.items()) {
-    if (key == "dynamic_kick") {
-      try {
-        val.at("right_map_x_min").get_to(right_map_x_min);
-        val.at("right_map_x_max").get_to(right_map_x_max);
-        val.at("left_map_x_min").get_to(left_map_x_min);
-        val.at("left_map_x_max").get_to(left_map_x_max);
-        val.at("using_dynamic_kick").get_to(using_dynamic_kick);
-      } catch (nlohmann::json::parse_error & ex) {
-        std::cerr << "error key: " << key << std::endl;
-        std::cerr << "parse error at byte " << ex.byte << std::endl;
-        throw ex;
-      }
+  nlohmann::json config;
+  if (!jitsuyo::load_config(path, "dynamic_kick.json", config)) {
+    throw std::runtime_error("Failed to load config file `" + path + "dynamic_kick.json`");
+  }
+
+  bool valid_config = true;
+
+  nlohmann::json dynamic_kick_section;
+  if (jitsuyo::assign_val(config, "dynamic_kick", dynamic_kick_section)) {
+    bool valid_section = jitsuyo::assign_val(dynamic_kick_section, "right_map_x_min", right_map_x_min);
+    valid_section &= jitsuyo::assign_val(dynamic_kick_section, "right_map_x_max", right_map_x_max);
+    valid_section &= jitsuyo::assign_val(dynamic_kick_section, "left_map_x_min", left_map_x_min);
+    valid_section &= jitsuyo::assign_val(dynamic_kick_section, "left_map_x_max", left_map_x_max);
+    valid_section &= jitsuyo::assign_val(dynamic_kick_section, "using_dynamic_kick", using_dynamic_kick);
+    if (!valid_section) {
+      std::cout << "Error found at section `dynamic_kick`" << std::endl;
+      valid_config = false;
     }
+  } else {
+    valid_config = false;
   }
 }
 
