@@ -27,6 +27,7 @@
 
 #include "akushon/config/utils/config.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include "akushon/config/grpc/call_data_brake_action.hpp"
 #include "akushon/config/grpc/call_data_get_config.hpp"
 #include "akushon/config/grpc/call_data_load_config.hpp"
 #include "akushon/config/grpc/call_data_save_config.hpp"
@@ -68,6 +69,7 @@ void ConfigGrpc::Run(uint16_t port, const std::string& path, rclcpp::Node::Share
     exit(signum);
   });
   async_server = std::thread([path, this, &node, &action_manager]() {
+    new CallDataBrakeAction(&service_, cq_.get(), path, action_manager);
     new CallDataGetConfig(&service_, cq_.get(), path);
     new CallDataSaveConfig(&service_, cq_.get(), path, action_manager);
     new CallDataPublishSetJoints(&service_, cq_.get(), path, node);
