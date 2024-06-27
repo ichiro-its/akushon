@@ -34,9 +34,11 @@ public:
 
   std::string get_config() const;
   void save_config(const std::string & actions_data);
+  void clear_directory(const std::string& directory_path);
 
 private:
   std::string path;
+  std::string action_dir;
 };
 
 }  // namespace akushon
