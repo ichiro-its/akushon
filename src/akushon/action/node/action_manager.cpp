@@ -84,7 +84,7 @@ void ActionManager::load_config(const std::string & path)
     std::string name = "";
     std::string file_name = entry.path();
     std::string extension_json = ".json";
-    for (int i = (path + action_dir).length(); i < file_name.length() - extension_json.length(); i++) {
+    for (int i = (path + action_dir).length() - 1; i < file_name.length() - extension_json.length(); ++i) {
       name += file_name[i];
     }
 

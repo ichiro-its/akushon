@@ -114,7 +114,7 @@ void Action::map_action(const Action & source_action, const Action & target_acti
 {
   std::vector<tachimawari::joint::Joint> src_joints = source_action.get_pose(target_pose_index).get_joints();
   std::vector<tachimawari::joint::Joint> target_joints = target_action.get_pose(target_pose_index).get_joints();
-  for (int joint = 19; joint >= 0; --joint)
+  for (int joint = src_joints.size() - 1; joint >= 0; --joint)
   {
       int joint_id = src_joints.at(joint).get_id();
       float target_min = src_joints.at(joint).get_position_value();
@@ -122,7 +122,7 @@ void Action::map_action(const Action & source_action, const Action & target_acti
       float new_joint_value = keisan::map(source_val, source_min, source_max, target_min, target_max);
       new_joint_value = keisan::curve(new_joint_value, target_min, target_max, float(2.0));
       new_joint_value = keisan::clamp(new_joint_value, target_min, target_max);
-      target_joints[joint].set_position_value(int(std::round(new_joint_value)));
+      target_joints[joint].set_position_value(static_cast<int>(std::round(new_joint_value)));
       RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Joint %d: %f -> %d", joint_id, target_min, int(std::round(new_joint_value)));
       RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Cek value in target joints %d: %f -> %d", target_joints[joint].get_id(), target_max, target_joints[joint].get_position_value());
   }
