@@ -49,6 +49,9 @@ public:
   static const char * KEEPER_UP;
   static const char * RIGHT_SIDEKICK_90;
   static const char * LEFT_SIDEKICK_90;
+  static const char * DK_INIT;
+  static const char * DK_KICK;
+  static const char * HIGH_KICK;
 
   static const std::map<std::string, int> map;
 };
