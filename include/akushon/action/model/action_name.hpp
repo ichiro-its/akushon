@@ -54,6 +54,8 @@ public:
   static const char * HIGH_KICK;
   static const char * PARKOUR_UP;
   static const char * PARKOUR_DOWN;
+  static const char * LEFT_KICK_CENTER;
+  static const char * RIGHT_KICK_CENTER;
 
   static const std::map<std::string, int> map;
 };

@@ -60,5 +60,7 @@ const char * ActionName::DK_KICK = "dk_kick";
 const char * ActionName::HIGH_KICK = "high_kick";
 const char * ActionName::PARKOUR_UP = "parkour_up";
 const char * ActionName::PARKOUR_DOWN = "parkour_down";
+const char * ActionName::LEFT_KICK_CENTER = "left_kick_center";
+const char * ActionName::RIGHT_KICK_CENTER = "right_kick_center";
 
 }  // namespace akushon
