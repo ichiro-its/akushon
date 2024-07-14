@@ -45,6 +45,8 @@ std::string ActionNode::brake_action_topic() {return get_node_prefix() + "/brake
 
 std::string ActionNode::status_topic() {return get_node_prefix() + "/status";}
 
+std::string ActionNode::ball_topic() {return get_node_prefix() + "/ball";}
+
 ActionNode::ActionNode(
   rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> & action_manager)
 : node(node), action_manager(action_manager), initial_pose(Pose("initial_pose"))
@@ -88,6 +90,11 @@ ActionNode::ActionNode(
   brake_action_subscriber = node->create_subscription<Empty>(
     brake_action_topic(), 10,
     [this](std::shared_ptr<Empty> message) {this->action_manager->brake();});
+  
+  ball_subscriber = node->create_subscription<Float64>(
+    ball_topic(), 10, [this](const std::shared_ptr<Float64> message) {
+      ball_pos = message->data;
+    });
 }
 
 bool ActionNode::start(const std::string & action_name)
@@ -95,7 +102,21 @@ bool ActionNode::start(const std::string & action_name)
   Pose pose = this->initial_pose;
 
   if (!pose.get_joints().empty()) {
-    action_manager->start(action_name, pose);
+    if (action_name == akushon::ActionName::LEFT_KICK_WIDE || action_name == akushon::ActionName::RIGHT_KICK_WIDE)
+    {
+      std::size_t pos = action_name.find("_wide");
+      std::string source_action = pos != std::string::npos ? action_name.substr(0, pos) : action_name;
+
+      RCLCPP_INFO(rclcpp::get_logger("Action Node"), "Start WIDE_KICK, source %s, target %s\n", source_action.c_str(), action_name.c_str());
+      if (action_manager->using_dynamic_kick)
+        action_manager->start(source_action, action_name, pose, ball_pos, action_manager->right_map_x_min, action_manager->right_map_x_max, action_manager->left_map_x_min, action_manager->left_map_x_max, source_action == "right_kick");
+      else
+        action_manager->start(action_name, pose);  
+    }
+    else {
+      RCLCPP_INFO(rclcpp::get_logger("Action Node"), "NOT WIDE KICK\n");
+      action_manager->start(action_name, pose);
+    }
   } else {
     return false;
   }

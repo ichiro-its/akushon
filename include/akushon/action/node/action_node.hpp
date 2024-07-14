@@ -31,8 +31,10 @@
 #include "akushon_interfaces/msg/status.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/empty.hpp"
+#include "std_msgs/msg/float64.hpp"
 #include "tachimawari_interfaces/msg/current_joints.hpp"
 #include "tachimawari_interfaces/msg/set_joints.hpp"
+#include "keisan/keisan.hpp"
 
 namespace akushon
 {
@@ -45,6 +47,7 @@ public:
   using RunAction = akushon_interfaces::msg::RunAction;
   using SetJoints = tachimawari_interfaces::msg::SetJoints;
   using Status = akushon_interfaces::msg::Status;
+  using Float64 = std_msgs::msg::Float64;
 
   enum { READY, PLAYING };
 
@@ -54,6 +57,7 @@ public:
   static std::string run_action_topic();
   static std::string brake_action_topic();
   static std::string status_topic();
+  static std::string ball_topic();
 
   explicit ActionNode(
     rclcpp::Node::SharedPtr node, std::shared_ptr<ActionManager> & action_manager);
@@ -68,6 +72,8 @@ private:
   void publish_status();
 
   Pose initial_pose;
+  double ball_pos;
+
   rclcpp::Node::SharedPtr node;
 
   std::shared_ptr<ActionManager> action_manager;
@@ -77,6 +83,7 @@ private:
 
   rclcpp::Subscription<RunAction>::SharedPtr run_action_subscriber;
   rclcpp::Subscription<Empty>::SharedPtr brake_action_subscriber;
+  rclcpp::Subscription<Float64>::SharedPtr ball_subscriber;
   rclcpp::Publisher<Status>::SharedPtr status_publisher;
 };
 

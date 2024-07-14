@@ -31,7 +31,7 @@
 #include <vector>
 
 #include "akushon/action/node/action_manager.hpp"
-
+#include "jitsuyo/config.hpp"
 #include "akushon/action/model/action_name.hpp"
 #include "akushon/action/process/interpolator.hpp"
 #include "nlohmann/json.hpp"
@@ -41,7 +41,7 @@ namespace akushon
 {
 
 ActionManager::ActionManager()
-: actions({}), is_running(false)
+: actions({}), is_running(false), config_name("dynamic_kick.json"), action_dir("actions/")
 {
   interpolator = std::make_shared<Interpolator>(std::vector<Action>(), Pose(""));
 }
@@ -67,11 +67,24 @@ Action ActionManager::get_action(std::string action_name) const
 
 void ActionManager::load_config(const std::string & path)
 {
-  for (const auto & entry : std::filesystem::directory_iterator(path)) {
+  try {
+    std::ifstream file(path + config_name);
+    nlohmann::json data = nlohmann::json::parse(file);
+
+    set_config(path);
+
+    file.close();
+  } catch (nlohmann::json::parse_error & ex) {
+      std::cerr << "failed to load action: " << config_name << std::endl;
+      std::cerr << "parse error at byte " << ex.byte << std::endl;
+      throw ex;
+  }
+
+  for (const auto & entry : std::filesystem::directory_iterator(path + action_dir)) {
     std::string name = "";
     std::string file_name = entry.path();
     std::string extension_json = ".json";
-    for (int i = path.length(); i < file_name.length() - extension_json.length(); i++) {
+    for (int i = (path + action_dir).length() - 1; i < file_name.length() - extension_json.length(); ++i) {
       name += file_name[i];
     }
 
@@ -87,6 +100,31 @@ void ActionManager::load_config(const std::string & path)
       std::cerr << "parse error at byte " << ex.byte << std::endl;
       throw ex;
     }
+  }
+}
+
+void ActionManager::set_config(const std::string & path)
+{
+  nlohmann::json config;
+  if (!jitsuyo::load_config(path, "dynamic_kick.json", config)) {
+    throw std::runtime_error("Failed to load config file `" + path + "dynamic_kick.json`");
+  }
+
+  bool valid_config = true;
+
+  nlohmann::json dynamic_kick_section;
+  if (jitsuyo::assign_val(config, "dynamic_kick", dynamic_kick_section)) {
+    bool valid_section = jitsuyo::assign_val(dynamic_kick_section, "right_map_x_min", right_map_x_min);
+    valid_section &= jitsuyo::assign_val(dynamic_kick_section, "right_map_x_max", right_map_x_max);
+    valid_section &= jitsuyo::assign_val(dynamic_kick_section, "left_map_x_min", left_map_x_min);
+    valid_section &= jitsuyo::assign_val(dynamic_kick_section, "left_map_x_max", left_map_x_max);
+    valid_section &= jitsuyo::assign_val(dynamic_kick_section, "using_dynamic_kick", using_dynamic_kick);
+    if (!valid_section) {
+      std::cout << "Error found at section `dynamic_kick`" << std::endl;
+      valid_config = false;
+    }
+  } else {
+    valid_config = false;
   }
 }
 
@@ -141,6 +179,50 @@ void ActionManager::start(std::string action_name, const Pose & initial_pose)
   while (true) {
     const auto & action = actions.at(action_name);
 
+    target_actions.push_back(action);
+
+    if (action.get_next_action() != "") {
+      std::string next_action_name = action.get_next_action();
+
+      if (actions.find(next_action_name) != actions.end()) {
+        action_name = next_action_name;
+      } else {
+        break;
+      }
+    } else {
+      break;
+    }
+  }
+
+  interpolator = std::make_shared<Interpolator>(target_actions, initial_pose);
+  is_running = true;
+}
+
+void ActionManager::start(std::string action_name, std::string target_action_name, const Pose & initial_pose, float ball_x, float right_map_x_min_, float right_map_x_max_, float left_map_x_min_, float left_map_x_max_, bool right)
+{
+  std::vector<Action> target_actions;
+
+  while (true) {
+    auto action = actions.at(action_name);
+    const auto & target_action = actions.at(target_action_name);
+    int pose_count = action.get_pose_count();
+    if (right)
+    {
+      for (int pose_index = pose_count - 1; pose_index >= 0; --pose_index) {
+        RCLCPP_INFO(rclcpp::get_logger("DEBUG ACTION MANAGER"), "Start Mapping!");
+        action.map_action(action, target_action, pose_index, ball_x, right_map_x_min_, right_map_x_max_);
+      }
+    } else {
+      for (int pose_index = pose_count - 1; pose_index >= 0; --pose_index) {
+        RCLCPP_INFO(rclcpp::get_logger("DEBUG ACTION MANAGER"), "Start Mapping!");
+        action.map_action(action, target_action, pose_index, ball_x, left_map_x_min_, left_map_x_max_);
+      }
+    }
+
+    RCLCPP_INFO(rclcpp::get_logger("DEBUG ACTION MANAGER"), "New Action Count: %d", action.get_pose_count());
+    for (const auto& the_action : target_actions) {
+      RCLCPP_INFO(rclcpp::get_logger("DEBUG ACTION MANAGER"), "Action Vector: %s", the_action.get_name().c_str());
+    }
     target_actions.push_back(action);
 
     if (action.get_next_action() != "") {

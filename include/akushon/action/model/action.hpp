@@ -57,6 +57,8 @@ public:
 
   void reset();
 
+  void map_action(const Action & source_action, const Action & target_action, int target_pose_index, float source_val, float source_min, float source_max);
+
   bool time_based;
 private:
   std::string name;

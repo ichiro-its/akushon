@@ -32,7 +32,7 @@ namespace akushon
 {
 
 Config::Config(const std::string & path)
-: path(path)
+: path(path), action_dir("actions/")
 {
 }
 
@@ -40,7 +40,7 @@ std::string Config::get_config() const
 {
   nlohmann::json actions_list;
   std::cout << "[ ACTIONS LIST ] : " << std::endl;
-  for (const auto & action_file : std::filesystem::directory_iterator(path)) {
+  for (const auto & action_file : std::filesystem::directory_iterator(path + action_dir)) {
     std::string file_name = action_file.path();
 
     std::string action_name = "";
@@ -56,7 +56,7 @@ std::string Config::get_config() const
       continue;
     }
 
-    if (action_data["name"] != action_name) {
+    if (action_data["name"] != action_name.substr(8)) {
       std::cerr << "Action name does not match file name in " << file_name << std::endl;
       continue;
     }
@@ -74,18 +74,35 @@ std::string Config::get_config() const
 
 void Config::save_config(const std::string & actions_data)
 {
+  clear_directory(path + action_dir);
   nlohmann::json actions_list = nlohmann::json::parse(actions_data);
   for (const auto & [key, val] : actions_list.items()) {
     std::locale loc;
     std::string action_name = key;
     std::replace(action_name.begin(), action_name.end(), ' ', '_');
-    std::string file_name = path + action_name + ".json";
+    std::string file_name = path + action_dir + action_name + ".json";
     std::ofstream file;
 
-    if (!jitsuyo::save_config(path, action_name + ".json", val)) {
+    if (!jitsuyo::save_config(path + action_dir, action_name + ".json", val)) {
       std::cerr << "Failed to save " << file_name << std::endl;
       continue;
     }
+  }
+}
+
+void Config::clear_directory(const std::string& directory_path)
+{
+  try {
+    if (std::filesystem::exists(directory_path) && std::filesystem::is_directory(directory_path)) {
+      for (const auto& entry : std::filesystem::directory_iterator(directory_path)) {
+          std::filesystem::remove_all(entry.path());
+      }
+      std::cout << "Directory cleared: " << directory_path << std::endl;
+    } else {
+      std::cerr << "Directory does not exist: " << directory_path << std::endl;
+    }
+  } catch (const std::filesystem::filesystem_error& e) {
+    std::cerr << "Error clearing directory: " << e.what() << std::endl;
   }
 }
 

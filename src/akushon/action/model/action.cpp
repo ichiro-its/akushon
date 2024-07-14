@@ -24,7 +24,7 @@
 #include <vector>
 
 #include "akushon/action/model/action.hpp"
-
+#include "rclcpp/rclcpp.hpp"
 #include "akushon/action/model/pose.hpp"
 
 namespace akushon
@@ -108,6 +108,50 @@ const std::string & Action::get_next_action() const
 void Action::reset()
 {
   poses.clear();
+}
+
+void Action::map_action(const Action & source_action, const Action & target_action, int target_pose_index, float source_val, float source_min, float source_max)
+{
+  std::vector<tachimawari::joint::Joint> src_joints = source_action.get_pose(target_pose_index).get_joints();
+  std::vector<tachimawari::joint::Joint> target_joints = target_action.get_pose(target_pose_index).get_joints();
+  for (int joint = src_joints.size() - 1; joint >= 0; --joint)
+  {
+      int joint_id = src_joints.at(joint).get_id();
+      float target_min = src_joints.at(joint).get_position_value();
+      float target_max = target_joints.at(joint).get_position_value();
+      float new_joint_value = keisan::map(source_val, source_min, source_max, target_min, target_max);
+      new_joint_value = keisan::curve(new_joint_value, target_min, target_max, float(2.0));
+      new_joint_value = keisan::clamp(new_joint_value, target_min, target_max);
+      target_joints[joint].set_position_value(static_cast<int>(std::round(new_joint_value)));
+      RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Joint %d: %f -> %d", joint_id, target_min, int(std::round(new_joint_value)));
+      RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Cek value in target joints %d: %f -> %d", target_joints[joint].get_id(), target_max, target_joints[joint].get_position_value());
+  }
+  Pose new_pose(target_action.get_pose(target_pose_index).get_name());
+  new_pose.set_pause(source_action.get_pose(target_pose_index).get_pause());
+  new_pose.set_speed(source_action.get_pose(target_pose_index).get_speed());
+  new_pose.action_time = source_action.get_pose(target_pose_index).action_time;
+  new_pose.set_joints(target_joints);
+  
+  RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Cek new pose name %s", new_pose.get_name().c_str());
+  RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Cek new pose pause %f", new_pose.get_pause());
+  RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Cek new pose speed %f", new_pose.get_speed());
+  RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Cek new pose joints size %ld", new_pose.get_joints().size());
+  for (int joint = new_pose.get_joints().size() - 1; joint >= 0; --joint)
+  {
+    RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Cek new pose joints %d: %d", new_pose.get_joints().at(joint).get_id(), new_pose.get_joints().at(joint).get_position_value());
+  }
+
+  this->delete_pose(target_pose_index);
+  this->set_pose(target_pose_index, new_pose);
+
+  RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Cek changed pose name %s", this->get_pose(target_pose_index).get_name().c_str());
+  RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Cek changed pose pause %f", this->get_pose(target_pose_index).get_pause());
+  RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Cek changed pose speed %f", this->get_pose(target_pose_index).get_speed());
+  RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Cek changed pose joints size %ld", this->get_pose(target_pose_index).get_joints().size());
+  for (int joint = this->get_pose(target_pose_index).get_joints().size() - 1; joint >= 0; --joint)
+  {
+    RCLCPP_INFO(rclcpp::get_logger("Map Action"), "Cek changed pose joints %d: %d", this->get_pose(target_pose_index).get_joints().at(joint).get_id(), this->get_pose(target_pose_index).get_joints().at(joint).get_position_value());
+  }
 }
 
 }  // namespace akushon
