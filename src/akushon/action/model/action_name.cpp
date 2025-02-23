@@ -18,49 +18,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "akushon/action/model/action_name.hpp"
+
 #include <map>
 #include <string>
 
-#include "akushon/action/model/action_name.hpp"
 #include "akushon/action/model/action.hpp"
 
 namespace akushon
 {
 
-const std::map<std::string, int> ActionName::map = {
-  {"init", 0},
-  {"walk_ready", 1},
-  {"sit_down", 2},
-  {"forward_up", 3},
-  {"backward_up", 4},
-  {"leftward_up", 5}
-};
+const std::map<std::string, int> ActionName::map = {{"init", 0},        {"walk_ready", 1},
+                                                    {"sit_down", 2},    {"forward_up", 3},
+                                                    {"backward_up", 4}, {"leftward_up", 5}};
 
 const char * ActionName::INIT = "init";
 const char * ActionName::WALKREADY = "walk_ready";
 const char * ActionName::SIT_DOWN = "sit_down";
 const char * ActionName::FORWARD_UP = "forward_up";
 const char * ActionName::BACKWARD_UP = "backward_up";
-const char * ActionName::LEFTWARD_UP = "leftward_up";
-const char * ActionName::RIGHTWARD_UP = "rightward_up";
+const char * ActionName::LEFTWARD_UP = "leftup_keeper";
+const char * ActionName::RIGHTWARD_UP = "rightup_keeper";
 const char * ActionName::RIGHT_KICK = "right_kick";
 const char * ActionName::LEFT_KICK = "left_kick";
-const char * ActionName::RIGHT_KICK_SHORT = "right_kick_short";
-const char * ActionName::LEFT_KICK_SHORT = "left_kick_short";
-const char * ActionName::RIGHT_KICK_WIDE = "right_kick_wide";
-const char * ActionName::LEFT_KICK_WIDE = "left_kick_wide";
-const char * ActionName::LEFT_SIDEKICK = "left_sidekick";
-const char * ActionName::RIGHT_SIDEKICK = "right_sidekick";
+const char * ActionName::RIGHT_KICK_SHORT = "right_kick";
+const char * ActionName::LEFT_KICK_SHORT = "left_kick";
+const char * ActionName::RIGHT_KICK_WIDE = "right_kick";
+const char * ActionName::LEFT_KICK_WIDE = "left_kick";
+const char * ActionName::LEFT_SIDEKICK = "left_kick";
+const char * ActionName::RIGHT_SIDEKICK = "right_kick";
 const char * ActionName::KEEPER_SIT = "keeper_sit";
 const char * ActionName::KEEPER_UP = "keeper_up";
-const char * ActionName::LEFT_SIDEKICK_90 = "left_sidekick90";
-const char * ActionName::RIGHT_SIDEKICK_90 = "right_sidekick90";
-const char * ActionName::DK_READY = "dk_ready";
-const char * ActionName::DK_KICK = "dk_kick";
-const char * ActionName::HIGH_KICK = "high_kick";
-const char * ActionName::PARKOUR_UP = "parkour_up";
-const char * ActionName::PARKOUR_DOWN = "parkour_down";
-const char * ActionName::LEFT_KICK_CENTER = "left_kick_center";
-const char * ActionName::RIGHT_KICK_CENTER = "right_kick_center";
-
+const char * ActionName::MIDDOWN_KEEPER = "middown_keeper";
+const char * ActionName::MIDUP_KEEPER = "midup_keeper";
+const char * ActionName::KEEPER_LEFT = "left_keeper";
+const char * ActionName::KEEPER_RIGHT = "right_keeper";
+const char * ActionName::KEEPER_LEFT_UP = "leftup_keeper";
+const char * ActionName::KEEPER_RIGHT_UP = "rightup_keeper";
+const char * ActionName::KEEPER_FORWARD = "front_keeper";
+const char * ActionName::KEEPER_BACKWARD = "back_keeper";
+const char * ActionName::RIGHT_SIDEKICK_90 = "right_kick";
+const char * ActionName::LEFT_SIDEKICK_90 = "left_kick";
+const char * ActionName::RIGHT_KICK_CENTER = "right_kick";
+const char * ActionName::LEFT_KICK_CENTER = "left_kick";
 }  // namespace akushon

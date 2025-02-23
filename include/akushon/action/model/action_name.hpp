@@ -47,15 +47,18 @@ public:
   static const char * RIGHT_SIDEKICK;
   static const char * KEEPER_SIT;
   static const char * KEEPER_UP;
+  static const char * MIDDOWN_KEEPER;
+  static const char * MIDUP_KEEPER;
+  static const char * KEEPER_LEFT;
+  static const char * KEEPER_RIGHT;
+  static const char * KEEPER_LEFT_UP;
+  static const char * KEEPER_RIGHT_UP;
+  static const char * KEEPER_FORWARD;
+  static const char * KEEPER_BACKWARD;
   static const char * RIGHT_SIDEKICK_90;
   static const char * LEFT_SIDEKICK_90;
-  static const char * DK_READY;
-  static const char * DK_KICK;
-  static const char * HIGH_KICK;
-  static const char * PARKOUR_UP;
-  static const char * PARKOUR_DOWN;
-  static const char * LEFT_KICK_CENTER;
   static const char * RIGHT_KICK_CENTER;
+  static const char * LEFT_KICK_CENTER;
 
   static const std::map<std::string, int> map;
 };
