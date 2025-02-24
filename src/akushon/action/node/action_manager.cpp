@@ -109,7 +109,7 @@ Action ActionManager::load_action(
           std::vector<Joint> joints;
 
           for (const auto & [joint_key, joint_val] : raw_pose["joints"].items()) {
-            if (strncmp(joint_key.c_str(), "neck", 4) == 0) {
+            if (joint_key.compare(0, 4, "neck") == 0) {
               continue;
             }
 
