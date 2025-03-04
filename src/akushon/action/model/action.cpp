@@ -105,6 +105,11 @@ const std::string & Action::get_next_action() const
   return next_action;
 }
 
+void Action::set_joint_target_position(int pose_index, uint8_t joint_id, float target_position)
+{
+  poses.at(pose_index).set_target_position(joint_id, target_position);
+}
+
 void Action::reset()
 {
   poses.clear();
