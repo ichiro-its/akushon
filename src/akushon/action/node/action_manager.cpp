@@ -90,7 +90,7 @@ void ActionManager::load_config(const std::string & path)
   }
 }
 
-Action ActionManager::load_action(
+static Action ActionManager::load_action(
   const nlohmann::json & action_data,
   const std::string & action_name) const
 {
