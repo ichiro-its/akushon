@@ -90,6 +90,14 @@ void ActionManager::load_config(const std::string & path)
   }
 }
 
+static Action ActionManager::load_action(const std::string & path, const std::string & action_name) const
+{
+  std::ifstream file(path + action_name + ".json");
+  nlohmann::json action_data = nlohmann::json::parse(file);
+
+  return load_action(action_data, action_name);
+}
+
 static Action ActionManager::load_action(
   const nlohmann::json & action_data,
   const std::string & action_name) const
