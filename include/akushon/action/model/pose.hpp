@@ -23,6 +23,7 @@
 
 #include <string>
 #include <vector>
+#include <stdint.h>
 
 #include "tachimawari/joint/model/joint.hpp"
 
@@ -45,6 +46,8 @@ public:
 
   void set_joints(const std::vector<tachimawari::joint::Joint> & joints);
   const std::vector<tachimawari::joint::Joint> & get_joints() const;
+  void set_target_position(uint8_t id, float target_position);
+  const float get_target_position(uint8_t id) const;
 
   void set_target_position(const Pose & target_pose);
 
