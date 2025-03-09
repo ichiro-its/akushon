@@ -47,28 +47,15 @@ ConfigNode::ConfigNode(rclcpp::Node::SharedPtr node, const std::string & path,
     get_node_prefix() + "/save_actions",
     [this](std::shared_ptr<SaveActions::Request> request,
     std::shared_ptr<SaveActions::Response> response) {
-      this->config_util.save_config(request->json);
-      response->status = "SAVED";
-    }
-  );
-
-  brake_acions_service = node->create_service<BrakeActions>(
-    get_node_prefix() + "/brake_actions",
-    [this](std::shared_ptr<BrakeActions::Request> request,
-    std::shared_ptr<BrakeActions::Response> response) {
       try {
-        action_manager->brake();
-        RCLCPP_INFO(rclcpp::get_logger("BrakeAction"), "Action has been braked!");
-        response->success = true;
-      } catch (nlohmann::json::exception e) {
-        RCLCPP_ERROR(rclcpp::get_logger("BrakeAction"), e.what());
-        response->success = false;
+        this->config_util.save_config(request->json);
+        response->status = true;
+      } catch (const std::exception & e) {
+        response->status = false;
       }
     }
   );
 
-  config_grpc.Run(5060, path, node, action_manager);
-  RCLCPP_INFO(rclcpp::get_logger("GrpcServers"), "grpc running");
 }
 
 std::string ConfigNode::get_node_prefix() const

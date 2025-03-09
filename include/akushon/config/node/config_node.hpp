@@ -24,9 +24,8 @@
 #include <memory>
 #include <string>
 
-#include "akushon/config/grpc/config.hpp"
+#include "akushon/action/node/action_manager.hpp"
 #include "akushon/config/utils/config.hpp"
-#include "akushon_interfaces/srv/brake_actions.hpp"
 #include "akushon_interfaces/srv/get_actions.hpp"
 #include "akushon_interfaces/srv/save_actions.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -39,7 +38,6 @@ class ConfigNode
 public:
   using SaveActions = akushon_interfaces::srv::SaveActions;
   using GetActions = akushon_interfaces::srv::GetActions;
-  using BrakeActions = akushon_interfaces::srv::BrakeActions;  
 
   explicit ConfigNode(
     rclcpp::Node::SharedPtr node, const std::string & path,
@@ -49,11 +47,9 @@ private:
   std::string get_node_prefix() const;
 
   Config config_util;
-  ConfigGrpc config_grpc;
 
   rclcpp::Service<SaveActions>::SharedPtr save_actions_service;
   rclcpp::Service<GetActions>::SharedPtr get_actions_service;
-  rclcpp::Service<BrakeActions>::SharedPtr brake_actions_service;
 };
 
 }  // namespace akushon
