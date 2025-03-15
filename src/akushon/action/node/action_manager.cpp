@@ -117,6 +117,10 @@ static Action ActionManager::load_action(
           std::vector<Joint> joints;
 
           for (const auto & [joint_key, joint_val] : raw_pose["joints"].items()) {
+            if (joint_key.compare(0, 4, "neck") == 0) {
+              continue;
+            }
+
             Joint joint(JointId::by_name.at(joint_key), joint_val);
             joints.push_back(joint);
           }

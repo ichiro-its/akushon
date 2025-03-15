@@ -47,12 +47,15 @@ ConfigNode::ConfigNode(rclcpp::Node::SharedPtr node, const std::string & path,
     get_node_prefix() + "/save_actions",
     [this](std::shared_ptr<SaveActions::Request> request,
     std::shared_ptr<SaveActions::Response> response) {
-      this->config_util.save_config(request->json);
-      response->status = "SAVED";
+      try {
+        this->config_util.save_config(request->json);
+        response->status = true;
+      } catch (const std::exception & e) {
+        response->status = false;
+      }
     }
   );
-  config_grpc.Run(5060, path, node, action_manager);
-  RCLCPP_INFO(rclcpp::get_logger("GrpcServers"), "grpc running");
+
 }
 
 std::string ConfigNode::get_node_prefix() const
