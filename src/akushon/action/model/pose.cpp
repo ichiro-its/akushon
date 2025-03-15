@@ -73,4 +73,22 @@ const std::vector<tachimawari::joint::Joint> & Pose::get_joints() const
   return joints;
 }
 
+void Pose::set_target_position(uint8_t id, float target_position)
+{
+  for (auto & joint : joints) {
+    if (joint.get_id() == id) {
+      joint.set_position(target_position);
+    }
+  }
+}
+
+const float Pose::get_target_position(uint8_t id) const
+{
+  for (const auto & joint : joints) {
+    if (joint.get_id() == id) {
+      return joint.get_position();
+    }
+  }
+}
+
 }  // namespace akushon

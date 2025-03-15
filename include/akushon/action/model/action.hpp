@@ -55,6 +55,8 @@ public:
   void set_next_action(const std::string & next_action);
   const std::string & get_next_action() const;
 
+  void set_joint_target_position(int pose_index, uint8_t joint_id, float target_position);
+
   void reset();
 
   bool time_based;
