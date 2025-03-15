@@ -47,9 +47,9 @@ public:
   void load_config(const std::string & path);
 
   static Action load_action(
-    const std::string & path, const std::string & action_name) const;
+    const std::string & path, const std::string & action_name);
   static Action load_action(
-    const nlohmann::json & action_data, const std::string & action_name) const;
+    const nlohmann::json & action_data, const std::string & action_name);
 
   void start(std::string action_name, const Pose & initial_pose);
   void start(const Action & action, const Pose & initial_pose);
