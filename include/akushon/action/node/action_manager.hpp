@@ -21,10 +21,10 @@
 #ifndef AKUSHON__ACTION__NODE__ACTION_MANAGER_HPP_
 #define AKUSHON__ACTION__NODE__ACTION_MANAGER_HPP_
 
-#include <string>
 #include <map>
-#include <vector>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "akushon/action/model/action.hpp"
 #include "akushon/action/model/pose.hpp"
@@ -46,7 +46,10 @@ public:
 
   void load_config(const std::string & path);
 
-  Action load_action(const nlohmann::json & action_data, const std::string & action_name) const;
+  static Action load_action(
+    const std::string & path, const std::string & action_name);
+  static Action load_action(
+    const nlohmann::json & action_data, const std::string & action_name);
 
   void start(std::string action_name, const Pose & initial_pose);
   void start(const Action & action, const Pose & initial_pose);
