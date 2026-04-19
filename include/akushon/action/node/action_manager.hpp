@@ -54,6 +54,7 @@ public:
   void start(std::string action_name, const Pose & initial_pose);
   void start(const Action & action, const Pose & initial_pose);
   void brake();
+  void cancel(const Pose & initial_pose);
   void process(double time);
 
   bool is_playing() const;

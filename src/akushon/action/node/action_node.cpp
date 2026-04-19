@@ -43,6 +43,8 @@ std::string ActionNode::run_action_topic() {return get_node_prefix() + "/run_act
 
 std::string ActionNode::brake_action_topic() {return get_node_prefix() + "/brake_action";}
 
+std::string ActionNode::cancel_action_topic() {return get_node_prefix() + "/cancel_action";}
+
 std::string ActionNode::status_topic() {return get_node_prefix() + "/status";}
 
 ActionNode::ActionNode(
@@ -88,6 +90,10 @@ ActionNode::ActionNode(
   brake_action_subscriber = node->create_subscription<Empty>(
     brake_action_topic(), 10,
     [this](std::shared_ptr<Empty> message) {this->action_manager->brake();});
+
+  cancel_action_subscriber = node->create_subscription<Empty>(
+    cancel_action_topic(), 10,
+    [this](std::shared_ptr<Empty> message) {this->cancel();});
 }
 
 bool ActionNode::start(const std::string & action_name)
@@ -109,6 +115,19 @@ bool ActionNode::start(const Action & action)
 
   if (!pose.get_joints().empty()) {
     action_manager->start(action, pose);
+  } else {
+    return false;
+  }
+
+  return true;
+}
+
+bool ActionNode::cancel()
+{
+  Pose pose = this->initial_pose;
+
+  if (!pose.get_joints().empty()) {
+    action_manager->cancel(pose);
   } else {
     return false;
   }
