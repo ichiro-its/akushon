@@ -188,54 +188,77 @@ void ActionManager::cancel(const Pose & initial_pose)
 
   auto current_actions = interpolator->get_actions();
   int action_idx = interpolator->get_current_action_index();
-  int pose_idx = interpolator->get_current_pose_index() - 2;
+  int pose_idx  = interpolator->get_current_pose_index();
 
-  if (action_idx < current_actions.size()) {
-    const std::string & name = current_actions[action_idx].get_name();
-    if (name.find("kick") != std::string::npos && pose_idx >= 2) {
-      return;
-    }
+  auto & first_action = current_actions.front();
+  bool is_kick_motion = first_action.get_name().find("kick") != std::string::npos;
+
+  if (is_kick_motion && (action_idx > 0 || pose_idx > 2)) {
+    return;
   }
 
   brake();
 
-  std::vector<Action> reversed_actions;
+  std::vector<Action> cancel_actions;
 
-  if (action_idx < current_actions.size()) {
-    const auto & action = current_actions[action_idx];
+  if (is_kick_motion) {
+    int pose_count = first_action.get_pose_count();
 
-    Action reversed_action(action.get_name() + "_reversed");
+    if (pose_idx == 2) {
+      Action cancel_action(first_action.get_name() + "_cancel");
 
-    for (int i = pose_idx; i >= 0; --i) {
-      reversed_action.add_pose(action.get_pose(i));
+      auto new_pose = first_action.get_pose(pose_count - 2);
+      new_pose.action_time = 0.5;
+      cancel_action.add_pose(new_pose);
+
+      cancel_action.set_start_delay(0);
+      cancel_action.set_stop_delay(0);
+      cancel_action.time_based = first_action.time_based;
+
+      cancel_actions.push_back(cancel_action);
+    }
+  } else {
+    if (action_idx < static_cast<int>(current_actions.size())) {
+      const auto & action = current_actions[action_idx];
+
+      Action cancel_action(action.get_name() + "_reversed");
+
+      for (int i = pose_idx; i >= 0; --i) {
+        cancel_action.add_pose(action.get_pose(i));
+      }
+
+      cancel_action.set_start_delay(0);
+      cancel_action.set_stop_delay(0);
+      cancel_action.time_based = action.time_based;
+
+      cancel_actions.push_back(cancel_action);
     }
 
-    reversed_action.set_start_delay(0);
-    reversed_action.set_stop_delay(0);
-    reversed_action.time_based = action.time_based;
+    for (int i = action_idx - 1; i >= 0; --i) {
+      const auto & action = current_actions[i];
 
-    reversed_actions.push_back(reversed_action);
-  }
+      Action cancel_action(action.get_name() + "_reversed");
 
-  for (int a = action_idx - 1; a >= 0; --a) {
-    const auto & action = current_actions[a];
+      for (int idx = action.get_pose_count() - 1; idx >= 0; --i) {
+        cancel_action.add_pose(action.get_pose(idx));
+      }
 
-    Action reversed_action(action.get_name() + "_reversed");
+      cancel_action.set_start_delay(0);
+      cancel_action.set_stop_delay(0);
+      cancel_action.time_based = action.time_based;
 
-    for (int i = action.get_pose_count() - 1; i >= 0; --i) {
-      reversed_action.add_pose(action.get_pose(i));
+      cancel_actions.push_back(cancel_action);
     }
-
-    reversed_action.set_start_delay(0);
-    reversed_action.set_stop_delay(0);
-    reversed_action.time_based = action.time_based;
-
-    reversed_actions.push_back(reversed_action);
   }
 
-  reversed_actions.push_back(actions.at(akushon::ActionName::WALKREADY));
+  auto walk_ready = actions.at(akushon::ActionName::WALKREADY);
+  auto new_pose = walk_ready.get_pose(0);
+  new_pose.action_time = 0.5;
+  walk_ready.set_pose(0, new_pose);
 
-  interpolator = std::make_shared<Interpolator>(reversed_actions, initial_pose);
+  cancel_actions.push_back(walk_ready);
+
+  interpolator = std::make_shared<Interpolator>(cancel_actions, initial_pose);
   is_running = true;
 }
 
