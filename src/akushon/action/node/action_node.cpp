@@ -100,11 +100,11 @@ bool ActionNode::start(const std::string & action_name)
 {
   Pose pose = this->initial_pose;
 
-  if (!pose.get_joints().empty()) {
-    action_manager->start(action_name, pose);
-  } else {
+  if (pose.get_joints().empty()) {
     return false;
   }
+
+  action_manager->start(action_name, pose);
 
   return true;
 }
@@ -113,11 +113,11 @@ bool ActionNode::start(const Action & action)
 {
   Pose pose = this->initial_pose;
 
-  if (!pose.get_joints().empty()) {
-    action_manager->start(action, pose);
-  } else {
+  if (pose.get_joints().empty()) {
     return false;
   }
+
+  action_manager->start(action, pose);
 
   return true;
 }
@@ -126,11 +126,11 @@ bool ActionNode::cancel()
 {
   Pose pose = this->initial_pose;
 
-  if (!pose.get_joints().empty()) {
-    action_manager->cancel(pose);
-  } else {
+  if (pose.get_joints().empty()) {
     return false;
   }
+
+  action_manager->cancel(pose);
 
   return true;
 }
