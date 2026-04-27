@@ -50,6 +50,10 @@ public:
 
   std::vector<tachimawari::joint::Joint> get_joints() const;
 
+  int get_current_action_index() const{ return current_action_index; }
+  int get_current_pose_index() const{ return current_pose_index; }
+  const std::vector<Action> & get_actions() const{ return actions; }
+
 private:
   const Action & get_current_action() const;
   const Pose & get_current_pose() const;

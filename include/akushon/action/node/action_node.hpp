@@ -53,6 +53,7 @@ public:
   static std::string get_node_prefix();
   static std::string run_action_topic();
   static std::string brake_action_topic();
+  static std::string cancel_action_topic();
   static std::string status_topic();
 
   explicit ActionNode(
@@ -60,6 +61,8 @@ public:
 
   bool start(const std::string & action_name);
   bool start(const Action & action);
+
+  bool cancel();
 
   bool update(double time);
 
@@ -77,6 +80,7 @@ private:
 
   rclcpp::Subscription<RunAction>::SharedPtr run_action_subscriber;
   rclcpp::Subscription<Empty>::SharedPtr brake_action_subscriber;
+  rclcpp::Subscription<Empty>::SharedPtr cancel_action_subscriber;
   rclcpp::Publisher<Status>::SharedPtr status_publisher;
 };
 
